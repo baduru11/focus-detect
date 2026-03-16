@@ -98,19 +98,12 @@ export default function Dashboard() {
     >
       {/* Active Profile Card */}
       <motion.div variants={staggerItem}>
-        <GlassCard className="flex items-center gap-4 py-4 px-6">
-          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-            <Target className="w-5 h-5 text-accent-light" />
-          </div>
-          <div>
-            <p className="text-xs text-text-muted uppercase tracking-[0.12em] leading-none mb-1.5 font-medium">
-              Active Profile
-            </p>
-            <p className="text-base font-semibold text-text-primary leading-tight">
-              {activeProfile?.name ?? "No Profile"}
-            </p>
-          </div>
-        </GlassCard>
+        <div className="flex items-center gap-3 py-2 px-4 rounded-lg bg-white/[0.05] border border-white/[0.08]">
+          <Target className="w-4 h-4 text-text-muted" />
+          <span className="text-sm text-text-secondary">
+            {activeProfile?.name ?? "No Profile"}
+          </span>
+        </div>
       </motion.div>
 
       {/* Timer Ring with Ripple */}
@@ -255,43 +248,19 @@ export default function Dashboard() {
       {/* Quick Stats Row */}
       <motion.div
         variants={staggerItem}
-        className="flex items-center gap-4 flex-wrap justify-center"
+        className="flex items-center gap-6 text-sm text-text-muted"
       >
-        <div className="card flex items-center gap-3 py-3.5 px-5 rounded-xl">
-          <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center">
-            <Zap className="w-4 h-4 text-accent-light" strokeWidth={1.8} />
-          </div>
-          <div>
-            <span className="text-xs text-text-muted block mb-0.5">Cycle</span>
-            <span className="text-base text-text-primary font-semibold tabular-nums">
-              {pomodoroState.currentCycle}/{config.cyclesBeforeLong}
-            </span>
-          </div>
-        </div>
-
-        <div className="card flex items-center gap-3 py-3.5 px-5 rounded-xl">
-          <div className="w-9 h-9 rounded-lg bg-warning/10 flex items-center justify-center">
-            <Flame className="w-4 h-4 text-warning" strokeWidth={1.8} />
-          </div>
-          <div>
-            <span className="text-xs text-text-muted block mb-0.5">Streak</span>
-            <span className="text-base text-text-primary font-semibold tabular-nums">
-              {currentStreak}
-            </span>
-          </div>
-        </div>
-
-        <div className="card flex items-center gap-3 py-3.5 px-5 rounded-xl">
-          <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center">
-            <Clock className="w-4 h-4 text-accent" strokeWidth={1.8} />
-          </div>
-          <div>
-            <span className="text-xs text-text-muted block mb-0.5">Today</span>
-            <span className="text-base text-text-primary font-semibold tabular-nums">
-              {todayHours}h {todayMins}m
-            </span>
-          </div>
-        </div>
+        <span>
+          Cycle <span className="text-text-primary font-medium tabular-nums">{pomodoroState.currentCycle}/{config.cyclesBeforeLong}</span>
+        </span>
+        <span className="w-px h-3 bg-white/10" />
+        <span>
+          Streak <span className="text-text-primary font-medium tabular-nums">{currentStreak}</span>
+        </span>
+        <span className="w-px h-3 bg-white/10" />
+        <span>
+          Today <span className="text-text-primary font-medium tabular-nums">{todayHours}h {todayMins}m</span>
+        </span>
       </motion.div>
     </motion.div>
   );

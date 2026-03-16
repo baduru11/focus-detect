@@ -1,0 +1,25 @@
+[     256ms] [ERROR] Failed to load profiles: Cannot read properties of undefined (reading 'invoke') @ http://localhost:1420/src/hooks/useProfiles.ts:35
+[     256ms] [ERROR] Failed to load profiles: Cannot read properties of undefined (reading 'invoke') @ http://localhost:1420/src/hooks/useProfiles.ts:35
+[     256ms] [WARNING] Failed to load AI settings: TypeError: Cannot read properties of undefined (reading 'invoke')
+    at invoke (http://localhost:1420/node_modules/.vite/deps/chunk-G7S6KQDI.js?v=de332d1f:109:37)
+    at _Database.load (http://localhost:1420/node_modules/.vite/deps/@tauri-apps_plugin-sql.js?v=de332d1f:27:25)
+    at getDb (http://localhost:1420/src/services/profileService.ts:5:25)
+    at getSettingValue (http://localhost:1420/src/services/profileService.ts:107:26)
+    at loadAISettings (http://localhost:1420/src/services/settingsService.ts:12:5)
+    at http://localhost:1420/src/components/settings/AIProviderConfig.tsx?t=1773671590035:98:5
+    at Object.react_stack_bottom_frame (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=de332d1f:18567:20)
+    at runWithFiberInDEV (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=de332d1f:997:72)
+    at commitHookEffectListMount (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=de332d1f:9411:163)
+    at commitHookPassiveMountEffects (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=de332d1f:9465:60) @ http://localhost:1420/src/components/settings/AIProviderConfig.tsx?t=1773671590035:117
+[     256ms] [WARNING] Failed to load AI settings: TypeError: Cannot read properties of undefined (reading 'invoke')
+    at invoke (http://localhost:1420/node_modules/.vite/deps/chunk-G7S6KQDI.js?v=de332d1f:109:37)
+    at _Database.load (http://localhost:1420/node_modules/.vite/deps/@tauri-apps_plugin-sql.js?v=de332d1f:27:25)
+    at getDb (http://localhost:1420/src/services/profileService.ts:5:25)
+    at getSettingValue (http://localhost:1420/src/services/profileService.ts:107:26)
+    at loadAISettings (http://localhost:1420/src/services/settingsService.ts:12:5)
+    at http://localhost:1420/src/components/settings/AIProviderConfig.tsx?t=1773671590035:98:5
+    at Object.react_stack_bottom_frame (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=de332d1f:18567:20)
+    at runWithFiberInDEV (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=de332d1f:997:72)
+    at commitHookEffectListMount (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=de332d1f:9411:163)
+    at commitHookPassiveMountEffects (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=de332d1f:9465:60) @ http://localhost:1420/src/components/settings/AIProviderConfig.tsx?t=1773671590035:117
+[    2626ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:11434/api/tags:0

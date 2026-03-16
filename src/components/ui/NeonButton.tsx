@@ -5,45 +5,28 @@ import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
   [
-    "relative overflow-hidden font-medium leading-none",
-    "transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
+    "relative font-medium",
+    "transition-colors duration-150",
     "cursor-pointer select-none",
     "disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none",
-    "inline-flex items-center justify-center",
+    "inline-flex items-center justify-center gap-2",
   ].join(" "),
   {
     variants: {
       variant: {
-        primary: [
-          "bg-gradient-to-b from-[#717bff] to-[#5b5ef0] text-white",
-          "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.16),0_1px_2px_rgba(0,0,0,0.3),0_0_0_1px_rgba(99,102,241,0.25)]",
-          "hover:from-[#7c85ff] hover:to-[#6366f1]",
-          "hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_2px_8px_rgba(99,102,241,0.2),0_0_0_1px_rgba(99,102,241,0.35)]",
-          "active:from-[#5b5ef0] active:to-[#4f46e5]",
-        ].join(" "),
-        ghost: [
-          "bg-white/[0.04] text-text-secondary",
-          "border border-white/[0.08]",
-          "hover:bg-white/[0.07] hover:text-text-primary hover:border-white/[0.12]",
-          "active:bg-white/[0.05]",
-        ].join(" "),
-        danger: [
-          "bg-gradient-to-b from-[#f87171] to-[#ef4444] text-white",
-          "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.3)]",
-          "hover:from-[#fca5a5] hover:to-[#f87171]",
-          "active:from-[#ef4444] active:to-[#dc2626]",
-        ].join(" "),
-        success: [
-          "bg-gradient-to-b from-[#4ade80] to-[#22c55e] text-white",
-          "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.3)]",
-          "hover:from-[#86efac] hover:to-[#4ade80]",
-          "active:from-[#22c55e] active:to-[#16a34a]",
-        ].join(" "),
+        primary:
+          "bg-accent text-white hover:bg-accent-light active:bg-[#5558e8] rounded-lg",
+        ghost:
+          "bg-transparent text-text-secondary hover:bg-white/[0.06] hover:text-text-primary active:bg-white/[0.04] rounded-lg",
+        danger:
+          "bg-danger text-white hover:bg-[#fca5a5] active:bg-[#dc2626] rounded-lg",
+        success:
+          "bg-success text-white hover:bg-[#6ee7b7] active:bg-[#16a34a] rounded-lg",
       },
       size: {
-        sm: "h-9 px-4 text-[13px] rounded-lg gap-2",
-        md: "h-11 px-6 text-sm rounded-xl gap-2.5",
-        lg: "h-12 px-7 text-[15px] rounded-xl gap-3",
+        sm: "h-8 px-4 text-xs",
+        md: "h-9 px-5 text-[13px]",
+        lg: "h-10 px-6 text-sm",
       },
     },
     defaultVariants: {
@@ -75,9 +58,8 @@ export function NeonButton({
       type={type}
       disabled={disabled}
       className={cn(buttonVariants({ variant, size }), className)}
-      whileHover={{ y: -0.5 }}
       whileTap={{ scale: 0.97 }}
-      transition={{ duration: 0.12, ease: "easeOut" }}
+      transition={{ duration: 0.1 }}
       onClick={onClick}
     >
       {children}

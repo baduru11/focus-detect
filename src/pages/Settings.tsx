@@ -18,9 +18,10 @@ const container = {
 
 export default function Settings() {
   return (
-    <div className="h-full px-10 py-10 overflow-y-auto">
+    <div className="h-full px-10 py-10 overflow-y-auto flex flex-col items-center">
+      <div className="w-full max-w-2xl">
       <motion.h1
-        className="text-2xl font-semibold tracking-tight mb-8 text-text-primary"
+        className="text-xl font-semibold tracking-tight mb-8 text-text-primary"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -28,7 +29,7 @@ export default function Settings() {
       </motion.h1>
 
       <motion.div
-        className="flex flex-col gap-6 max-w-2xl"
+        className="flex flex-col gap-8 w-full"
         variants={container}
         initial="hidden"
         animate="show"
@@ -45,6 +46,7 @@ export default function Settings() {
           <DataExport />
         </motion.div>
       </motion.div>
+      </div>
     </div>
   );
 }

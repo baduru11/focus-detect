@@ -22,37 +22,28 @@ export function Sidebar() {
 
   return (
     <motion.aside
-      className={cn(
-        "relative h-full flex flex-col z-20",
-        "border-r border-white/[0.06]"
-      )}
-      animate={{ width: expanded ? 240 : 64 }}
-      transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+      className="relative h-full flex flex-col z-20 bg-white/[0.03] border-r border-white/[0.06]"
+      animate={{ width: expanded ? 220 : 56 }}
+      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
-      style={{
-        background:
-          "linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.015) 100%)",
-        backdropFilter: "blur(40px) saturate(1.4)",
-        WebkitBackdropFilter: "blur(40px) saturate(1.4)",
-      }}
     >
-      {/* Logo area */}
-      <div className="flex items-center h-16 px-5 border-b border-white/[0.06] overflow-hidden">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-accent-light flex items-center justify-center flex-shrink-0">
-          <span className="text-sm font-bold text-white leading-none">F</span>
+      {/* Logo */}
+      <div className="flex items-center h-14 px-4 overflow-hidden">
+        <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
+          <span className="text-xs font-bold text-white">F</span>
         </div>
         <motion.span
           className="ml-3 text-sm font-semibold text-text-primary whitespace-nowrap"
-          animate={{ opacity: expanded ? 1 : 0, width: expanded ? "auto" : 0 }}
-          transition={{ duration: 0.15 }}
+          animate={{ opacity: expanded ? 1 : 0 }}
+          transition={{ duration: 0.1 }}
         >
-          Focus
+          Focus Detector
         </motion.span>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 flex flex-col gap-1 py-3 px-2.5">
+      {/* Nav */}
+      <nav className="flex-1 flex flex-col gap-0.5 py-2 px-2">
         {navItems.map(({ to, icon: Icon, label }) => {
           const isActive =
             to === "/"
@@ -61,53 +52,38 @@ export function Sidebar() {
 
           return (
             <NavLink key={to} to={to} className="block">
-              <motion.div
+              <div
                 className={cn(
-                  "relative flex items-center gap-3 h-11 px-3.5 rounded-xl overflow-hidden",
-                  "transition-colors duration-150",
+                  "flex items-center gap-3 h-9 px-3 rounded-md",
+                  "transition-colors duration-100",
                   isActive
-                    ? "text-text-primary bg-white/[0.07]"
-                    : "text-text-muted hover:text-text-secondary hover:bg-white/[0.04]"
+                    ? "bg-white/[0.08] text-text-primary"
+                    : "text-text-muted hover:bg-white/[0.05] hover:text-text-secondary"
                 )}
               >
-                {/* Active indicator */}
-                {isActive && (
-                  <motion.div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[2.5px] h-4 rounded-r-full bg-accent"
-                    layoutId="sidebar-indicator"
-                    transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                  />
-                )}
-
-                <Icon className="flex-shrink-0 w-5 h-5" strokeWidth={1.6} />
-
+                <Icon className="flex-shrink-0 w-[18px] h-[18px]" strokeWidth={1.8} />
                 <motion.span
-                  className="text-sm whitespace-nowrap font-medium"
+                  className="text-[13px] whitespace-nowrap"
                   animate={{ opacity: expanded ? 1 : 0 }}
-                  transition={{ duration: 0.12 }}
+                  transition={{ duration: 0.1 }}
                 >
                   {label}
                 </motion.span>
-              </motion.div>
+              </div>
             </NavLink>
           );
         })}
       </nav>
 
-      {/* Separator */}
-      <div className="mx-3 border-t border-white/[0.06]" />
-
-      {/* Bottom branding */}
-      <div className="px-5 py-3 overflow-hidden">
-        <motion.div
-          className="flex items-center gap-2"
-          animate={{ opacity: expanded ? 0.4 : 0 }}
-          transition={{ duration: 0.12 }}
+      {/* Version */}
+      <div className="px-4 py-3 overflow-hidden">
+        <motion.span
+          className="text-[10px] text-text-muted font-mono"
+          animate={{ opacity: expanded ? 0.5 : 0 }}
+          transition={{ duration: 0.1 }}
         >
-          <span className="text-[10px] text-text-muted tracking-widest font-mono">
-            v0.1.0
-          </span>
-        </motion.div>
+          v0.1.0
+        </motion.span>
       </div>
     </motion.aside>
   );
