@@ -73,6 +73,9 @@ export function matchWindowAgainstProfile(
 ): MatchResult {
   const rule = findMatchingRule(window.process_name, profile.apps);
 
+  console.log(`[Match] process="${window.process_name}" title="${window.title.slice(0,50)}" rule=${rule ? `found(allowed=${rule.allowed})` : "none"} mode=${profile.mode} apps=${profile.apps.map(a=>a.process).join(",")}`);
+
+
   // If the current process is a browser (even if not explicitly in rules),
   // check window title against ALL site rules from the profile
   if (isBrowser(window.process_name)) {
