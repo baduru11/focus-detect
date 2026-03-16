@@ -187,6 +187,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Alarm dismissed — detection pipeline handles de-escalation
   }, []);
 
+  // Sync state to widget via localStorage
+  useEffect(() => {
+    const mins = Math.floor(pomodoroState.state.secondsRemaining / 60);
+    const secs = pomodoroState.state.secondsRemaining % 60;
+    const time = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    localStorage.setItem("widget-sync", JSON.stringify({
+      time,
+      phase: pomodoroState.state.phase,
+      status: pomodoroState.state.status,
+      detection: detectionState,
+      graceRemaining,
+    }));
+  }, [pomodoroState.state, detectionState, graceRemaining]);
+
+  // Listen for widget actions
+  useEffect(() => {
+    const interval = setInterval(() => {
+      try {
+        const raw = localStorage.getItem("widget-action");
+        if (!raw) return;
+        const { action, ts } = JSON.parse(raw);
+        if (Date.now() - ts > 2000) return; // stale
+        localStorage.removeItem("widget-action");
+        if (action === "start") startTimer();
+        else if (action === "pause") pauseTimer();
+        else if (action === "resume") resumeTimer();
+        else if (action === "stop") stopTimer();
+      } catch { /* ignore */ }
+    }, 200);
+    return () => clearInterval(interval);
+  }, [startTimer, pauseTimer, resumeTimer, stopTimer]);
+
   return (
     <AppContext.Provider
       value={{

@@ -38,19 +38,6 @@ pub fn run() {
 
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.show();
-
-                // Close button → hide to tray + show widget (not quit)
-                let app_handle = app.handle().clone();
-                window.on_window_event(move |event| {
-                    if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                        api.prevent_close();
-                        if let Some(win) = app_handle.get_webview_window("main") {
-                            let _ = win.hide();
-                        }
-                        // Show the floating widget
-                        let _ = tray::create_widget_window(&app_handle);
-                    }
-                });
             }
 
             Ok(())
