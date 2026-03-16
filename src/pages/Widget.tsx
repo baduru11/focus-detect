@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Play, Pause, Square, Maximize2 } from "lucide-react";
 
 interface WidgetState {
@@ -18,6 +18,18 @@ export default function Widget() {
     graceRemaining: 0,
   });
 
+  // Force always-on-top on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const { getCurrentWindow } = await import("@tauri-apps/api/window");
+        const win = getCurrentWindow();
+        await win.setAlwaysOnTop(true);
+      } catch { /* ignore */ }
+    })();
+  }, []);
+
+  // Sync state from main window
   useEffect(() => {
     const interval = setInterval(() => {
       try {
@@ -26,6 +38,14 @@ export default function Widget() {
       } catch { /* ignore */ }
     }, 200);
     return () => clearInterval(interval);
+  }, []);
+
+  // Drag handler
+  const startDrag = useCallback(async () => {
+    try {
+      const { getCurrentWindow } = await import("@tauri-apps/api/window");
+      await getCurrentWindow().startDragging();
+    } catch { /* ignore */ }
   }, []);
 
   const sendAction = (action: string) => {
@@ -67,6 +87,7 @@ export default function Widget() {
 
   return (
     <div
+      onMouseDown={startDrag}
       style={{
         width: "100%",
         height: "100%",
@@ -77,6 +98,8 @@ export default function Widget() {
         fontFamily: "'Inter', -apple-system, system-ui, sans-serif",
         color: "#f0f0f5",
         overflow: "hidden",
+        cursor: "grab",
+        borderRadius: 12,
       }}
     >
       {/* Timer row */}
@@ -110,26 +133,26 @@ export default function Widget() {
         {/* Controls */}
         <div style={{ display: "flex", gap: 4 }}>
           {state.status === "idle" && (
-            <button onClick={() => sendAction("start")} style={btnStyle}>
+            <button onMouseDown={e => e.stopPropagation()} onClick={() => sendAction("start")} style={btnStyle}>
               <Play size={16} color="#6366f1" />
             </button>
           )}
           {state.status === "running" && (
-            <button onClick={() => sendAction("pause")} style={btnStyle}>
+            <button onMouseDown={e => e.stopPropagation()} onClick={() => sendAction("pause")} style={btnStyle}>
               <Pause size={16} color="#f0f0f5" />
             </button>
           )}
           {state.status === "paused" && (
-            <button onClick={() => sendAction("resume")} style={btnStyle}>
+            <button onMouseDown={e => e.stopPropagation()} onClick={() => sendAction("resume")} style={btnStyle}>
               <Play size={16} color="#34d399" />
             </button>
           )}
           {state.status !== "idle" && (
-            <button onClick={() => sendAction("stop")} style={btnStyle}>
+            <button onMouseDown={e => e.stopPropagation()} onClick={() => sendAction("stop")} style={btnStyle}>
               <Square size={14} color="#f87171" />
             </button>
           )}
-          <button onClick={openMain} style={btnStyle} title="Open main window">
+          <button onMouseDown={e => e.stopPropagation()} onClick={openMain} style={btnStyle} title="Open main window">
             <Maximize2 size={14} color="#888" />
           </button>
         </div>
