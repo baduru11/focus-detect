@@ -14,15 +14,15 @@ interface PomodoroRingProps {
 const phaseConfig: Record<TimerPhase, { label: string; gradient: [string, string] }> = {
   work: {
     label: "FOCUS",
-    gradient: ["#6366f1", "#06b6d4"],
+    gradient: ["#818cf8", "#a78bfa"],
   },
   shortBreak: {
     label: "SHORT BREAK",
-    gradient: ["#22c55e", "#06b6d4"],
+    gradient: ["#34d399", "#6ee7b7"],
   },
   longBreak: {
     label: "LONG BREAK",
-    gradient: ["#22c55e", "#818cf8"],
+    gradient: ["#34d399", "#818cf8"],
   },
 };
 
