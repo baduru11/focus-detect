@@ -3,25 +3,21 @@ import { AnimatePresence } from "framer-motion";
 import { stop } from "@/services/alarmSound";
 import { AlarmLevel1 } from "./AlarmLevel1";
 import { AlarmLevel2 } from "./AlarmLevel2";
+import { AlarmLevel3 } from "./AlarmLevel3";
 
 interface AlarmControllerProps {
   alarmLevel: 0 | 1 | 2 | 3;
   onDismiss: () => void;
 }
 
-async function showOverlay() {
+async function setAlwaysOnTop(on: boolean) {
   try {
-    const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("show_alarm_overlay");
-  } catch {
-    // Not in Tauri
-  }
-}
-
-async function hideOverlay() {
-  try {
-    const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("hide_alarm_overlay");
+    const { getCurrentWindow } = await import("@tauri-apps/api/window");
+    const win = getCurrentWindow();
+    await win.setAlwaysOnTop(on);
+    if (on) {
+      await win.show();
+    }
   } catch {
     // Not in Tauri
   }
@@ -33,45 +29,44 @@ export function AlarmController({
 }: AlarmControllerProps) {
   const handleDismiss = useCallback(() => {
     stop();
-    hideOverlay();
+    setAlwaysOnTop(false);
     onDismiss();
   }, [onDismiss]);
 
-  // Level 3: show separate fullscreen overlay window on the monitor
+  // Always-on-top when alarm is active so user can't hide it
   useEffect(() => {
-    if (alarmLevel >= 3) {
-      showOverlay();
+    if (alarmLevel >= 1) {
+      setAlwaysOnTop(true);
     } else {
-      hideOverlay();
+      setAlwaysOnTop(false);
     }
   }, [alarmLevel]);
 
   useEffect(() => {
     if (alarmLevel === 0) {
       stop();
-      hideOverlay();
+      setAlwaysOnTop(false);
     }
   }, [alarmLevel]);
 
   useEffect(() => {
     return () => {
       stop();
-      hideOverlay();
+      setAlwaysOnTop(false);
     };
   }, []);
 
   return (
     <AnimatePresence mode="wait">
-      {/* Level 1: small toast in-app */}
       {alarmLevel === 1 && (
         <AlarmLevel1 key="alarm-1" onDismiss={handleDismiss} />
       )}
-      {/* Level 2: popup in-app */}
       {alarmLevel === 2 && (
         <AlarmLevel2 key="alarm-2" onDismiss={handleDismiss} />
       )}
-      {/* Level 3: separate fullscreen overlay window (AlarmPage) */}
-      {/* The overlay is handled via the Tauri window, not rendered here */}
+      {alarmLevel === 3 && (
+        <AlarmLevel3 key="alarm-3" onDismiss={handleDismiss} />
+      )}
     </AnimatePresence>
   );
 }
