@@ -1,6 +1,6 @@
-import { useCallback } from "react";
-import { motion } from "framer-motion";
-import { Target, Flame, Clock, Zap, Eye, Monitor } from "lucide-react";
+import { useCallback, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Target, Flame, Clock, Zap, Eye, Monitor, ChevronDown } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Ripple } from "@/components/magicui/Ripple";
 import { PomodoroRing } from "@/components/timer/PomodoroRing";
@@ -8,6 +8,7 @@ import { TimerControls } from "@/components/timer/TimerControls";
 import { DetectionStatus } from "@/components/detection/DetectionStatus";
 import { useApp } from "@/context/AppContext";
 import type { PomodoroConfig, TimerPhase } from "@/types/pomodoro";
+import type { ActiveWindowInfo } from "@/services/detectionService";
 
 const DEFAULT_CONFIG: PomodoroConfig = {
   work: 25,
@@ -198,48 +199,9 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Recent checks log */}
+            {/* Recent checks log — show 3, expandable */}
             {recentChecks.length > 0 && (
-              <div className="mt-4">
-                <p className="text-[10px] text-text-muted uppercase tracking-wider mb-2 px-1 font-medium">
-                  Recent Checks
-                </p>
-                <div className="space-y-1">
-                  {recentChecks.map((check, i) => (
-                    <motion.div
-                      key={`${check.timestamp}-${i}`}
-                      className="flex items-center gap-2 py-1.5 px-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04]"
-                      initial={i === 0 ? { opacity: 0, x: -8 } : false}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                          check.result === "on_task"
-                            ? "bg-emerald-400"
-                            : check.result === "off_task"
-                              ? "bg-red-400"
-                              : "bg-amber-400"
-                        }`}
-                      />
-                      <span className={`text-[11px] font-medium ${resultColors[check.result]}`}>
-                        {resultLabels[check.result]}
-                      </span>
-                      <span className="text-[11px] text-text-muted truncate flex-1 min-w-0">
-                        {check.window
-                          ? truncate(
-                              check.window.app_name || check.window.process_name,
-                              20
-                            )
-                          : "---"}
-                      </span>
-                      <span className="text-[10px] text-text-muted/60 font-mono flex-shrink-0 tabular-nums">
-                        {formatTimestamp(check.timestamp)}
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+              <RecentChecksLog checks={recentChecks} />
             )}
           </GlassCard>
         </motion.div>
@@ -263,5 +225,61 @@ export default function Dashboard() {
         </span>
       </motion.div>
     </motion.div>
+  );
+}
+
+// ── Recent Checks with dropdown ──────────────────────────
+
+function RecentChecksLog({ checks }: { checks: Array<{ timestamp: number; result: string; window: ActiveWindowInfo | null }> }) {
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? checks : checks.slice(0, 3);
+
+  return (
+    <div className="mt-4">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-1.5 text-[11px] text-text-muted uppercase tracking-wider mb-2 px-1 font-medium cursor-pointer hover:text-text-secondary transition-colors"
+      >
+        Recent Checks ({checks.length})
+        <ChevronDown
+          className={`w-3 h-3 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+        />
+      </button>
+      <div className="space-y-1">
+        <AnimatePresence initial={false}>
+          {visible.map((check, i) => (
+            <motion.div
+              key={`${check.timestamp}-${i}`}
+              className="flex items-center gap-2 py-1.5 px-2.5 rounded-md bg-white/[0.03] border border-white/[0.05]"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                  check.result === "on_task"
+                    ? "bg-emerald-400"
+                    : check.result === "off_task"
+                      ? "bg-red-400"
+                      : "bg-amber-400"
+                }`}
+              />
+              <span className={`text-[11px] font-medium ${resultColors[check.result]}`}>
+                {resultLabels[check.result]}
+              </span>
+              <span className="text-[11px] text-text-muted truncate flex-1 min-w-0">
+                {check.window
+                  ? truncate(check.window.app_name || check.window.process_name, 20)
+                  : "---"}
+              </span>
+              <span className="text-[10px] text-text-muted/60 font-mono flex-shrink-0 tabular-nums">
+                {formatTimestamp(check.timestamp)}
+              </span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    </div>
   );
 }
