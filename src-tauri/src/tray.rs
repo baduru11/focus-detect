@@ -62,21 +62,25 @@ pub fn create_widget_window(app: &tauri::AppHandle) -> Result<(), String> {
         return Ok(());
     }
 
-    let _widget = WebviewWindowBuilder::new(
+    let widget = WebviewWindowBuilder::new(
         app,
         "widget",
         WebviewUrl::App("/widget".into()),
     )
-    .title("")
-    .inner_size(220.0, 80.0)
-    .position(20.0, 20.0)
+    .title("Focus Detector")
+    .inner_size(320.0, 120.0)
+    .min_inner_size(200.0, 80.0)
+    .position(100.0, 100.0)
     .decorations(false)
-    .transparent(true)
+    .transparent(false)
     .always_on_top(true)
-    .resizable(false)
-    .skip_taskbar(true)
+    .resizable(true)
+    .skip_taskbar(false)
     .build()
     .map_err(|e| e.to_string())?;
+
+    // Ensure always-on-top is set after creation
+    let _ = widget.set_always_on_top(true);
 
     Ok(())
 }
