@@ -10,20 +10,13 @@ interface AlarmControllerProps {
   onDismiss: () => void;
 }
 
-async function setFullscreen(fullscreen: boolean) {
+async function setAlwaysOnTop(on: boolean) {
   try {
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
     const win = getCurrentWindow();
-    if (fullscreen) {
-      await win.setFullscreen(true);
-      await win.setAlwaysOnTop(true);
-      await win.setFocus();
-    } else {
-      await win.setFullscreen(false);
-      await win.setAlwaysOnTop(false);
-    }
+    await win.setAlwaysOnTop(on);
   } catch {
-    // Not in Tauri environment
+    // Not in Tauri
   }
 }
 
@@ -33,32 +26,30 @@ export function AlarmController({
 }: AlarmControllerProps) {
   const handleDismiss = useCallback(() => {
     stop();
-    setFullscreen(false);
+    setAlwaysOnTop(false);
     onDismiss();
   }, [onDismiss]);
 
-  // Fullscreen on alarm level 2+, restore on dismiss
+  // Keep window on top during alarm, release when cleared
   useEffect(() => {
     if (alarmLevel >= 2) {
-      setFullscreen(true);
+      setAlwaysOnTop(true);
     } else {
-      setFullscreen(false);
+      setAlwaysOnTop(false);
     }
   }, [alarmLevel]);
 
-  // Stop all sounds when alarm level changes to 0
   useEffect(() => {
     if (alarmLevel === 0) {
       stop();
-      setFullscreen(false);
+      setAlwaysOnTop(false);
     }
   }, [alarmLevel]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       stop();
-      setFullscreen(false);
+      setAlwaysOnTop(false);
     };
   }, []);
 
