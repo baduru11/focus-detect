@@ -379,16 +379,18 @@ export function ProfileEditor({
                 {showNewAppForm && (
                   <RunningAppsPicker
                     onSelect={(app) => {
+                      const defaultAllowed = mode === "whitelist";
                       setAppRules((prev) => [
                         ...prev,
-                        { name: app.app_name, process: app.process_name, allowed: true },
+                        { name: app.app_name, process: app.process_name, allowed: defaultAllowed },
                       ]);
                       setShowNewAppForm(false);
                     }}
                     onManualAdd={(name, process) => {
+                      const defaultAllowed = mode === "whitelist";
                       setAppRules((prev) => [
                         ...prev,
-                        { name, process, allowed: true },
+                        { name, process, allowed: defaultAllowed },
                       ]);
                       setShowNewAppForm(false);
                     }}
