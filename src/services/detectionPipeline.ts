@@ -219,9 +219,9 @@ export class DetectionPipeline {
     }
 
     if (this.inAlarm) {
-      // User got back on task after alarm
+      // User got back on task — immediately dismiss alarm
       this.inAlarm = false;
-      this.escalationLevel = Math.max(0, this.escalationLevel - 1);
+      this.escalationLevel = 0;
       this.callbacks.onBackOnTask();
       return;
     }

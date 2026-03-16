@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Database, FileJson, FileSpreadsheet, AlertTriangle } from "lucide-react";
+import { Database as DatabaseIcon, FileJson, FileSpreadsheet, AlertTriangle } from "lucide-react";
+import Database from "@tauri-apps/plugin-sql";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { NeonButton } from "@/components/ui/NeonButton";
 
@@ -17,10 +18,20 @@ export function DataExport() {
     console.log("Exporting sessions as CSV...");
   };
 
+  const clearAllData = async () => {
+    try {
+      const db = await Database.load("sqlite:focus_detector.db");
+      await db.execute("DELETE FROM distractions");
+      await db.execute("DELETE FROM sessions");
+      // Don't delete profiles or settings — just session data
+    } catch (err) {
+      console.error("Failed to clear data:", err);
+    }
+  };
+
   const handleClearData = () => {
     if (showClearConfirm) {
-      // Placeholder for actual clear logic
-      console.log("Clearing all data...");
+      clearAllData();
       setShowClearConfirm(false);
     } else {
       setShowClearConfirm(true);
@@ -32,7 +43,7 @@ export function DataExport() {
     <GlassCard>
       <div className="flex items-center gap-3 mb-6">
         <div className="w-7 h-7 rounded-lg bg-danger/10 flex items-center justify-center">
-          <Database className="w-3.5 h-3.5 text-danger" strokeWidth={1.8} />
+          <DatabaseIcon className="w-3.5 h-3.5 text-danger" strokeWidth={1.8} />
         </div>
         <h2 className="text-sm font-semibold text-text-primary">
           Data & Export

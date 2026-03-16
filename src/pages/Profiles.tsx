@@ -86,13 +86,18 @@ export default function Profiles() {
   const handleSave = async (
     profileData: Omit<Profile, "id"> | Profile
   ) => {
-    if ("id" in profileData) {
-      const { id, ...updates } = profileData;
-      await updateProfile(id, updates);
-    } else {
-      await createProfile(profileData);
+    try {
+      if ("id" in profileData) {
+        const { id, ...updates } = profileData;
+        await updateProfile(id, updates);
+      } else {
+        await createProfile(profileData);
+      }
+      setEditorState({ mode: "closed" });
+    } catch (err) {
+      console.error("Failed to save profile:", err);
+      // Don't close editor on error
     }
-    setEditorState({ mode: "closed" });
   };
 
   const handleDelete = async (id: string) => {
