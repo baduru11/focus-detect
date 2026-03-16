@@ -23,8 +23,11 @@ function isBrowser(processName: string): boolean {
 
 function matchesSitePattern(title: string, pattern: string): boolean {
   const lowerTitle = title.toLowerCase();
-  const lowerPattern = pattern.toLowerCase();
-  return lowerTitle.includes(lowerPattern);
+  const lowerPattern = pattern.toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/$/, "");
+  // Match against both the domain and common title patterns
+  // e.g. "youtube.com" matches title "Some Video - YouTube" (strip .com and check)
+  const domainBase = lowerPattern.replace(/\.\w+$/, ""); // "youtube.com" -> "youtube"
+  return lowerTitle.includes(lowerPattern) || lowerTitle.includes(domainBase);
 }
 
 function findMatchingRule(
