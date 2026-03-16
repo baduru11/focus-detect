@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Russo+One&display=swap');
+
 @import "tailwindcss";
 
 @theme {
@@ -14,7 +16,8 @@
   --color-text-muted: #555577;
   --color-border-glow: rgba(0, 240, 255, 0.15);
 
-  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Chakra Petch", system-ui, sans-serif;
+  --font-heading: "Russo One", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
 }
 
@@ -103,4 +106,51 @@ body {
 }
 .animate-neon-pulse {
   animation: neon-pulse 2s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════
+   MagicUI Keyframe Animations
+   ═══════════════════════════════════════════════ */
+
+/* NeonGradientCard — rotating gradient border */
+@keyframes background-position-spin {
+  0% { background-position: top center; }
+  100% { background-position: bottom center; }
+}
+.animate-background-position-spin {
+  animation: background-position-spin 3s linear infinite alternate;
+}
+
+/* AnimatedGradientText — sweeping gradient */
+@keyframes gradient {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+}
+.animate-gradient {
+  animation: gradient 3s linear infinite;
+}
+
+/* Ripple — expanding concentric circles */
+@keyframes ripple {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: calc(var(--opacity)); }
+  100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+}
+.animate-ripple {
+  animation: ripple 3s ease-out infinite;
+}
+
+/* Scanline overlay utility */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.1) 2px,
+    rgba(0, 0, 0, 0.1) 4px
+  );
+  pointer-events: none;
+  z-index: 50;
 }
