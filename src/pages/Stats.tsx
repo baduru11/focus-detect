@@ -64,14 +64,14 @@ export default function Stats() {
   }
 
   return (
-    <div className="h-full flex flex-col px-8 py-8 overflow-y-auto">
+    <div className="h-full flex flex-col px-10 py-10 overflow-y-auto">
       {/* Header */}
       <motion.div
-        className="flex items-center justify-between mb-6 flex-shrink-0"
+        className="flex items-center justify-between mb-8 flex-shrink-0"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h1 className="text-xl font-semibold text-text-primary tracking-tight">
+        <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
           Statistics
         </h1>
         <motion.button

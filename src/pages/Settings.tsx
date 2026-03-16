@@ -18,9 +18,9 @@ const container = {
 
 export default function Settings() {
   return (
-    <div className="h-full px-8 py-8 overflow-y-auto">
+    <div className="h-full px-10 py-10 overflow-y-auto">
       <motion.h1
-        className="text-xl font-semibold tracking-tight mb-7 text-text-primary"
+        className="text-2xl font-semibold tracking-tight mb-8 text-text-primary"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
