@@ -18,7 +18,7 @@ interface AppContextValue {
   profiles: Profile[];
   activeProfile: Profile | null;
   setActiveProfile: (id: string) => void;
-  createProfile: (profile: Omit<Profile, "id">) => Promise<void>;
+  createProfile: (profile: Omit<Profile, "id">) => Promise<Profile>;
   updateProfile: (id: string, updates: Partial<Profile>) => Promise<void>;
   deleteProfile: (id: string) => Promise<void>;
 
@@ -79,7 +79,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   } = useDetection();
 
   const [todayFocusMinutes, setTodayFocusMinutes] = useState(0);
-  const [currentStreak, setCurrentStreak] = useState(0);
+  const [currentStreak] = useState(0);
   const focusStartRef = useRef<number | null>(null);
 
   // Track focus time
