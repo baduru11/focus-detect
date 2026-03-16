@@ -1,125 +1,156 @@
-import { motion } from "framer-motion";
-import { Code2, BookOpen, Gamepad2, Plus } from "lucide-react";
-import { GlassCard } from "@/components/ui/GlassCard";
-
-const mockProfiles = [
-  {
-    id: 1,
-    name: "Deep Work",
-    icon: Code2,
-    color: "cyan" as const,
-    description: "Maximum focus, block all distractions",
-    apps: 12,
-  },
-  {
-    id: 2,
-    name: "Study Mode",
-    icon: BookOpen,
-    color: "purple" as const,
-    description: "Block social media, allow reference sites",
-    apps: 8,
-  },
-  {
-    id: 3,
-    name: "Gaming Break",
-    icon: Gamepad2,
-    color: "green" as const,
-    description: "Relax mode with minimal restrictions",
-    apps: 3,
-  },
-];
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, Loader2 } from "lucide-react";
+import { useProfiles } from "@/hooks/useProfiles";
+import { ProfileCard } from "@/components/profiles/ProfileCard";
+import { ProfileEditor } from "@/components/profiles/ProfileEditor";
+import type { Profile } from "@/types/profile";
 
 const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 },
+    transition: { staggerChildren: 0.08 },
   },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  show: { opacity: 1, y: 0, scale: 1 },
 };
 
 export default function Profiles() {
+  const {
+    profiles,
+    activeProfile,
+    loading,
+    setActiveProfile,
+    createProfile,
+    updateProfile,
+    deleteProfile,
+  } = useProfiles();
+
+  const [editorState, setEditorState] = useState<
+    | { mode: "closed" }
+    | { mode: "create" }
+    | { mode: "edit"; profile: Profile }
+  >({ mode: "closed" });
+
+  const handleSave = async (
+    profileData: Omit<Profile, "id"> | Profile
+  ) => {
+    if ("id" in profileData) {
+      const { id, ...updates } = profileData;
+      await updateProfile(id, updates);
+    } else {
+      await createProfile(profileData);
+    }
+    setEditorState({ mode: "closed" });
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteProfile(id);
+  };
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center gap-3"
+        >
+          <Loader2 className="w-8 h-8 text-neon-cyan animate-spin" />
+          <span className="text-sm text-text-muted">Loading profiles...</span>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full p-8">
+    <div className="h-full p-8 overflow-y-auto">
+      {/* Title */}
       <motion.h1
-        className="text-3xl font-bold text-text-primary tracking-tight mb-8"
+        className="text-3xl font-bold tracking-tight mb-8"
+        style={{
+          background: "linear-gradient(135deg, #00f0ff, #bf00ff)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+        }}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        Profiles
+        Activity Profiles
       </motion.h1>
 
+      {/* Profile Grid */}
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
         variants={container}
         initial="hidden"
         animate="show"
       >
-        {mockProfiles.map((profile) => {
-          const Icon = profile.icon;
-          return (
-            <motion.div key={profile.id} variants={item}>
-              <GlassCard glow={profile.color} hoverable className="h-full">
-                <div className="flex flex-col gap-4">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{
-                      background:
-                        profile.color === "cyan"
-                          ? "rgba(0,240,255,0.1)"
-                          : profile.color === "purple"
-                          ? "rgba(191,0,255,0.1)"
-                          : "rgba(0,255,136,0.1)",
-                    }}
-                  >
-                    <Icon
-                      className="w-5 h-5"
-                      style={{
-                        color:
-                          profile.color === "cyan"
-                            ? "#00f0ff"
-                            : profile.color === "purple"
-                            ? "#bf00ff"
-                            : "#00ff88",
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-text-primary">
-                      {profile.name}
-                    </h3>
-                    <p className="text-xs text-text-secondary mt-1">
-                      {profile.description}
-                    </p>
-                  </div>
-                  <div className="text-xs text-text-muted">
-                    {profile.apps} apps monitored
-                  </div>
-                </div>
-              </GlassCard>
+        <AnimatePresence mode="popLayout">
+          {profiles.map((profile) => (
+            <motion.div
+              key={profile.id}
+              variants={item}
+              layout
+              exit={{ opacity: 0, scale: 0.9 }}
+            >
+              <ProfileCard
+                profile={profile}
+                isActive={activeProfile?.id === profile.id}
+                onSelect={() => setActiveProfile(profile.id)}
+                onEdit={() =>
+                  setEditorState({ mode: "edit", profile })
+                }
+                onDelete={() => handleDelete(profile.id)}
+              />
             </motion.div>
-          );
-        })}
+          ))}
+        </AnimatePresence>
 
-        {/* Add new profile card */}
-        <motion.div variants={item}>
-          <GlassCard
-            hoverable
-            className="h-full flex items-center justify-center min-h-[180px] border-dashed"
+        {/* Add New Profile Card */}
+        <motion.div variants={item} layout>
+          <motion.div
+            className="glass-panel rounded-2xl p-5 cursor-pointer flex items-center justify-center min-h-[140px] border border-dashed border-text-muted/20 hover:border-neon-cyan/30 transition-colors"
+            whileHover={{
+              scale: 1.02,
+              borderColor: "rgba(0, 240, 255, 0.4)",
+            }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setEditorState({ mode: "create" })}
           >
             <div className="flex flex-col items-center gap-3 text-text-muted">
-              <div className="w-12 h-12 rounded-xl border border-dashed border-text-muted/30 flex items-center justify-center">
+              <motion.div
+                className="w-12 h-12 rounded-xl border border-dashed border-text-muted/30 flex items-center justify-center"
+                whileHover={{
+                  borderColor: "rgba(0, 240, 255, 0.5)",
+                  boxShadow: "0 0 15px rgba(0, 240, 255, 0.15)",
+                }}
+              >
                 <Plus className="w-6 h-6" />
-              </div>
-              <span className="text-sm">New Profile</span>
+              </motion.div>
+              <span className="text-sm font-medium">New Profile</span>
             </div>
-          </GlassCard>
+          </motion.div>
         </motion.div>
       </motion.div>
+
+      {/* Profile Editor Overlay */}
+      <AnimatePresence>
+        {editorState.mode !== "closed" && (
+          <ProfileEditor
+            profile={
+              editorState.mode === "edit" ? editorState.profile : null
+            }
+            onSave={handleSave}
+            onCancel={() => setEditorState({ mode: "closed" })}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
