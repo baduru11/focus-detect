@@ -88,10 +88,10 @@ export default function Dashboard() {
 
   return (
     <motion.div
-      className="h-full flex flex-col items-center justify-start gap-6 p-10 overflow-y-auto"
+      className="h-full flex flex-col items-center justify-start gap-7 px-8 py-10 overflow-y-auto"
       variants={{
         hidden: { opacity: 0 },
-        show: { opacity: 1, transition: { staggerChildren: 0.08 } },
+        show: { opacity: 1, transition: { staggerChildren: 0.06 } },
       }}
       initial="hidden"
       animate="show"
@@ -99,9 +99,11 @@ export default function Dashboard() {
       {/* Active Profile Card */}
       <motion.div variants={staggerItem}>
         <GlassCard className="flex items-center gap-3 py-3 px-5">
-          <Target className="w-4 h-4 text-accent-light/60" />
+          <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
+            <Target className="w-3.5 h-3.5 text-accent-light" />
+          </div>
           <div>
-            <p className="text-[10px] text-text-muted uppercase tracking-[0.15em] leading-none mb-0.5 font-light">
+            <p className="text-[10px] text-text-muted uppercase tracking-[0.15em] leading-none mb-1 font-medium">
               Active Profile
             </p>
             <p className="text-sm font-semibold text-text-primary leading-tight">
@@ -111,7 +113,7 @@ export default function Dashboard() {
         </GlassCard>
       </motion.div>
 
-      {/* Timer Ring with Ripple behind it */}
+      {/* Timer Ring with Ripple */}
       <motion.div variants={staggerItem} className="relative">
         {isRunning && (
           <Ripple
@@ -165,10 +167,12 @@ export default function Dashboard() {
           variants={staggerItem}
           className="w-full max-w-sm"
         >
-          <GlassCard className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Monitor className="w-3.5 h-3.5 text-accent-light/50" strokeWidth={1.5} />
-              <span className="text-[10px] text-text-muted uppercase tracking-[0.15em] font-light">
+          <GlassCard className="p-5">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-6 h-6 rounded-md bg-accent/10 flex items-center justify-center">
+                <Monitor className="w-3 h-3 text-accent-light" strokeWidth={1.8} />
+              </div>
+              <span className="text-[11px] text-text-muted uppercase tracking-[0.12em] font-semibold">
                 Detection Status
               </span>
             </div>
@@ -183,16 +187,18 @@ export default function Dashboard() {
 
             {/* Last checked window */}
             {lastCheckedWindow && (
-              <div className="mt-3 flex items-start gap-2 py-2 px-3 rounded-lg bg-white/[0.02] border border-white/[0.05]">
-                <Eye className="w-3.5 h-3.5 text-text-muted flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+              <div className="mt-3.5 flex items-start gap-2.5 py-2.5 px-3 rounded-xl bg-white/[0.025] border border-white/[0.06]">
+                <div className="w-6 h-6 rounded-md bg-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Eye className="w-3 h-3 text-text-muted" strokeWidth={1.8} />
+                </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] text-text-muted uppercase tracking-wider mb-0.5">
+                  <p className="text-[10px] text-text-muted uppercase tracking-wider mb-0.5 font-medium">
                     Active Window
                   </p>
-                  <p className="text-xs text-text-primary font-medium leading-tight">
+                  <p className="text-[13px] text-text-primary font-medium leading-tight">
                     {lastCheckedWindow.app_name || lastCheckedWindow.process_name}
                   </p>
-                  <p className="text-[10px] text-text-muted leading-tight truncate">
+                  <p className="text-[11px] text-text-muted leading-tight truncate mt-0.5">
                     {truncate(lastCheckedWindow.title, 60)}
                   </p>
                 </div>
@@ -201,15 +207,15 @@ export default function Dashboard() {
 
             {/* Recent checks log */}
             {recentChecks.length > 0 && (
-              <div className="mt-3">
-                <p className="text-[10px] text-text-muted uppercase tracking-wider mb-1.5 px-1">
+              <div className="mt-4">
+                <p className="text-[10px] text-text-muted uppercase tracking-wider mb-2 px-1 font-medium">
                   Recent Checks
                 </p>
                 <div className="space-y-1">
                   {recentChecks.map((check, i) => (
                     <motion.div
                       key={`${check.timestamp}-${i}`}
-                      className="flex items-center gap-2 py-1 px-2 rounded-md bg-white/[0.02]"
+                      className="flex items-center gap-2 py-1.5 px-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04]"
                       initial={i === 0 ? { opacity: 0, x: -8 } : false}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.2 }}
@@ -223,10 +229,10 @@ export default function Dashboard() {
                               : "bg-amber-400"
                         }`}
                       />
-                      <span className={`text-[10px] font-medium ${resultColors[check.result]}`}>
+                      <span className={`text-[11px] font-medium ${resultColors[check.result]}`}>
                         {resultLabels[check.result]}
                       </span>
-                      <span className="text-[10px] text-text-muted truncate flex-1 min-w-0">
+                      <span className="text-[11px] text-text-muted truncate flex-1 min-w-0">
                         {check.window
                           ? truncate(
                               check.window.app_name || check.window.process_name,
@@ -234,7 +240,7 @@ export default function Dashboard() {
                             )
                           : "---"}
                       </span>
-                      <span className="text-[10px] text-text-muted/60 font-mono flex-shrink-0">
+                      <span className="text-[10px] text-text-muted/60 font-mono flex-shrink-0 tabular-nums">
                         {formatTimestamp(check.timestamp)}
                       </span>
                     </motion.div>
@@ -249,33 +255,39 @@ export default function Dashboard() {
       {/* Quick Stats Row */}
       <motion.div
         variants={staggerItem}
-        className="flex items-center gap-4 flex-wrap justify-center"
+        className="flex items-center gap-3 flex-wrap justify-center"
       >
         <div className="card flex items-center gap-2.5 py-2.5 px-4 rounded-xl">
-          <Zap className="w-3.5 h-3.5 text-accent-light/60" strokeWidth={1.5} />
-          <span className="text-xs text-text-secondary">
+          <div className="w-6 h-6 rounded-md bg-accent/10 flex items-center justify-center">
+            <Zap className="w-3 h-3 text-accent-light" strokeWidth={1.8} />
+          </div>
+          <span className="text-[13px] text-text-secondary">
             Cycle{" "}
-            <span className="text-text-primary font-semibold">
+            <span className="text-text-primary font-semibold tabular-nums">
               {pomodoroState.currentCycle}/{config.cyclesBeforeLong}
             </span>
           </span>
         </div>
 
         <div className="card flex items-center gap-2.5 py-2.5 px-4 rounded-xl">
-          <Flame className="w-3.5 h-3.5 text-warning/60" strokeWidth={1.5} />
-          <span className="text-xs text-text-secondary">
+          <div className="w-6 h-6 rounded-md bg-warning/10 flex items-center justify-center">
+            <Flame className="w-3 h-3 text-warning" strokeWidth={1.8} />
+          </div>
+          <span className="text-[13px] text-text-secondary">
             Streak{" "}
-            <span className="text-text-primary font-semibold">
+            <span className="text-text-primary font-semibold tabular-nums">
               {currentStreak}
             </span>
           </span>
         </div>
 
         <div className="card flex items-center gap-2.5 py-2.5 px-4 rounded-xl">
-          <Clock className="w-3.5 h-3.5 text-accent/60" strokeWidth={1.5} />
-          <span className="text-xs text-text-secondary">
+          <div className="w-6 h-6 rounded-md bg-accent/10 flex items-center justify-center">
+            <Clock className="w-3 h-3 text-accent" strokeWidth={1.8} />
+          </div>
+          <span className="text-[13px] text-text-secondary">
             Today{" "}
-            <span className="text-text-primary font-semibold">
+            <span className="text-text-primary font-semibold tabular-nums">
               {todayHours}h {todayMins}m
             </span>
           </span>
