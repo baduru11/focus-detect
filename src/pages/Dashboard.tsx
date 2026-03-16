@@ -1,122 +1,167 @@
-import { useState } from "react";
+import { useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause, Target } from "lucide-react";
+import { Target, Flame, Clock, Zap } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { NeonButton } from "@/components/ui/NeonButton";
+import { PomodoroRing } from "@/components/timer/PomodoroRing";
+import { TimerControls } from "@/components/timer/TimerControls";
+import { usePomodoro } from "@/hooks/usePomodoro";
+import type { PomodoroConfig, TimerPhase } from "@/types/pomodoro";
+
+const DEFAULT_CONFIG: PomodoroConfig = {
+  work: 25,
+  shortBreak: 5,
+  longBreak: 15,
+  cyclesBeforeLong: 4,
+};
+
+function phaseTotalSeconds(phase: TimerPhase, config: PomodoroConfig): number {
+  switch (phase) {
+    case "work":
+      return config.work * 60;
+    case "shortBreak":
+      return config.shortBreak * 60;
+    case "longBreak":
+      return config.longBreak * 60;
+  }
+}
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0 },
+};
 
 export default function Dashboard() {
-  const [running, setRunning] = useState(false);
+  const config = DEFAULT_CONFIG;
 
-  const timerRadius = 90;
-  const circumference = 2 * Math.PI * timerRadius;
-  const progress = running ? 0.35 : 0;
+  const callbacks = useMemo(
+    () => ({
+      onPhaseChange: (_phase: TimerPhase) => {},
+      onCycleComplete: (_cycle: number) => {},
+      onTimerEnd: () => {},
+    }),
+    []
+  );
+
+  const { state, start, pause, resume, stop, skip } = usePomodoro(
+    config,
+    callbacks
+  );
+
+  const totalSeconds = phaseTotalSeconds(state.phase, config);
+  const isIdle = state.status === "idle";
+
+  const handleStart = useCallback(() => start(), [start]);
+  const handlePause = useCallback(() => pause(), [pause]);
+  const handleResume = useCallback(() => resume(), [resume]);
+  const handleStop = useCallback(() => stop(), [stop]);
+  const handleSkip = useCallback(() => skip(), [skip]);
+
+  const elapsedMinutes = Math.floor(
+    ((totalSeconds - state.secondsRemaining) * state.totalCyclesCompleted) / 60
+  );
+  const todayHours = Math.floor(elapsedMinutes / 60);
+  const todayMins = elapsedMinutes % 60;
 
   return (
-    <div className="h-full flex flex-col items-center justify-center gap-8 p-8">
-      <motion.h1
-        className="text-3xl font-bold text-text-primary tracking-tight"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        Dashboard
-      </motion.h1>
-
-      {/* Timer Ring */}
-      <motion.div
-        className="relative"
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-      >
-        <svg width="220" height="220" viewBox="0 0 220 220">
-          {/* Background ring */}
-          <circle
-            cx="110"
-            cy="110"
-            r={timerRadius}
-            fill="none"
-            stroke="rgba(255,255,255,0.05)"
-            strokeWidth="6"
-          />
-          {/* Progress ring */}
-          <motion.circle
-            cx="110"
-            cy="110"
-            r={timerRadius}
-            fill="none"
-            stroke="url(#timerGradient)"
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            animate={{
-              strokeDashoffset: circumference * (1 - progress),
-            }}
-            transition={{ duration: 1, ease: "easeInOut" }}
-            style={{
-              filter: "drop-shadow(0 0 8px rgba(0, 240, 255, 0.5))",
-              transform: "rotate(-90deg)",
-              transformOrigin: "center",
-            }}
-          />
-          <defs>
-            <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#00f0ff" />
-              <stop offset="100%" stopColor="#bf00ff" />
-            </linearGradient>
-          </defs>
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-4xl font-mono font-bold text-text-primary">
-            {running ? "25:00" : "00:00"}
-          </span>
-          <span className="text-xs text-text-muted mt-1">
-            {running ? "FOCUSING" : "READY"}
-          </span>
-        </div>
-      </motion.div>
-
+    <motion.div
+      className="h-full flex flex-col items-center justify-center gap-6 p-6 overflow-y-auto"
+      variants={{
+        hidden: { opacity: 0 },
+        show: { opacity: 1, transition: { staggerChildren: 0.08 } },
+      }}
+      initial="hidden"
+      animate="show"
+    >
       {/* Active Profile Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <GlassCard glow="cyan" className="flex items-center gap-3 py-4 px-6">
+      <motion.div variants={staggerItem}>
+        <GlassCard glow="cyan" className="flex items-center gap-3 py-3 px-5">
           <Target className="w-5 h-5 text-neon-cyan" />
           <div>
-            <p className="text-xs text-text-muted uppercase tracking-wider">
+            <p className="text-[10px] text-text-muted uppercase tracking-[0.15em] leading-none mb-0.5">
               Active Profile
             </p>
-            <p className="text-sm font-semibold text-text-primary">
+            <p className="text-sm font-semibold text-text-primary leading-tight">
               General Focus
             </p>
           </div>
         </GlassCard>
       </motion.div>
 
-      {/* Start/Stop Button */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
-        <NeonButton
-          variant={running ? "danger" : "primary"}
-          size="lg"
-          onClick={() => setRunning(!running)}
-        >
-          {running ? (
-            <span className="flex items-center gap-2">
-              <Pause className="w-5 h-5" /> Stop Focus
-            </span>
-          ) : (
-            <span className="flex items-center gap-2">
-              <Play className="w-5 h-5" /> Start Focus
-            </span>
-          )}
-        </NeonButton>
+      {/* Timer Ring */}
+      <motion.div variants={staggerItem}>
+        {isIdle ? (
+          <motion.div
+            className="flex flex-col items-center justify-center"
+            style={{ height: 280 }}
+          >
+            <PomodoroRing
+              secondsRemaining={state.secondsRemaining}
+              totalSeconds={totalSeconds}
+              phase={state.phase}
+              status={state.status}
+              currentCycle={state.currentCycle}
+              cyclesBeforeLong={config.cyclesBeforeLong}
+            />
+          </motion.div>
+        ) : (
+          <PomodoroRing
+            secondsRemaining={state.secondsRemaining}
+            totalSeconds={totalSeconds}
+            phase={state.phase}
+            status={state.status}
+            currentCycle={state.currentCycle}
+            cyclesBeforeLong={config.cyclesBeforeLong}
+          />
+        )}
       </motion.div>
-    </div>
+
+      {/* Timer Controls */}
+      <motion.div variants={staggerItem}>
+        <TimerControls
+          status={state.status}
+          onStart={handleStart}
+          onPause={handlePause}
+          onResume={handleResume}
+          onStop={handleStop}
+          onSkip={handleSkip}
+        />
+      </motion.div>
+
+      {/* Quick Stats Row */}
+      <motion.div
+        variants={staggerItem}
+        className="flex items-center gap-3 flex-wrap justify-center"
+      >
+        <GlassCard className="flex items-center gap-2 py-2.5 px-4 !rounded-xl">
+          <Zap className="w-4 h-4 text-neon-cyan" />
+          <span className="text-xs text-text-secondary">
+            Cycle{" "}
+            <span className="text-text-primary font-semibold">
+              {state.currentCycle}/{config.cyclesBeforeLong}
+            </span>
+          </span>
+        </GlassCard>
+
+        <GlassCard className="flex items-center gap-2 py-2.5 px-4 !rounded-xl">
+          <Flame className="w-4 h-4 text-neon-orange" />
+          <span className="text-xs text-text-secondary">
+            Streak{" "}
+            <span className="text-text-primary font-semibold">
+              {state.totalCyclesCompleted}
+            </span>
+          </span>
+        </GlassCard>
+
+        <GlassCard className="flex items-center gap-2 py-2.5 px-4 !rounded-xl">
+          <Clock className="w-4 h-4 text-neon-purple" />
+          <span className="text-xs text-text-secondary">
+            Today{" "}
+            <span className="text-text-primary font-semibold">
+              {todayHours}h {todayMins}m
+            </span>
+          </span>
+        </GlassCard>
+      </motion.div>
+    </motion.div>
   );
 }
