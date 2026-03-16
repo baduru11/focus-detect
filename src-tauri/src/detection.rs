@@ -1,6 +1,7 @@
 use active_win_pos_rs::get_active_window;
 use base64::Engine;
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 use std::io::Cursor;
 use xcap::Monitor;
 
@@ -25,6 +26,62 @@ pub fn get_active_window_info() -> Result<ActiveWindowInfo, String> {
         }),
         Err(()) => Err("Failed to get active window".to_string()),
     }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct RunningApp {
+    pub process_name: String,
+    pub app_name: String,
+}
+
+#[tauri::command]
+pub async fn list_running_apps() -> Result<Vec<RunningApp>, String> {
+    tokio::task::spawn_blocking(|| {
+        let output = std::process::Command::new("powershell")
+            .args([
+                "-NoProfile",
+                "-Command",
+                "Get-Process | Where-Object { $_.MainWindowTitle -ne '' } | Select-Object ProcessName, MainWindowTitle -Unique | ConvertTo-Json",
+            ])
+            .output()
+            .map_err(|e| format!("Failed to list processes: {e}"))?;
+
+        let json_str = String::from_utf8_lossy(&output.stdout);
+
+        #[derive(Deserialize)]
+        struct PsProc {
+            ProcessName: String,
+            #[allow(dead_code)]
+            MainWindowTitle: String,
+        }
+
+        // PowerShell returns single object (not array) if only 1 result
+        let procs: Vec<PsProc> = if json_str.trim().starts_with('[') {
+            serde_json::from_str(&json_str).unwrap_or_default()
+        } else if let Ok(single) = serde_json::from_str::<PsProc>(&json_str) {
+            vec![single]
+        } else {
+            vec![]
+        };
+
+        let mut seen = HashSet::new();
+        let mut apps: Vec<RunningApp> = Vec::new();
+
+        for p in procs {
+            let name = format!("{}.exe", p.ProcessName);
+            if seen.insert(name.clone()) {
+                apps.push(RunningApp {
+                    process_name: name,
+                    app_name: p.ProcessName,
+                });
+            }
+        }
+
+        apps.sort_by(|a, b| a.app_name.to_lowercase().cmp(&b.app_name.to_lowercase()));
+        Ok(apps)
+    })
+    .await
+    .map_err(|e| format!("Task join error: {e}"))?
 }
 
 #[tauri::command]

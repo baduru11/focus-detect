@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, ChevronDown, ChevronUp, Globe } from "lucide-react";
+import { X, Plus, Globe, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { NeonButton } from "@/components/ui/NeonButton";
@@ -8,6 +8,8 @@ import { NeonInput } from "@/components/ui/NeonInput";
 import { NeonSlider } from "@/components/ui/NeonSlider";
 import { NeonToggle } from "@/components/ui/NeonToggle";
 import type { Profile, AppRule } from "@/types/profile";
+
+const BROWSER_PROCESS = "__browser__";
 
 const ICON_OPTIONS = [
   "\uD83C\uDFAF",
@@ -33,6 +35,55 @@ interface NewAppForm {
   process: string;
 }
 
+/** Extract non-browser apps and a flat sites list from the apps array */
+function splitAppsAndSites(apps: AppRule[]): {
+  appRules: AppRule[];
+  sites: string[];
+} {
+  const appRules: AppRule[] = [];
+  const sites: string[] = [];
+
+  for (const app of apps) {
+    if (app.process === BROWSER_PROCESS) {
+      // This is our synthetic browser rule — collect its sites
+      sites.push(...(app.sites ?? []));
+    } else if (app.sites && app.sites.length > 0) {
+      // Legacy: a non-browser app that had sites nested in it
+      // Move sites to the flat list and keep the app without sites
+      sites.push(...app.sites);
+      appRules.push({ ...app, sites: undefined });
+    } else {
+      appRules.push({ ...app, sites: undefined });
+    }
+  }
+
+  return { appRules, sites };
+}
+
+/** Merge separate app rules and sites back into the apps array for saving */
+function mergeAppsAndSites(
+  appRules: AppRule[],
+  sites: string[],
+  mode: "whitelist" | "blacklist"
+): AppRule[] {
+  const merged: AppRule[] = appRules.map((a) => ({
+    name: a.name,
+    process: a.process,
+    allowed: a.allowed,
+  }));
+
+  if (sites.length > 0) {
+    merged.push({
+      name: "Websites",
+      process: BROWSER_PROCESS,
+      allowed: mode === "whitelist",
+      sites,
+    });
+  }
+
+  return merged;
+}
+
 export function ProfileEditor({
   profile,
   onSave,
@@ -45,7 +96,16 @@ export function ProfileEditor({
   const [mode, setMode] = useState<"whitelist" | "blacklist">(
     profile?.mode ?? "blacklist"
   );
-  const [apps, setApps] = useState<AppRule[]>(profile?.apps ?? []);
+
+  // Split incoming apps into separate app rules and sites
+  const initial = useMemo(
+    () => splitAppsAndSites(profile?.apps ?? []),
+    [profile]
+  );
+
+  const [appRules, setAppRules] = useState<AppRule[]>(initial.appRules);
+  const [sites, setSites] = useState<string[]>(initial.sites);
+
   const [pomodoroWork, setPomodoroWork] = useState(profile?.pomodoro.work ?? 25);
   const [pomodoroShortBreak, setPomodoroShortBreak] = useState(
     profile?.pomodoro.shortBreak ?? 5
@@ -68,23 +128,11 @@ export function ProfileEditor({
 
   const [showNewAppForm, setShowNewAppForm] = useState(false);
   const [newApp, setNewApp] = useState<NewAppForm>({ name: "", process: "" });
-  const [expandedApps, setExpandedApps] = useState<Set<number>>(new Set());
 
-  const toggleAppExpanded = (index: number) => {
-    setExpandedApps((prev) => {
-      const next = new Set(prev);
-      if (next.has(index)) {
-        next.delete(index);
-      } else {
-        next.add(index);
-      }
-      return next;
-    });
-  };
-
+  // ---- App handlers ----
   const handleAddApp = useCallback(() => {
     if (!newApp.name.trim() || !newApp.process.trim()) return;
-    setApps((prev) => [
+    setAppRules((prev) => [
       ...prev,
       { name: newApp.name.trim(), process: newApp.process.trim(), allowed: true },
     ]);
@@ -93,45 +141,31 @@ export function ProfileEditor({
   }, [newApp]);
 
   const handleRemoveApp = useCallback((index: number) => {
-    setApps((prev) => prev.filter((_, i) => i !== index));
+    setAppRules((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const handleToggleApp = useCallback((index: number) => {
-    setApps((prev) =>
+    setAppRules((prev) =>
       prev.map((app, i) =>
         i === index ? { ...app, allowed: !app.allowed } : app
       )
     );
   }, []);
 
-  const handleAddSite = useCallback((appIndex: number, url: string) => {
+  // ---- Site handlers ----
+  const handleAddSite = useCallback((url: string) => {
     if (!url.trim()) return;
-    setApps((prev) =>
-      prev.map((app, i) =>
-        i === appIndex
-          ? { ...app, sites: [...(app.sites ?? []), url.trim()] }
-          : app
-      )
-    );
+    setSites((prev) => [...prev, url.trim()]);
   }, []);
 
-  const handleRemoveSite = useCallback(
-    (appIndex: number, siteIndex: number) => {
-      setApps((prev) =>
-        prev.map((app, i) =>
-          i === appIndex
-            ? {
-                ...app,
-                sites: (app.sites ?? []).filter((_, si) => si !== siteIndex),
-              }
-            : app
-        )
-      );
-    },
-    []
-  );
+  const handleRemoveSite = useCallback((index: number) => {
+    setSites((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
+  // ---- Save ----
   const handleSave = () => {
+    const apps = mergeAppsAndSites(appRules, sites, mode);
+
     const profileData = {
       name,
       icon,
@@ -273,12 +307,15 @@ export function ProfileEditor({
             </div>
           </GlassCard>
 
-          {/* Apps Section */}
+          {/* ======== Apps Section ======== */}
           <GlassCard>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">
-                Apps
-              </h3>
+              <div className="flex items-center gap-2">
+                <Monitor className="w-4 h-4 text-accent/70" />
+                <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">
+                  {mode === "blacklist" ? "Blocked Apps" : "Allowed Apps"}
+                </h3>
+              </div>
               <NeonButton
                 variant="ghost"
                 size="sm"
@@ -289,9 +326,13 @@ export function ProfileEditor({
               </NeonButton>
             </div>
 
+            <p className="text-xs text-text-muted mb-3">
+              Desktop applications matched by process name.
+            </p>
+
             <div className="flex flex-col gap-2">
               <AnimatePresence mode="popLayout">
-                {apps.map((app, index) => (
+                {appRules.map((app, index) => (
                   <motion.div
                     key={`${app.process}-${index}`}
                     layout
@@ -317,21 +358,6 @@ export function ProfileEditor({
                           onChange={() => handleToggleApp(index)}
                         />
 
-                        {/* Expand for sites */}
-                        {app.sites !== undefined && (
-                          <motion.button
-                            className="w-6 h-6 rounded flex items-center justify-center text-text-muted hover:text-accent-light transition-colors"
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => toggleAppExpanded(index)}
-                          >
-                            {expandedApps.has(index) ? (
-                              <ChevronUp className="w-4 h-4" />
-                            ) : (
-                              <ChevronDown className="w-4 h-4" />
-                            )}
-                          </motion.button>
-                        )}
-
                         {/* Remove */}
                         <motion.button
                           className="w-6 h-6 rounded flex items-center justify-center text-text-muted hover:text-danger transition-colors"
@@ -342,26 +368,6 @@ export function ProfileEditor({
                           <X className="w-3.5 h-3.5" />
                         </motion.button>
                       </div>
-
-                      {/* Expanded Sites */}
-                      <AnimatePresence>
-                        {expandedApps.has(index) && app.sites !== undefined && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="mt-3 pt-3 border-t border-white/[0.06]"
-                          >
-                            <SiteRules
-                              sites={app.sites}
-                              onAdd={(url) => handleAddSite(index, url)}
-                              onRemove={(siteIndex) =>
-                                handleRemoveSite(index, siteIndex)
-                              }
-                            />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
                     </div>
                   </motion.div>
                 ))}
@@ -378,14 +384,14 @@ export function ProfileEditor({
                   >
                     <div className="flex flex-col gap-2">
                       <NeonInput
-                        placeholder="App name (e.g. Chrome)"
+                        placeholder="App name (e.g. Discord)"
                         value={newApp.name}
                         onChange={(e) =>
                           setNewApp((p) => ({ ...p, name: e.target.value }))
                         }
                       />
                       <NeonInput
-                        placeholder="Process name (e.g. chrome.exe)"
+                        placeholder="Process name (e.g. discord.exe)"
                         value={newApp.process}
                         onChange={(e) =>
                           setNewApp((p) => ({ ...p, process: e.target.value }))
@@ -411,12 +417,34 @@ export function ProfileEditor({
                 )}
               </AnimatePresence>
 
-              {apps.length === 0 && !showNewAppForm && (
+              {appRules.length === 0 && !showNewAppForm && (
                 <div className="text-center py-6 text-text-muted text-sm">
-                  No apps configured. Click "Add App" to get started.
+                  No apps configured. Click &quot;Add App&quot; to get started.
                 </div>
               )}
             </div>
+          </GlassCard>
+
+          {/* ======== Sites Section ======== */}
+          <GlassCard>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-accent/70" />
+                <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">
+                  {mode === "blacklist" ? "Blocked Sites" : "Allowed Sites"}
+                </h3>
+              </div>
+            </div>
+
+            <p className="text-xs text-text-muted mb-3">
+              Website URLs matched by checking the window title of any browser.
+            </p>
+
+            <SiteRules
+              sites={sites}
+              onAdd={handleAddSite}
+              onRemove={handleRemoveSite}
+            />
           </GlassCard>
 
           {/* Pomodoro Settings */}
@@ -580,11 +608,6 @@ function SiteRules({ sites, onAdd, onRemove }: SiteRulesProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-1.5 text-xs text-text-muted">
-        <Globe className="w-3 h-3" />
-        Site Rules
-      </div>
-
       <AnimatePresence mode="popLayout">
         {sites.map((site, index) => (
           <motion.div
@@ -595,6 +618,7 @@ function SiteRules({ sites, onAdd, onRemove }: SiteRulesProps) {
             exit={{ opacity: 0, x: 10 }}
             className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]"
           >
+            <Globe className="w-3 h-3 text-text-muted shrink-0" />
             <span className="flex-1 text-xs text-text-primary font-mono truncate">
               {site}
             </span>
@@ -613,7 +637,7 @@ function SiteRules({ sites, onAdd, onRemove }: SiteRulesProps) {
       <div className="flex gap-2">
         <div className="flex-1">
           <NeonInput
-            placeholder="https://example.com"
+            placeholder="youtube.com, reddit.com, etc."
             value={newUrl}
             onChange={(e) => setNewUrl(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -623,6 +647,12 @@ function SiteRules({ sites, onAdd, onRemove }: SiteRulesProps) {
           <Plus className="w-3.5 h-3.5" />
         </NeonButton>
       </div>
+
+      {sites.length === 0 && (
+        <div className="text-center py-4 text-text-muted text-sm">
+          No sites configured. Add a URL above.
+        </div>
+      )}
     </div>
   );
 }

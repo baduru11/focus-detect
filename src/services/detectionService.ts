@@ -21,3 +21,12 @@ export async function getActiveWindowInfo(): Promise<ActiveWindowInfo> {
 export async function getMonitors(): Promise<MonitorInfo[]> {
   return invoke<MonitorInfo[]>("get_monitors");
 }
+
+export interface RunningApp {
+  process_name: string;
+  app_name: string;
+}
+
+export async function listRunningApps(): Promise<RunningApp[]> {
+  return invoke<RunningApp[]>("list_running_apps");
+}
