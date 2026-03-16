@@ -47,7 +47,7 @@ VALUES (
   'General Focus',
   '🎯',
   'blacklist',
-  '[{"name":"YouTube","process":"chrome.exe","allowed":false,"sites":["youtube.com"]},{"name":"Reddit","process":"chrome.exe","allowed":false,"sites":["reddit.com"]},{"name":"Twitter","process":"chrome.exe","allowed":false,"sites":["twitter.com","x.com"]}]',
+  '[{"name":"YouTube (Chrome)","process":"chrome.exe","allowed":false,"sites":["youtube.com"]},{"name":"YouTube (Whale)","process":"whale.exe","allowed":false,"sites":["youtube.com"]},{"name":"YouTube (Edge)","process":"msedge.exe","allowed":false,"sites":["youtube.com"]},{"name":"Reddit","process":"chrome.exe","allowed":false,"sites":["reddit.com"]},{"name":"Reddit (Whale)","process":"whale.exe","allowed":false,"sites":["reddit.com"]},{"name":"Twitter","process":"chrome.exe","allowed":false,"sites":["twitter.com","x.com"]},{"name":"Twitter (Whale)","process":"whale.exe","allowed":false,"sites":["twitter.com","x.com"]}]',
   '{"work":25,"shortBreak":5,"longBreak":15,"cyclesBeforeLong":4}',
   '{"checkInterval":30,"graceCountdown":10,"alarmLockDuration":15}',
   '{"detection":"all","alarm":"all"}'

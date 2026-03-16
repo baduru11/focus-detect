@@ -10,6 +10,11 @@ const BROWSER_PROCESSES = [
   "brave.exe",
   "opera.exe",
   "arc.exe",
+  "whale.exe",
+  "vivaldi.exe",
+  "thorium.exe",
+  "ungoogled-chromium.exe",
+  "chromium.exe",
 ];
 
 function isBrowser(processName: string): boolean {
@@ -35,45 +40,71 @@ function findMatchingRule(
   return null;
 }
 
+/**
+ * Collect ALL site rules across all browser rules in the profile.
+ * This way if "youtube.com" is blocked on chrome.exe, it's also blocked on whale.exe.
+ */
+function getAllBlockedSites(profile: Profile): string[] {
+  const sites: string[] = [];
+  for (const rule of profile.apps) {
+    if (!rule.allowed && rule.sites) {
+      sites.push(...rule.sites);
+    }
+  }
+  return [...new Set(sites)];
+}
+
+function getAllAllowedSites(profile: Profile): string[] {
+  const sites: string[] = [];
+  for (const rule of profile.apps) {
+    if (rule.allowed && rule.sites) {
+      sites.push(...rule.sites);
+    }
+  }
+  return [...new Set(sites)];
+}
+
 export function matchWindowAgainstProfile(
   window: ActiveWindowInfo,
   profile: Profile
 ): MatchResult {
   const rule = findMatchingRule(window.process_name, profile.apps);
 
-  if (rule) {
-    // Check if the process is a browser with site-level rules
-    if (isBrowser(window.process_name) && rule.sites && rule.sites.length > 0) {
-      const siteMatch = rule.sites.some((site) =>
-        matchesSitePattern(window.title, site)
-      );
-
-      if (siteMatch) {
-        // A site rule matched
-        if (profile.mode === "whitelist") {
-          return rule.allowed ? "on_task" : "off_task";
-        }
-        // blacklist mode
-        return rule.allowed ? "on_task" : "off_task";
+  // If the current process is a browser (even if not explicitly in rules),
+  // check window title against ALL site rules from the profile
+  if (isBrowser(window.process_name)) {
+    if (profile.mode === "blacklist") {
+      const blockedSites = getAllBlockedSites(profile);
+      if (blockedSites.length > 0) {
+        const siteMatch = blockedSites.some((site) =>
+          matchesSitePattern(window.title, site)
+        );
+        if (siteMatch) return "off_task";
       }
-
-      // Browser matched but no site rule matched — ambiguous
-      return "ambiguous";
+    } else {
+      // whitelist mode — only allowed sites are OK
+      const allowedSites = getAllAllowedSites(profile);
+      if (allowedSites.length > 0) {
+        const siteMatch = allowedSites.some((site) =>
+          matchesSitePattern(window.title, site)
+        );
+        if (siteMatch) return "on_task";
+        return "off_task";
+      }
     }
 
-    // Non-browser app or browser without site rules
-    if (profile.mode === "whitelist") {
+    // Browser with no matching site rules — ambiguous
+    if (rule) {
       return rule.allowed ? "on_task" : "off_task";
     }
-    // blacklist mode
+    return "ambiguous";
+  }
+
+  // Non-browser app
+  if (rule) {
     return rule.allowed ? "on_task" : "off_task";
   }
 
   // No matching rule found
-  if (profile.mode === "whitelist") {
-    // Whitelist: anything not explicitly listed is off-task
-    return "off_task";
-  }
-  // Blacklist: anything not explicitly listed is on-task
-  return "on_task";
+  return profile.mode === "whitelist" ? "off_task" : "on_task";
 }
