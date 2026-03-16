@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Target, Eye, Monitor } from "lucide-react";
+import { Target, Eye, Monitor, Minimize2 } from "lucide-react";
 import { FlickeringGrid } from "@/components/magicui/FlickeringGrid";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { PomodoroRing } from "@/components/timer/PomodoroRing";
@@ -98,14 +98,28 @@ export default function Dashboard() {
       initial="hidden"
       animate="show"
     >
-      {/* Active Profile Card */}
-      <motion.div variants={staggerItem}>
+      {/* Top bar: profile + widget toggle */}
+      <motion.div variants={staggerItem} className="flex items-center gap-3">
         <div className="flex items-center gap-3 py-2 px-4 rounded-lg bg-white/[0.05] border border-white/[0.08]">
           <Target className="w-4 h-4 text-text-muted" />
           <span className="text-sm text-text-secondary">
             {activeProfile?.name ?? "No Profile"}
           </span>
         </div>
+        <button
+          className="p-2 rounded-lg bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.08] transition-colors cursor-pointer"
+          title="Switch to mini widget"
+          onClick={async () => {
+            try {
+              const { invoke } = await import("@tauri-apps/api/core");
+              await invoke("toggle_widget", { visible: true });
+              const { getCurrentWindow } = await import("@tauri-apps/api/window");
+              await getCurrentWindow().hide();
+            } catch { /* Not in Tauri */ }
+          }}
+        >
+          <Minimize2 className="w-4 h-4 text-text-muted" />
+        </button>
       </motion.div>
 
       {/* Timer Ring */}

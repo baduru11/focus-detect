@@ -49,6 +49,7 @@ pub async fn list_running_apps() -> Result<Vec<RunningApp>, String> {
         let json_str = String::from_utf8_lossy(&output.stdout);
 
         #[derive(Deserialize)]
+        #[allow(non_snake_case)]
         struct PsProc {
             ProcessName: String,
             #[allow(dead_code)]
