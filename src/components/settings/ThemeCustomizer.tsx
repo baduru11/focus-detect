@@ -5,47 +5,43 @@ import { cn } from "@/lib/utils";
 import { GlassCard } from "@/components/ui/GlassCard";
 
 const ACCENT_COLORS = [
-  { name: "Cyan", hex: "#00f0ff" },
-  { name: "Purple", hex: "#bf00ff" },
-  { name: "Red", hex: "#ff003c" },
-  { name: "Green", hex: "#00ff88" },
-  { name: "Orange", hex: "#ff8c00" },
-  { name: "Pink", hex: "#ff69b4" },
+  { name: "Indigo", hex: "#6366f1" },
+  { name: "Purple", hex: "#a855f7" },
+  { name: "Cyan", hex: "#06b6d4" },
+  { name: "Green", hex: "#22c55e" },
+  { name: "Orange", hex: "#f59e0b" },
+  { name: "Pink", hex: "#ec4899" },
 ];
 
 export function ThemeCustomizer() {
-  const [selectedColor, setSelectedColor] = useState("#00f0ff");
+  const [selectedColor, setSelectedColor] = useState("#6366f1");
 
   return (
     <GlassCard>
       <div className="flex items-center gap-3 mb-6">
-        <Palette className="w-4 h-4 text-neon-purple/60" />
+        <Palette className="w-4 h-4 text-accent-light/60" strokeWidth={1.5} />
         <h2 className="text-base font-semibold text-text-primary">Theme</h2>
       </div>
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
-          <span className="text-xs text-text-muted uppercase tracking-wider">Accent Color</span>
+          <span className="text-xs text-text-muted uppercase tracking-wider font-light">Accent Color</span>
           <div className="flex gap-3">
             {ACCENT_COLORS.map((color) => (
               <motion.button
                 key={color.hex}
                 type="button"
                 className={cn(
-                  "relative w-7 h-7 rounded-full transition-all duration-200",
+                  "relative w-6 h-6 rounded-full transition-all duration-200",
                   selectedColor === color.hex
-                    ? "ring-2 ring-offset-2 ring-offset-void"
+                    ? "ring-2 ring-offset-2 ring-offset-base"
                     : "hover:scale-110"
                 )}
                 style={{
                   background: color.hex,
-                  opacity: selectedColor === color.hex ? 1 : 0.6,
-                  boxShadow:
-                    selectedColor === color.hex
-                      ? `0 0 10px ${color.hex}40`
-                      : "none",
+                  opacity: selectedColor === color.hex ? 1 : 0.5,
                 }}
-                whileHover={{ scale: 1.15, opacity: 0.9 }}
+                whileHover={{ scale: 1.15, opacity: 0.85 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setSelectedColor(color.hex)}
                 title={color.name}
@@ -56,7 +52,7 @@ export function ThemeCustomizer() {
 
         {/* Preview Swatch */}
         <div className="flex flex-col gap-3">
-          <span className="text-xs text-text-muted uppercase tracking-wider">Preview</span>
+          <span className="text-xs text-text-muted uppercase tracking-wider font-light">Preview</span>
           <div
             className="h-11 rounded-lg border border-white/[0.06] flex items-center justify-center gap-3"
             style={{
@@ -65,11 +61,10 @@ export function ThemeCustomizer() {
             }}
           >
             <div
-              className="w-2.5 h-2.5 rounded-full"
+              className="w-2 h-2 rounded-full"
               style={{
                 background: selectedColor,
                 opacity: 0.7,
-                boxShadow: `0 0 6px ${selectedColor}40`,
               }}
             />
             <span

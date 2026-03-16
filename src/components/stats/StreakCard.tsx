@@ -47,44 +47,17 @@ export function StreakCard({ current, best, className }: StreakCardProps) {
       className={cn("relative overflow-hidden", className)}
     >
       <div className="flex flex-col items-center text-center gap-2">
-        {/* Fire animation */}
-        <motion.div
-          className="text-3xl"
-          animate={
-            hasStreak
-              ? {
-                  scale: [1, 1.1, 1],
-                  filter: [
-                    "brightness(1)",
-                    "brightness(1.2)",
-                    "brightness(1)",
-                  ],
-                }
-              : {}
-          }
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        >
-          {hasStreak ? "\uD83D\uDD25" : "\u2744\uFE0F"}
-        </motion.div>
+        {/* Simple text indicator instead of animated emoji */}
+        <span className="text-xs text-text-muted uppercase tracking-wider font-light">
+          {hasStreak ? "Active Streak" : "No Streak"}
+        </span>
 
         {/* Current streak number */}
         <motion.span
           className={cn(
-            "text-4xl font-bold font-mono",
-            hasStreak ? "text-neon-green/80" : "text-text-muted"
+            "text-4xl font-semibold",
+            hasStreak ? "text-accent-light" : "text-text-muted"
           )}
-          style={
-            hasStreak
-              ? {
-                  textShadow:
-                    "0 0 12px rgba(0,255,136,0.3)",
-                }
-              : undefined
-          }
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -92,7 +65,7 @@ export function StreakCard({ current, best, className }: StreakCardProps) {
           {displayCount}
         </motion.span>
 
-        <span className="text-xs text-text-muted uppercase tracking-wider">
+        <span className="text-xs text-text-muted uppercase tracking-wider font-light">
           Day Streak
         </span>
 

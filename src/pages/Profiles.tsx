@@ -4,9 +4,6 @@ import { Plus, Loader2 } from "lucide-react";
 import { useProfiles } from "@/hooks/useProfiles";
 import { ProfileCard } from "@/components/profiles/ProfileCard";
 import { ProfileEditor } from "@/components/profiles/ProfileEditor";
-import { MagicCard } from "@/components/magicui/MagicCard";
-import { BorderBeam } from "@/components/magicui/BorderBeam";
-import { AnimatedGradientText } from "@/components/magicui/AnimatedGradientText";
 import type { Profile } from "@/types/profile";
 
 const MOCK_PROFILES: Profile[] = [
@@ -118,19 +115,17 @@ export default function Profiles() {
   }
 
   return (
-    <div className="h-full p-8 overflow-y-auto">
+    <div className="h-full p-10 overflow-y-auto">
       {/* Title */}
       <motion.h1
-        className="text-2xl font-bold tracking-tight mb-8"
+        className="text-2xl font-semibold tracking-tight mb-8 text-text-primary"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <AnimatedGradientText speed={1} colorFrom="#00f0ff" colorTo="#bf00ff" className="text-2xl font-bold">
-          Activity Profiles
-        </AnimatedGradientText>
+        Activity Profiles
       </motion.h1>
 
-      {/* Profile Grid */}
+      {/* Profile Grid — clean glass cards */}
       <motion.div
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
         variants={container}
@@ -149,13 +144,12 @@ export default function Profiles() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 className="relative"
               >
-                {/* Use MagicCard for mouse spotlight */}
-                <MagicCard
-                  gradientSize={250}
-                  gradientFrom="#00f0ff"
-                  gradientTo="#bf00ff"
-                  gradientOpacity={0.6}
-                  className="!rounded-xl"
+                <div
+                  className={`rounded-2xl border transition-all duration-200 ${
+                    isActive
+                      ? "border-accent/30 bg-white/[0.04]"
+                      : "border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.05] hover:border-white/[0.12]"
+                  } backdrop-blur-[40px]`}
                 >
                   <ProfileCard
                     profile={profile}
@@ -166,17 +160,7 @@ export default function Profiles() {
                     }
                     onDelete={() => handleDelete(profile.id)}
                   />
-                  {/* BorderBeam for active profile */}
-                  {isActive && (
-                    <BorderBeam
-                      size={60}
-                      duration={4}
-                      colorFrom="#00f0ff"
-                      colorTo="#bf00ff"
-                      borderWidth={1.5}
-                    />
-                  )}
-                </MagicCard>
+                </div>
               </motion.div>
             );
           })}
@@ -185,10 +169,10 @@ export default function Profiles() {
         {/* Add New Profile Card */}
         <motion.div variants={item} layout>
           <motion.div
-            className="rounded-xl p-5 cursor-pointer flex items-center justify-center min-h-[140px] border border-dashed border-white/[0.08] hover:border-neon-cyan/20 transition-colors bg-white/[0.01]"
+            className="rounded-2xl p-5 cursor-pointer flex items-center justify-center min-h-[140px] border border-dashed border-white/[0.08] hover:border-accent/30 transition-colors bg-white/[0.01]"
             whileHover={{
-              scale: 1.02,
-              borderColor: "rgba(0, 240, 255, 0.2)",
+              scale: 1.01,
+              borderColor: "rgba(99, 102, 241, 0.3)",
             }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setEditorState({ mode: "create" })}
@@ -197,7 +181,7 @@ export default function Profiles() {
               <motion.div
                 className="w-11 h-11 rounded-lg border border-dashed border-white/[0.1] flex items-center justify-center"
                 whileHover={{
-                  borderColor: "rgba(0, 240, 255, 0.25)",
+                  borderColor: "rgba(99, 102, 241, 0.3)",
                 }}
               >
                 <Plus className="w-5 h-5" />

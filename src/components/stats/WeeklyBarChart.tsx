@@ -44,21 +44,16 @@ export function WeeklyBarChart({ data, className }: WeeklyBarChartProps) {
                 {bar.hours}h
               </motion.span>
 
-              {/* Bar — thin with rounded tops */}
+              {/* Bar — thin with rounded top, indigo gradient */}
               <div className="relative w-full flex justify-center">
                 <motion.div
-                  className={cn(
-                    "w-full max-w-[24px] rounded-t-md cursor-pointer relative"
-                  )}
+                  className="w-full max-w-[20px] rounded-t-md cursor-pointer"
                   style={{
                     background: isToday
-                      ? "linear-gradient(to top, rgba(0,240,255,0.5), rgba(191,0,255,0.4))"
-                      : "linear-gradient(to top, rgba(0,240,255,0.25), rgba(191,0,255,0.15))",
-                    boxShadow: isToday
-                      ? "0 0 8px rgba(0,240,255,0.15)"
+                      ? "linear-gradient(to top, #6366f1, #818cf8)"
                       : isHovered
-                      ? "0 0 6px rgba(0,240,255,0.1)"
-                      : "none",
+                      ? "linear-gradient(to top, rgba(99,102,241,0.4), rgba(129,140,248,0.3))"
+                      : "linear-gradient(to top, rgba(99,102,241,0.25), rgba(129,140,248,0.15))",
                   }}
                   initial={{ height: 0 }}
                   animate={{ height: Math.max(barHeight, 3) }}
@@ -74,7 +69,7 @@ export function WeeklyBarChart({ data, className }: WeeklyBarChartProps) {
               <span
                 className={cn(
                   "text-[10px] mt-2 font-medium",
-                  isToday ? "text-neon-cyan/70" : "text-text-muted"
+                  isToday ? "text-accent-light" : "text-text-muted"
                 )}
               >
                 {bar.day}

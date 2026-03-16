@@ -31,7 +31,7 @@ export function DataExport() {
   return (
     <GlassCard>
       <div className="flex items-center gap-3 mb-6">
-        <Database className="w-4 h-4 text-neon-red/60" />
+        <Database className="w-4 h-4 text-danger/60" strokeWidth={1.5} />
         <h2 className="text-base font-semibold text-text-primary">
           Data & Export
         </h2>
@@ -40,7 +40,7 @@ export function DataExport() {
       <div className="flex flex-col gap-6">
         {/* Export Buttons */}
         <div className="flex flex-col gap-3">
-          <span className="text-xs text-text-muted uppercase tracking-wider">Export Sessions</span>
+          <span className="text-xs text-text-muted uppercase tracking-wider font-light">Export Sessions</span>
           <div className="flex gap-3">
             <NeonButton variant="ghost" size="sm" onClick={handleExportJSON}>
               <FileJson className="w-3.5 h-3.5 mr-2 inline" />
@@ -54,12 +54,12 @@ export function DataExport() {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-white/[0.04]" />
+        <div className="border-t border-white/[0.06]" />
 
         {/* Clear Data */}
         <div className="flex flex-col gap-3">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="w-3.5 h-3.5 text-neon-red/40 mt-0.5 shrink-0" />
+            <AlertTriangle className="w-3.5 h-3.5 text-danger/40 mt-0.5 shrink-0" strokeWidth={1.5} />
             <p className="text-xs text-text-muted leading-relaxed">
               Clearing all data will permanently remove all session history,
               statistics, and cached AI analysis results. This action cannot be
@@ -76,7 +76,7 @@ export function DataExport() {
                 exit={{ opacity: 0, y: -5 }}
                 className="flex items-center gap-3"
               >
-                <span className="text-sm text-neon-red/80 font-semibold">
+                <span className="text-sm text-danger/80 font-semibold">
                   Are you sure?
                 </span>
                 <NeonButton

@@ -25,9 +25,9 @@ type ProviderKey = (typeof PROVIDERS)[number]["key"];
 function StatusDot({ status }: { status: ConnectionStatus }) {
   const colors: Record<ConnectionStatus, string> = {
     idle: "bg-text-muted/50",
-    testing: "bg-neon-orange/60 animate-pulse",
-    connected: "bg-neon-green/60",
-    error: "bg-neon-red/60",
+    testing: "bg-warning/60 animate-pulse",
+    connected: "bg-success/60",
+    error: "bg-danger/60",
   };
 
   const labels: Record<ConnectionStatus, string> = {
@@ -86,7 +86,7 @@ export function AIProviderConfig() {
   return (
     <GlassCard>
       <div className="flex items-center gap-3 mb-6">
-        <Brain className="w-4 h-4 text-neon-cyan/60" />
+        <Brain className="w-4 h-4 text-accent-light/60" strokeWidth={1.5} />
         <h2 className="text-base font-semibold text-text-primary">AI Provider</h2>
       </div>
 
@@ -105,7 +105,7 @@ export function AIProviderConfig() {
           {PROVIDERS.map(({ key, label, placeholder }) => (
             <div
               key={key}
-              className="rounded-lg p-4 border border-white/[0.04] bg-white/[0.02] flex flex-col gap-3"
+              className="rounded-lg p-4 border border-white/[0.06] bg-white/[0.02] flex flex-col gap-3"
             >
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-text-primary">

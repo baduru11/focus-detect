@@ -1,27 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Russo+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @import "tailwindcss";
 
 @theme {
-  --color-void: #0a0a0f;
-  --color-void-light: #0e0e1a;
-  --color-surface: rgba(14, 14, 26, 0.55);
-  --color-surface-solid: #0f0f23;
-  --color-surface-raised: rgba(20, 20, 40, 0.5);
-  --color-neon-cyan: #00f0ff;
-  --color-neon-purple: #bf00ff;
-  --color-neon-red: #ff003c;
-  --color-neon-green: #00ff88;
-  --color-neon-orange: #ff8c00;
-  --color-text-primary: #e0e0ff;
-  --color-text-secondary: #8888aa;
-  --color-text-muted: #555577;
-  --color-border-glow: rgba(0, 240, 255, 0.15);
+  --color-base: #060611;
+  --color-surface: rgba(255, 255, 255, 0.03);
+  --color-surface-hover: rgba(255, 255, 255, 0.06);
+  --color-surface-solid: #0a0a1a;
+  --color-surface-raised: rgba(255, 255, 255, 0.04);
+
+  --color-accent: #6366f1;
+  --color-accent-light: #818cf8;
+  --color-accent-glow: rgba(99, 102, 241, 0.15);
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  --color-text-primary: #f0f0f0;
+  --color-text-secondary: #888899;
+  --color-text-muted: #555566;
+
+  --color-border-default: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.12);
   --color-border-subtle: rgba(255, 255, 255, 0.06);
 
-  --font-sans: "Chakra Petch", system-ui, sans-serif;
-  --font-heading: "Russo One", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --font-sans: "Inter", -apple-system, system-ui, sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", monospace;
 }
 
 * {
@@ -37,7 +41,8 @@ html, body, #root {
 }
 
 body {
-  background: linear-gradient(145deg, #0a0a0f 0%, #0d0d1a 40%, #0a0e14 70%, #0a0a0f 100%);
+  background: #060611;
+  background-image: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(99, 102, 241, 0.04) 0%, transparent 70%);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -52,85 +57,67 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.18);
 }
 
-/* Glass panel base — more subtle, layered depth */
+/* Glass — Apple Liquid Glass */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(40px) saturate(1.5);
+  -webkit-backdrop-filter: blur(40px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  position: relative;
+}
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  pointer-events: none;
+}
+.glass:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Legacy alias for components still referencing glass-panel */
 .glass-panel {
-  background: var(--color-surface);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(40px) saturate(1.5);
+  -webkit-backdrop-filter: blur(40px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
 }
 
-/* Modern card — premium, no neon by default */
+/* Modern card — clean glass depth */
 .card {
-  background: rgba(14, 14, 26, 0.6);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(40px) saturate(1.5);
+  -webkit-backdrop-filter: blur(40px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.3),
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    0 0 0 0.5px rgba(255, 255, 255, 0.04) inset;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .card:hover {
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    0 8px 24px rgba(0, 0, 0, 0.25),
-    0 0 0 0.5px rgba(255, 255, 255, 0.06) inset;
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-/* Neon glow utilities — MUCH more subtle */
-.neon-cyan {
-  box-shadow: 0 0 8px rgba(0, 240, 255, 0.12), 0 0 1px rgba(0, 240, 255, 0.2);
-}
-.neon-purple {
-  box-shadow: 0 0 8px rgba(191, 0, 255, 0.12), 0 0 1px rgba(191, 0, 255, 0.2);
-}
-.neon-red {
-  box-shadow: 0 0 8px rgba(255, 0, 60, 0.12), 0 0 1px rgba(255, 0, 60, 0.2);
-}
-.neon-green {
-  box-shadow: 0 0 8px rgba(0, 255, 136, 0.12), 0 0 1px rgba(0, 255, 136, 0.2);
-}
-
-/* Animated gradient border */
-.gradient-border {
-  position: relative;
-}
-.gradient-border::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background: linear-gradient(135deg, var(--color-neon-cyan), var(--color-neon-purple), var(--color-neon-cyan));
-  background-size: 200% 200%;
-  animation: gradient-shift 3s ease infinite;
-  z-index: -1;
-  opacity: 0.3;
-}
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-/* Pulse animation */
-@keyframes neon-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-.animate-neon-pulse {
-  animation: neon-pulse 2s ease-in-out infinite;
+/* Subtle accent glow utility */
+.accent-glow {
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2), 0 0 8px rgba(99, 102, 241, 0.1);
 }
 
 /* ═══════════════════════════════════════════════
@@ -162,20 +149,4 @@ body {
 }
 .animate-ripple {
   animation: ripple 3s ease-out infinite;
-}
-
-/* Scanline overlay utility */
-.scanlines::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.1) 2px,
-    rgba(0, 0, 0, 0.1) 4px
-  );
-  pointer-events: none;
-  z-index: 50;
 }

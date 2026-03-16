@@ -39,7 +39,6 @@ export function DistractorLeaderboard({
       <div className="flex flex-col gap-3">
         {items.map((item, i) => {
           const proportion = (item.count / maxCount) * 100;
-          const isWorst = i === 0;
 
           return (
             <motion.div
@@ -52,22 +51,17 @@ export function DistractorLeaderboard({
               {/* Rank */}
               <span
                 className={cn(
-                  "w-5 text-right text-xs font-mono font-bold flex-shrink-0",
-                  isWorst ? "text-neon-red/70" : "text-text-muted"
+                  "w-5 text-right text-xs font-mono font-medium flex-shrink-0",
+                  "text-text-muted"
                 )}
               >
                 {i + 1}
               </span>
 
-              {/* Name + bar */}
+              {/* Name + count */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span
-                    className={cn(
-                      "text-xs font-medium truncate",
-                      isWorst ? "text-neon-red/80" : "text-text-primary"
-                    )}
-                  >
+                  <span className="text-xs font-medium truncate text-text-primary">
                     {item.name}
                   </span>
                   <span className="text-[10px] font-mono text-text-muted ml-2 flex-shrink-0">
@@ -78,9 +72,7 @@ export function DistractorLeaderboard({
                   <motion.div
                     className="h-full rounded-full"
                     style={{
-                      background: isWorst
-                        ? "linear-gradient(90deg, rgba(255,0,60,0.6), rgba(255,0,60,0.3))"
-                        : "linear-gradient(90deg, rgba(0,240,255,0.4), rgba(0,240,255,0.15))",
+                      background: "linear-gradient(90deg, rgba(99,102,241,0.5), rgba(99,102,241,0.2))",
                     }}
                     initial={{ width: 0 }}
                     animate={{ width: `${proportion}%` }}

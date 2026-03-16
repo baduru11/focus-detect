@@ -182,7 +182,7 @@ export function ProfileEditor({
     >
       {/* Backdrop */}
       <motion.div
-        className="absolute inset-0 bg-void/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-base/60 backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -191,19 +191,19 @@ export function ProfileEditor({
 
       {/* Panel */}
       <motion.div
-        className="relative w-full max-w-2xl h-full bg-surface-solid/95 backdrop-blur-xl border-l border-border-glow overflow-y-auto"
+        className="relative w-full max-w-2xl h-full bg-surface-solid/95 backdrop-blur-xl border-l border-white/[0.08] overflow-y-auto"
         initial={{ x: "100%" }}
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between p-6 pb-4 bg-surface-solid/90 backdrop-blur-md border-b border-border-glow">
-          <h2 className="text-xl font-bold text-text-primary">
+        <div className="sticky top-0 z-10 flex items-center justify-between p-6 pb-4 bg-surface-solid/90 backdrop-blur-md border-b border-white/[0.06]">
+          <h2 className="text-xl font-semibold text-text-primary">
             {isNew ? "Create Profile" : "Edit Profile"}
           </h2>
           <motion.button
-            className="w-8 h-8 rounded-lg bg-white/5 border border-border-glow flex items-center justify-center text-text-secondary hover:text-neon-red hover:border-neon-red/40 transition-colors"
+            className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-text-secondary hover:text-danger hover:border-danger/30 transition-colors"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onCancel}
@@ -228,7 +228,7 @@ export function ProfileEditor({
 
               {/* Icon Picker */}
               <div className="flex flex-col gap-2">
-                <span className="text-sm text-text-secondary">Icon</span>
+                <span className="text-sm text-text-secondary font-light">Icon</span>
                 <div className="flex flex-wrap gap-2">
                   {ICON_OPTIONS.map((emoji) => (
                     <motion.button
@@ -237,17 +237,9 @@ export function ProfileEditor({
                       className={cn(
                         "w-10 h-10 rounded-xl flex items-center justify-center text-lg border transition-colors",
                         icon === emoji
-                          ? "border-neon-cyan/60 bg-neon-cyan/10"
-                          : "border-border-glow bg-white/5 hover:border-neon-cyan/30"
+                          ? "border-accent/50 bg-accent/10"
+                          : "border-white/[0.06] bg-white/[0.03] hover:border-accent/25"
                       )}
-                      style={
-                        icon === emoji
-                          ? {
-                              boxShadow:
-                                "0 0 12px rgba(0, 240, 255, 0.3)",
-                            }
-                          : undefined
-                      }
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => setIcon(emoji)}
@@ -260,7 +252,7 @@ export function ProfileEditor({
 
               {/* Mode Toggle */}
               <div className="flex flex-col gap-2">
-                <span className="text-sm text-text-secondary">Mode</span>
+                <span className="text-sm text-text-secondary font-light">Mode</span>
                 <div className="flex gap-2">
                   <NeonButton
                     variant={mode === "whitelist" ? "success" : "ghost"}
@@ -306,9 +298,9 @@ export function ProfileEditor({
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
                   >
-                    <div className="glass-panel rounded-xl p-3 border border-border-glow">
+                    <div className="glass-panel rounded-xl p-3 border border-white/[0.06]">
                       <div className="flex items-center gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="text-sm text-text-primary font-medium truncate">
@@ -328,7 +320,7 @@ export function ProfileEditor({
                         {/* Expand for sites */}
                         {app.sites !== undefined && (
                           <motion.button
-                            className="w-6 h-6 rounded flex items-center justify-center text-text-muted hover:text-neon-cyan transition-colors"
+                            className="w-6 h-6 rounded flex items-center justify-center text-text-muted hover:text-accent-light transition-colors"
                             whileTap={{ scale: 0.9 }}
                             onClick={() => toggleAppExpanded(index)}
                           >
@@ -342,7 +334,7 @@ export function ProfileEditor({
 
                         {/* Remove */}
                         <motion.button
-                          className="w-6 h-6 rounded flex items-center justify-center text-text-muted hover:text-neon-red transition-colors"
+                          className="w-6 h-6 rounded flex items-center justify-center text-text-muted hover:text-danger transition-colors"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handleRemoveApp(index)}
@@ -358,7 +350,7 @@ export function ProfileEditor({
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="mt-3 pt-3 border-t border-border-glow"
+                            className="mt-3 pt-3 border-t border-white/[0.06]"
                           >
                             <SiteRules
                               sites={app.sites}
@@ -382,7 +374,7 @@ export function ProfileEditor({
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="glass-panel rounded-xl p-3 border border-neon-cyan/30"
+                    className="glass-panel rounded-xl p-3 border border-accent/20"
                   >
                     <div className="flex flex-col gap-2">
                       <NeonInput
@@ -467,16 +459,16 @@ export function ProfileEditor({
 
               {/* Timeline Preview */}
               <div className="flex flex-col gap-2">
-                <span className="text-xs text-text-muted">Cycle Preview</span>
-                <div className="flex h-6 rounded-lg overflow-hidden border border-border-glow">
+                <span className="text-xs text-text-muted font-light">Cycle Preview</span>
+                <div className="flex h-6 rounded-lg overflow-hidden border border-white/[0.06]">
                   {timelineSegments.map((seg, i) => {
                     const widthPercent = (seg.duration / totalTime) * 100;
                     const colors = {
-                      work: "bg-neon-cyan/40 border-r border-neon-cyan/20",
+                      work: "bg-accent/40 border-r border-accent/20",
                       shortBreak:
-                        "bg-neon-green/30 border-r border-neon-green/20",
+                        "bg-success/30 border-r border-success/20",
                       longBreak:
-                        "bg-neon-purple/30 border-r border-neon-purple/20",
+                        "bg-[#a855f7]/30 border-r border-[#a855f7]/20",
                     };
                     return (
                       <motion.div
@@ -498,15 +490,15 @@ export function ProfileEditor({
                 </div>
                 <div className="flex gap-4 text-[10px] text-text-muted">
                   <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-sm bg-neon-cyan/40" />
+                    <span className="w-2 h-2 rounded-sm bg-accent/40" />
                     Work
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-sm bg-neon-green/30" />
+                    <span className="w-2 h-2 rounded-sm bg-success/30" />
                     Short Break
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-sm bg-neon-purple/30" />
+                    <span className="w-2 h-2 rounded-sm bg-[#a855f7]/30" />
                     Long Break
                   </span>
                 </div>
@@ -601,13 +593,13 @@ function SiteRules({ sites, onAdd, onRemove }: SiteRulesProps) {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 10 }}
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-border-glow"
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]"
           >
             <span className="flex-1 text-xs text-text-primary font-mono truncate">
               {site}
             </span>
             <motion.button
-              className="text-text-muted hover:text-neon-red transition-colors"
+              className="text-text-muted hover:text-danger transition-colors"
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.8 }}
               onClick={() => onRemove(index)}

@@ -4,11 +4,11 @@ import { Particles } from "@/components/magicui/Particles";
 
 export function AppShell() {
   return (
-    <div className="flex h-full w-full overflow-hidden bg-void relative">
+    <div className="flex h-full w-full overflow-hidden bg-base relative">
       <Particles
         className="fixed inset-0 z-0"
-        quantity={50}
-        color="#00f0ff"
+        quantity={30}
+        color="#6366f1"
         size={0.3}
         staticity={80}
         ease={80}

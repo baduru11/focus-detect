@@ -18,7 +18,6 @@ import { WeeklyBarChart } from "@/components/stats/WeeklyBarChart";
 import { StreakCard } from "@/components/stats/StreakCard";
 import { AchievementCard } from "@/components/stats/AchievementCard";
 import { DistractorLeaderboard } from "@/components/stats/DistractorLeaderboard";
-import { AnimatedGradientText } from "@/components/magicui/AnimatedGradientText";
 import { useStats } from "@/hooks/useStats";
 import { cn } from "@/lib/utils";
 
@@ -65,17 +64,15 @@ export default function Stats() {
   }
 
   return (
-    <div className="h-full flex flex-col p-8 overflow-y-auto">
+    <div className="h-full flex flex-col p-10 overflow-y-auto">
       {/* Header */}
       <motion.div
         className="flex items-center justify-between mb-6 flex-shrink-0"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h1 className="text-2xl font-bold text-text-primary tracking-tight">
-          <AnimatedGradientText speed={1} colorFrom="#00f0ff" colorTo="#bf00ff" className="text-2xl font-bold">
-            Statistics
-          </AnimatedGradientText>
+        <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
+          Statistics
         </h1>
         <motion.button
           className="text-xs text-text-muted hover:text-text-secondary transition-colors cursor-pointer px-3 py-1.5 rounded-lg hover:bg-white/[0.03]"
@@ -87,7 +84,7 @@ export default function Stats() {
         </motion.button>
       </motion.div>
 
-      {/* Tab bar — pill style */}
+      {/* Tab bar — clean pill style */}
       <motion.div
         className="flex gap-1 mb-6 flex-shrink-0 bg-white/[0.03] rounded-lg p-1 w-fit"
         initial={{ opacity: 0, y: -5 }}
@@ -100,16 +97,16 @@ export default function Stats() {
             className={cn(
               "relative px-4 py-1.5 text-xs font-medium rounded-md transition-all duration-200 cursor-pointer",
               activeTab === tab.id
-                ? "text-neon-cyan"
+                ? "text-text-primary"
                 : "text-text-muted hover:text-text-secondary"
             )}
             onClick={() => setActiveTab(tab.id)}
           >
             {activeTab === tab.id && (
               <motion.div
-                className="absolute inset-0 rounded-md bg-neon-cyan/[0.08] border border-neon-cyan/[0.12]"
+                className="absolute inset-0 rounded-md bg-white/[0.06] border border-white/[0.08]"
                 layoutId="stats-tab-bg"
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
               />
             )}
             <span className="relative z-10">{tab.label}</span>
@@ -221,7 +218,7 @@ export default function Stats() {
                         0
                       )
                     )}
-                    color="#00f0ff"
+                    color="#6366f1"
                   />
                   <SummaryItem
                     label="Total Distractions"
@@ -231,21 +228,21 @@ export default function Stats() {
                         0
                       )
                     )}
-                    color="#ff003c"
+                    color="#ef4444"
                   />
                   <SummaryItem
                     label="Total Alarms"
                     value={String(
                       stats.weekSummary.reduce((s, d) => s + d.alarms, 0)
                     )}
-                    color="#ff8c00"
+                    color="#f59e0b"
                   />
                   <SummaryItem
                     label="Total Cycles"
                     value={String(
                       stats.weekSummary.reduce((s, d) => s + d.cycles, 0)
                     )}
-                    color="#00ff88"
+                    color="#22c55e"
                   />
                 </div>
               </GlassCard>
@@ -344,10 +341,10 @@ function SummaryItem({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
     >
-      <span className="text-lg font-bold font-mono" style={{ color, opacity: 0.8 }}>
+      <span className="text-lg font-semibold font-mono" style={{ color, opacity: 0.8 }}>
         {value}
       </span>
-      <span className="text-[10px] text-text-muted uppercase tracking-wider">
+      <span className="text-[10px] text-text-muted uppercase tracking-wider font-light">
         {label}
       </span>
     </motion.div>

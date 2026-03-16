@@ -61,7 +61,7 @@ export function NeonSlider({
       {label && (
         <div className="flex items-center justify-between">
           <span className="text-sm text-text-secondary">{label}</span>
-          <span className="text-sm font-mono text-neon-cyan">
+          <span className="text-sm font-mono text-accent-light">
             {value}
             {unit}
           </span>
@@ -77,33 +77,32 @@ export function NeonSlider({
         onMouseLeave={() => setHovering(false)}
       >
         {/* Track background */}
-        <div className="absolute inset-x-0 h-1.5 rounded-full bg-white/5" />
+        <div className="absolute inset-x-0 h-1.5 rounded-full bg-white/[0.08]" />
 
-        {/* Filled track with glow */}
+        {/* Filled track — indigo gradient */}
         <div
-          className="absolute left-0 h-1.5 rounded-full bg-neon-cyan"
+          className="absolute left-0 h-1.5 rounded-full"
           style={{
             width: `${percent}%`,
-            boxShadow: "0 0 10px rgba(0, 240, 255, 0.5), 0 0 4px rgba(0, 240, 255, 0.8)",
+            background: "linear-gradient(90deg, #6366f1, #818cf8)",
           }}
         />
 
-        {/* Thumb */}
+        {/* Thumb — small white circle */}
         <motion.div
-          className="absolute w-4 h-4 rounded-full bg-neon-cyan border-2 border-void"
+          className="absolute w-3.5 h-3.5 rounded-full bg-white border-2 border-accent shadow-sm"
           style={{
-            left: `calc(${percent}% - 8px)`,
-            boxShadow: "0 0 12px rgba(0, 240, 255, 0.6)",
+            left: `calc(${percent}% - 7px)`,
           }}
-          animate={{ scale: dragging ? 1.3 : 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          animate={{ scale: dragging ? 1.2 : 1 }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
         />
 
         {/* Tooltip */}
         <AnimatePresence>
           {showTooltip && (
             <motion.div
-              className="absolute -top-9 px-2 py-1 rounded-md bg-surface-solid border border-border-glow text-xs font-mono text-neon-cyan whitespace-nowrap pointer-events-none"
+              className="absolute -top-9 px-2 py-1 rounded-md bg-surface-solid border border-white/[0.1] text-xs font-mono text-text-primary whitespace-nowrap pointer-events-none"
               style={{ left: `calc(${percent}% - 20px)` }}
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}

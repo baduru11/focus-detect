@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import type { TimerPhase, TimerStatus } from "@/types/pomodoro";
 import { cn } from "@/lib/utils";
+import type { TimerPhase, TimerStatus } from "@/types/pomodoro";
 
 interface PomodoroRingProps {
   secondsRemaining: number;
@@ -11,28 +11,25 @@ interface PomodoroRingProps {
   cyclesBeforeLong: number;
 }
 
-const phaseColors: Record<TimerPhase, { glow: string; label: string; gradient: [string, string] }> = {
+const phaseConfig: Record<TimerPhase, { label: string; gradient: [string, string] }> = {
   work: {
-    glow: "drop-shadow(0 0 12px rgba(0, 240, 255, 0.6)) drop-shadow(0 0 24px rgba(0, 240, 255, 0.3))",
     label: "FOCUS",
-    gradient: ["#00f0ff", "#bf00ff"],
+    gradient: ["#6366f1", "#06b6d4"],
   },
   shortBreak: {
-    glow: "drop-shadow(0 0 12px rgba(0, 255, 136, 0.6)) drop-shadow(0 0 24px rgba(0, 255, 136, 0.3))",
     label: "SHORT BREAK",
-    gradient: ["#00ff88", "#00f0ff"],
+    gradient: ["#22c55e", "#06b6d4"],
   },
   longBreak: {
-    glow: "drop-shadow(0 0 12px rgba(0, 255, 136, 0.6)) drop-shadow(0 0 24px rgba(0, 255, 136, 0.3))",
     label: "LONG BREAK",
-    gradient: ["#00ff88", "#bf00ff"],
+    gradient: ["#22c55e", "#818cf8"],
   },
 };
 
 const phaseLabelColor: Record<TimerPhase, string> = {
-  work: "text-neon-cyan",
-  shortBreak: "text-neon-green",
-  longBreak: "text-neon-green",
+  work: "text-accent-light",
+  shortBreak: "text-success",
+  longBreak: "text-success",
 };
 
 export function PomodoroRing({
@@ -44,7 +41,7 @@ export function PomodoroRing({
   cyclesBeforeLong,
 }: PomodoroRingProps) {
   const radius = 120;
-  const strokeWidth = 8;
+  const strokeWidth = 6;
   const svgSize = (radius + strokeWidth) * 2;
   const center = svgSize / 2;
   const circumference = 2 * Math.PI * radius;
@@ -55,24 +52,24 @@ export function PomodoroRing({
   const seconds = secondsRemaining % 60;
   const timeDisplay = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
-  const colors = phaseColors[phase];
+  const config = phaseConfig[phase];
   const gradientId = `ring-gradient-${phase}`;
   const isRunning = status === "running";
 
   return (
     <div className="relative flex items-center justify-center">
-      {/* Outer ambient glow */}
+      {/* Subtle ambient glow */}
       <motion.div
         className="absolute rounded-full"
         style={{
           width: svgSize + 40,
           height: svgSize + 40,
-          background: `radial-gradient(circle, ${colors.gradient[0]}08 0%, transparent 70%)`,
+          background: `radial-gradient(circle, ${config.gradient[0]}06 0%, transparent 70%)`,
         }}
         animate={
           isRunning
-            ? { opacity: [0.4, 0.8, 0.4], scale: [0.98, 1.02, 0.98] }
-            : { opacity: 0.3, scale: 1 }
+            ? { opacity: [0.3, 0.6, 0.3] }
+            : { opacity: 0.2 }
         }
         transition={
           isRunning
@@ -89,8 +86,8 @@ export function PomodoroRing({
       >
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={colors.gradient[0]} />
-            <stop offset="100%" stopColor={colors.gradient[1]} />
+            <stop offset="0%" stopColor={config.gradient[0]} />
+            <stop offset="100%" stopColor={config.gradient[1]} />
           </linearGradient>
         </defs>
 
@@ -104,27 +101,7 @@ export function PomodoroRing({
           strokeWidth={strokeWidth}
         />
 
-        {/* Tick marks */}
-        {Array.from({ length: 60 }).map((_, i) => {
-          const angle = (i / 60) * 360 - 90;
-          const rad = (angle * Math.PI) / 180;
-          const isMajor = i % 5 === 0;
-          const innerR = radius - (isMajor ? 16 : 12);
-          const outerR = radius - 8;
-          return (
-            <line
-              key={i}
-              x1={center + innerR * Math.cos(rad)}
-              y1={center + innerR * Math.sin(rad)}
-              x2={center + outerR * Math.cos(rad)}
-              y2={center + outerR * Math.sin(rad)}
-              stroke={isMajor ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.06)"}
-              strokeWidth={isMajor ? 1.5 : 0.75}
-            />
-          );
-        })}
-
-        {/* Progress ring */}
+        {/* Progress ring — clean gradient stroke with subtle shadow */}
         <motion.circle
           cx={center}
           cy={center}
@@ -138,7 +115,7 @@ export function PomodoroRing({
           animate={{ strokeDashoffset: offset }}
           transition={{ duration: 0.4, ease: "easeOut" }}
           style={{
-            filter: isRunning ? colors.glow : colors.glow.replace(/0\.\d/g, (m) => String(Number(m) * 0.5)),
+            filter: `drop-shadow(0 0 2px ${config.gradient[0]}26)`,
             transform: "rotate(-90deg)",
             transformOrigin: "center",
           }}
@@ -150,7 +127,7 @@ export function PomodoroRing({
         <AnimatePresence mode="wait">
           <motion.span
             key={timeDisplay}
-            className="text-5xl font-mono font-bold text-text-primary tracking-wider"
+            className="text-5xl font-light text-text-primary tracking-wider font-mono"
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
@@ -164,7 +141,7 @@ export function PomodoroRing({
           <motion.span
             key={phase}
             className={cn(
-              "text-xs font-semibold uppercase tracking-[0.2em] mt-2",
+              "text-xs font-medium uppercase tracking-[0.2em] mt-2",
               phaseLabelColor[phase]
             )}
             initial={{ opacity: 0, y: 4 }}
@@ -172,11 +149,11 @@ export function PomodoroRing({
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.2 }}
           >
-            {colors.label}
+            {config.label}
           </motion.span>
         </AnimatePresence>
 
-        <span className="text-[11px] text-text-muted mt-1.5 tracking-wide">
+        <span className="text-[11px] text-text-muted mt-1.5 tracking-wide font-light">
           Cycle {currentCycle} of {cyclesBeforeLong}
         </span>
       </div>

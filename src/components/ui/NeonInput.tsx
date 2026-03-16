@@ -18,7 +18,7 @@ export function NeonInput({
       {label && (
         <label
           htmlFor={inputId}
-          className="text-sm text-text-secondary"
+          className="text-sm text-text-secondary font-light"
         >
           {label}
         </label>
@@ -26,13 +26,13 @@ export function NeonInput({
       <input
         id={inputId}
         className={cn(
-          "w-full px-4 py-2.5 rounded-xl",
-          "bg-white/[0.03] backdrop-blur-md",
-          "border border-transparent border-b-border-glow",
+          "w-full px-4 py-2.5 rounded-lg",
+          "bg-white/[0.04] backdrop-blur-md",
+          "border border-white/[0.08]",
           "text-text-primary text-sm placeholder:text-text-muted",
           "outline-none transition-all duration-200",
-          "focus:border-b-neon-cyan focus:bg-white/[0.06]",
-          "focus:shadow-[0_2px_15px_rgba(0,240,255,0.15)]"
+          "focus:border-accent focus:bg-white/[0.06]",
+          "focus:ring-1 focus:ring-accent/30"
         )}
         {...props}
       />

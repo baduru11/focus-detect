@@ -29,7 +29,7 @@ export function TimerControls({
       className="flex items-center gap-3"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3, type: "spring", stiffness: 200, damping: 20 }}
+      transition={{ delay: 0.3, duration: 0.3, ease: "easeOut" }}
     >
       {/* Stop button - only when not idle */}
       {!isIdle && (
@@ -37,7 +37,7 @@ export function TimerControls({
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
         >
           <NeonButton variant="danger" size="md" onClick={onStop}>
             <span className="flex items-center gap-2">
@@ -82,7 +82,7 @@ export function TimerControls({
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
         >
           <NeonButton variant="ghost" size="md" onClick={onSkip}>
             <span className="flex items-center gap-2">

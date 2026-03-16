@@ -14,15 +14,15 @@ interface TimelineBarProps {
 }
 
 const typeStyles: Record<string, { color: string; label: string }> = {
-  focus: { color: "rgba(0, 240, 255, 0.5)", label: "Focus" },
-  alarm: { color: "rgba(255, 0, 60, 0.45)", label: "Alarm" },
-  break: { color: "rgba(0, 255, 136, 0.3)", label: "Break" },
+  focus: { color: "rgba(99, 102, 241, 0.5)", label: "Focus" },
+  alarm: { color: "rgba(239, 68, 68, 0.45)", label: "Alarm" },
+  break: { color: "rgba(34, 197, 94, 0.35)", label: "Break" },
 };
 
-const legendDots: Record<string, string> = {
-  focus: "bg-neon-cyan/50",
-  alarm: "bg-neon-red/45",
-  break: "bg-neon-green/30",
+const legendColors: Record<string, string> = {
+  focus: "bg-accent/50",
+  alarm: "bg-danger/45",
+  break: "bg-success/35",
 };
 
 function formatTime(minutes: number): string {
@@ -62,8 +62,8 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
         </span>
       </div>
 
-      {/* Timeline bar — thin and elegant */}
-      <div className="relative h-[5px] rounded-full bg-white/[0.04] overflow-hidden">
+      {/* Timeline bar — thin, rounded, soft */}
+      <div className="relative h-[3px] rounded-full bg-white/[0.04] overflow-hidden">
         {sessions.map((seg, i) => {
           const left = ((seg.startMinute - minStart) / totalSpan) * 100;
           const width = ((seg.endMinute - seg.startMinute) / totalSpan) * 100;
@@ -97,7 +97,7 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
         {/* Tooltip */}
         {hoveredIdx !== null && (
           <motion.div
-            className="absolute -top-9 z-20 px-2 py-1 rounded-md bg-surface-solid border border-white/[0.08] text-[10px] text-text-primary whitespace-nowrap pointer-events-none shadow-lg"
+            className="absolute -top-9 z-20 px-2 py-1 rounded-md bg-surface-solid border border-white/[0.1] text-[10px] text-text-primary whitespace-nowrap pointer-events-none shadow-lg"
             style={{
               left: `${((sessions[hoveredIdx].startMinute - minStart) / totalSpan) * 100}%`,
               transform: "translateX(-25%)",
@@ -119,7 +119,7 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
             <div
               className={cn(
                 "w-2 h-2 rounded-full",
-                legendDots[t]
+                legendColors[t]
               )}
             />
             <span className="text-[10px] text-text-muted capitalize">{t}</span>
