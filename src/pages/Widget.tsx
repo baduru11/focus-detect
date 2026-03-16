@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Play, Pause, Square, Maximize2 } from "lucide-react";
 
 interface WidgetState {
@@ -18,18 +18,20 @@ export default function Widget() {
     graceRemaining: 0,
   });
 
-  // Force always-on-top on mount
+  // Force always-on-top repeatedly (in case it gets lost)
   useEffect(() => {
-    (async () => {
+    const enforce = async () => {
       try {
         const { getCurrentWindow } = await import("@tauri-apps/api/window");
-        const win = getCurrentWindow();
-        await win.setAlwaysOnTop(true);
+        await getCurrentWindow().setAlwaysOnTop(true);
       } catch { /* ignore */ }
-    })();
+    };
+    enforce();
+    const interval = setInterval(enforce, 3000);
+    return () => clearInterval(interval);
   }, []);
 
-  // Sync state from main window
+  // Sync state
   useEffect(() => {
     const interval = setInterval(() => {
       try {
@@ -38,14 +40,6 @@ export default function Widget() {
       } catch { /* ignore */ }
     }, 200);
     return () => clearInterval(interval);
-  }, []);
-
-  // Drag handler
-  const startDrag = useCallback(async () => {
-    try {
-      const { getCurrentWindow } = await import("@tauri-apps/api/window");
-      await getCurrentWindow().startDragging();
-    } catch { /* ignore */ }
   }, []);
 
   const sendAction = (action: string) => {
@@ -59,140 +53,115 @@ export default function Widget() {
     } catch { /* ignore */ }
   };
 
-  const phaseColors: Record<string, string> = {
-    work: "#6366f1",
-    shortBreak: "#34d399",
-    longBreak: "#34d399",
+  const colors: Record<string, string> = {
+    work: "#818cf8", shortBreak: "#6ee7b7", longBreak: "#6ee7b7",
   };
-
-  const phaseLabels: Record<string, string> = {
-    work: "Focus",
-    shortBreak: "Break",
-    longBreak: "Long Break",
-  };
-
-  const detectionColors: Record<string, string> = {
-    idle: "#555",
-    checking: "#34d399",
-    grace: "#fbbf24",
-    alarm: "#f87171",
-  };
-
-  const detectionLabels: Record<string, string> = {
-    idle: "",
-    checking: "Monitoring",
-    grace: `Grace ${state.graceRemaining}s`,
-    alarm: "OFF TASK",
+  const detColors: Record<string, string> = {
+    idle: "#555", checking: "#34d399", grace: "#fbbf24", alarm: "#f87171",
   };
 
   return (
-    <div
-      onMouseDown={startDrag}
-      style={{
-        width: "100%",
-        height: "100%",
-        background: "#0a0a14",
-        display: "flex",
-        flexDirection: "column",
-        padding: "16px",
-        fontFamily: "'Inter', -apple-system, system-ui, sans-serif",
-        color: "#f0f0f5",
-        overflow: "hidden",
-        cursor: "grab",
-        borderRadius: 12,
-      }}
-    >
-      {/* Timer row */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        {/* Status dot */}
-        <div
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: "50%",
-            background: state.status === "idle" ? "#555" : phaseColors[state.phase],
-            boxShadow: state.status !== "idle" ? `0 0 8px ${phaseColors[state.phase]}` : "none",
-            flexShrink: 0,
-          }}
-        />
+    <div style={{
+      width: "100%", height: "100%", background: "#0d0d1a",
+      display: "flex", flexDirection: "column",
+      fontFamily: "'Inter', system-ui, sans-serif", color: "#f0f0f5",
+      overflow: "hidden",
+    }}>
+      {/* Drag region — click and drag to move */}
+      <div
+        onMouseDown={async () => {
+          try {
+            const { getCurrentWindow } = await import("@tauri-apps/api/window");
+            await getCurrentWindow().startDragging();
+          } catch { /* ignore */ }
+        }}
+        style={{
+          flex: 1, display: "flex", flexDirection: "column",
+          justifyContent: "center", padding: "12px 16px",
+          cursor: "grab",
+        }}
+      >
+        {/* Timer row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
+            background: state.status === "idle" ? "#555" : colors[state.phase],
+            boxShadow: state.status !== "idle" ? `0 0 6px ${colors[state.phase]}` : "none",
+          }} />
 
-        {/* Time */}
-        <span
-          style={{
-            fontSize: 28,
-            fontWeight: 600,
+          <span style={{
+            fontSize: 24, fontWeight: 600, flex: 1,
             fontFamily: "'SF Mono', 'JetBrains Mono', monospace",
             fontVariantNumeric: "tabular-nums",
-            color: phaseColors[state.phase] || "#f0f0f5",
-            flex: 1,
-          }}
-        >
-          {state.time}
-        </span>
+            color: colors[state.phase] || "#f0f0f5",
+          }}>
+            {state.time}
+          </span>
 
-        {/* Controls */}
-        <div style={{ display: "flex", gap: 4 }}>
-          {state.status === "idle" && (
-            <button onMouseDown={e => e.stopPropagation()} onClick={() => sendAction("start")} style={btnStyle}>
-              <Play size={16} color="#6366f1" />
-            </button>
+          {state.detection === "grace" && (
+            <span style={{ fontSize: 12, color: "#fbbf24", fontFamily: "monospace" }}>
+              {state.graceRemaining}s
+            </span>
           )}
-          {state.status === "running" && (
-            <button onMouseDown={e => e.stopPropagation()} onClick={() => sendAction("pause")} style={btnStyle}>
-              <Pause size={16} color="#f0f0f5" />
-            </button>
+        </div>
+
+        {/* Status row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+          <span style={{ fontSize: 11, color: "#8b8ca0" }}>
+            {state.phase === "work" ? "Focus" : state.phase === "shortBreak" ? "Break" : "Long Break"}
+          </span>
+          {state.detection !== "idle" && (
+            <>
+              <span style={{ color: "#333" }}>·</span>
+              <span style={{ fontSize: 10, color: detColors[state.detection], fontWeight: 500 }}>
+                {state.detection === "checking" ? "Monitoring" : state.detection === "grace" ? "Grace" : state.detection === "alarm" ? "OFF TASK" : ""}
+              </span>
+            </>
           )}
-          {state.status === "paused" && (
-            <button onMouseDown={e => e.stopPropagation()} onClick={() => sendAction("resume")} style={btnStyle}>
-              <Play size={16} color="#34d399" />
-            </button>
-          )}
-          {state.status !== "idle" && (
-            <button onMouseDown={e => e.stopPropagation()} onClick={() => sendAction("stop")} style={btnStyle}>
-              <Square size={14} color="#f87171" />
-            </button>
-          )}
-          <button onMouseDown={e => e.stopPropagation()} onClick={openMain} style={btnStyle} title="Open main window">
-            <Maximize2 size={14} color="#888" />
-          </button>
         </div>
       </div>
 
-      {/* Status row */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-        <span style={{ fontSize: 12, color: "#8b8ca0", fontWeight: 500 }}>
-          {phaseLabels[state.phase] || "Ready"}
-        </span>
-        {state.detection !== "idle" && (
-          <>
-            <span style={{ color: "#333", fontSize: 10 }}>•</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <div
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: detectionColors[state.detection],
-                }}
-              />
-              <span style={{ fontSize: 11, color: detectionColors[state.detection], fontWeight: 500 }}>
-                {detectionLabels[state.detection]}
-              </span>
-            </div>
-          </>
+      {/* Button bar — NOT draggable */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 4,
+        padding: "8px 12px",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+        background: "rgba(255,255,255,0.02)",
+      }}>
+        {state.status === "idle" && (
+          <Btn onClick={() => sendAction("start")}><Play size={14} color="#818cf8" /> Start</Btn>
         )}
+        {state.status === "running" && (
+          <Btn onClick={() => sendAction("pause")}><Pause size={14} /> Pause</Btn>
+        )}
+        {state.status === "paused" && (
+          <Btn onClick={() => sendAction("resume")}><Play size={14} color="#34d399" /> Resume</Btn>
+        )}
+        {state.status !== "idle" && (
+          <Btn onClick={() => sendAction("stop")}><Square size={12} color="#f87171" /> Stop</Btn>
+        )}
+        <div style={{ flex: 1 }} />
+        <Btn onClick={openMain}><Maximize2 size={13} color="#888" /></Btn>
       </div>
     </div>
   );
 }
 
-const btnStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  borderRadius: 8,
-  padding: 6,
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
+function Btn({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        background: "rgba(255,255,255,0.05)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: 6, padding: "5px 10px",
+        cursor: "pointer", display: "flex", alignItems: "center", gap: 5,
+        color: "#ccc", fontSize: 12, fontFamily: "inherit",
+      }}
+      onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
+      onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+    >
+      {children}
+    </button>
+  );
+}
