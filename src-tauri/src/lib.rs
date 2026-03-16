@@ -23,6 +23,7 @@ pub fn run() {
         )
         .invoke_handler(tauri::generate_handler![
             detection::get_active_window_info,
+            detection::capture_screenshot,
             monitors::get_monitors,
             tray::update_tray_tooltip,
             tray::toggle_widget,

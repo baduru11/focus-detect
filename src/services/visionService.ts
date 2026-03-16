@@ -4,6 +4,8 @@ export interface ApiKeys {
   gemini?: string;
   groq?: string;
   openRouter?: string;
+  ollamaModel?: string;
+  ollamaEndpoint?: string;
 }
 
 const VISION_PROMPT_TEMPLATE = (profileContext: string) =>
@@ -23,6 +25,69 @@ function parseVisionResponse(text: string): VisionResult {
     confidence: Math.min(1, Math.max(0, Number(parsed.confidence) || 0)),
     reason: String(parsed.reason || "No reason provided"),
   };
+}
+
+/**
+ * Check if Ollama is running and accessible at the given endpoint.
+ */
+export async function isOllamaAvailable(
+  endpoint: string = "http://localhost:11434"
+): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    const response = await fetch(`${endpoint}/api/tags`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+class OllamaProvider implements VisionProvider {
+  name = "Ollama";
+  type = "local" as const;
+  private model: string;
+  private endpoint: string;
+
+  constructor(model: string = "llava", endpoint: string = "http://localhost:11434") {
+    this.model = model;
+    this.endpoint = endpoint;
+  }
+
+  async analyze(screenshot: string, profileContext: string): Promise<VisionResult> {
+    const prompt = VISION_PROMPT_TEMPLATE(profileContext);
+
+    const response = await fetch(`${this.endpoint}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: this.model,
+        prompt,
+        images: [screenshot],
+        stream: false,
+        options: {
+          temperature: 0.1,
+          num_predict: 256,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Ollama API error ${response.status}: ${errorBody}`);
+    }
+
+    const data = await response.json();
+    const text = data.response;
+    if (!text) {
+      throw new Error("Empty response from Ollama");
+    }
+
+    return parseVisionResponse(text);
+  }
 }
 
 class GeminiProvider implements VisionProvider {
@@ -201,6 +266,15 @@ export async function analyzeScreenshot(
 ): Promise<VisionResult> {
   const providers: VisionProvider[] = [];
 
+  // Ollama (local) is first in the chain — free and fast if available
+  const ollamaEndpoint = apiKeys.ollamaEndpoint || "http://localhost:11434";
+  const ollamaModel = apiKeys.ollamaModel || "llava";
+  const ollamaUp = await isOllamaAvailable(ollamaEndpoint);
+  if (ollamaUp) {
+    providers.push(new OllamaProvider(ollamaModel, ollamaEndpoint));
+  }
+
+  // Cloud providers as fallbacks
   if (apiKeys.gemini) {
     providers.push(new GeminiProvider(apiKeys.gemini));
   }
@@ -215,7 +289,7 @@ export async function analyzeScreenshot(
     return {
       onTask: true,
       confidence: 0,
-      reason: "No AI vision API keys configured. Skipping vision analysis.",
+      reason: "No AI vision providers available. Configure Ollama or add API keys.",
     };
   }
 

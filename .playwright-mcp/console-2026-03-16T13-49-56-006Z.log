@@ -1,0 +1,4 @@
+[     192ms] [ERROR] Failed to load profiles: Cannot read properties of undefined (reading 'invoke') @ http://localhost:1420/src/hooks/useProfiles.ts:35
+[     192ms] [ERROR] Failed to load profiles: Cannot read properties of undefined (reading 'invoke') @ http://localhost:1420/src/hooks/useProfiles.ts:35
+[   38229ms] [ERROR] Failed to load profiles: Cannot read properties of undefined (reading 'invoke') @ http://localhost:1420/src/hooks/useProfiles.ts:35
+[   38229ms] [ERROR] Failed to load profiles: Cannot read properties of undefined (reading 'invoke') @ http://localhost:1420/src/hooks/useProfiles.ts:35

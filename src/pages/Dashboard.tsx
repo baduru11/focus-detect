@@ -1,11 +1,12 @@
-import { useMemo, useCallback } from "react";
+import { useCallback } from "react";
 import { motion } from "framer-motion";
-import { Target, Flame, Clock, Zap } from "lucide-react";
+import { Target, Flame, Clock, Zap, Eye, Monitor } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Ripple } from "@/components/magicui/Ripple";
 import { PomodoroRing } from "@/components/timer/PomodoroRing";
 import { TimerControls } from "@/components/timer/TimerControls";
-import { usePomodoro } from "@/hooks/usePomodoro";
+import { DetectionStatus } from "@/components/detection/DetectionStatus";
+import { useApp } from "@/context/AppContext";
 import type { PomodoroConfig, TimerPhase } from "@/types/pomodoro";
 
 const DEFAULT_CONFIG: PomodoroConfig = {
@@ -31,42 +32,63 @@ const staggerItem = {
   show: { opacity: 1, y: 0 },
 };
 
+function formatTimestamp(ts: number): string {
+  const d = new Date(ts);
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+function truncate(str: string, maxLen: number): string {
+  if (str.length <= maxLen) return str;
+  return str.slice(0, maxLen - 1) + "\u2026";
+}
+
+const resultColors: Record<string, string> = {
+  on_task: "text-emerald-400",
+  off_task: "text-red-400",
+  ambiguous: "text-amber-400",
+};
+
+const resultLabels: Record<string, string> = {
+  on_task: "On Task",
+  off_task: "Off Task",
+  ambiguous: "Ambiguous",
+};
+
 export default function Dashboard() {
-  const config = DEFAULT_CONFIG;
+  const {
+    pomodoroState,
+    startTimer,
+    pauseTimer,
+    resumeTimer,
+    stopTimer,
+    skipPhase,
+    activeProfile,
+    detectionState,
+    graceRemaining,
+    alarmLevel,
+    lastCheckedWindow,
+    recentChecks,
+    todayFocusMinutes,
+    currentStreak,
+  } = useApp();
 
-  const callbacks = useMemo(
-    () => ({
-      onPhaseChange: (_phase: TimerPhase) => {},
-      onCycleComplete: (_cycle: number) => {},
-      onTimerEnd: () => {},
-    }),
-    []
-  );
+  const config = activeProfile?.pomodoro ?? DEFAULT_CONFIG;
+  const totalSeconds = phaseTotalSeconds(pomodoroState.phase, config);
+  const isIdle = pomodoroState.status === "idle";
+  const isRunning = pomodoroState.status === "running";
 
-  const { state, start, pause, resume, stop, skip } = usePomodoro(
-    config,
-    callbacks
-  );
+  const handleStart = useCallback(() => startTimer(), [startTimer]);
+  const handlePause = useCallback(() => pauseTimer(), [pauseTimer]);
+  const handleResume = useCallback(() => resumeTimer(), [resumeTimer]);
+  const handleStop = useCallback(() => stopTimer(), [stopTimer]);
+  const handleSkip = useCallback(() => skipPhase(), [skipPhase]);
 
-  const totalSeconds = phaseTotalSeconds(state.phase, config);
-  const isIdle = state.status === "idle";
-  const isRunning = state.status === "running";
-
-  const handleStart = useCallback(() => start(), [start]);
-  const handlePause = useCallback(() => pause(), [pause]);
-  const handleResume = useCallback(() => resume(), [resume]);
-  const handleStop = useCallback(() => stop(), [stop]);
-  const handleSkip = useCallback(() => skip(), [skip]);
-
-  const elapsedMinutes = Math.floor(
-    ((totalSeconds - state.secondsRemaining) * state.totalCyclesCompleted) / 60
-  );
-  const todayHours = Math.floor(elapsedMinutes / 60);
-  const todayMins = elapsedMinutes % 60;
+  const todayHours = Math.floor(todayFocusMinutes / 60);
+  const todayMins = Math.floor(todayFocusMinutes % 60);
 
   return (
     <motion.div
-      className="h-full flex flex-col items-center justify-center gap-8 p-10 overflow-y-auto"
+      className="h-full flex flex-col items-center justify-start gap-6 p-10 overflow-y-auto"
       variants={{
         hidden: { opacity: 0 },
         show: { opacity: 1, transition: { staggerChildren: 0.08 } },
@@ -74,7 +96,7 @@ export default function Dashboard() {
       initial="hidden"
       animate="show"
     >
-      {/* Active Profile Card — simple glass card */}
+      {/* Active Profile Card */}
       <motion.div variants={staggerItem}>
         <GlassCard className="flex items-center gap-3 py-3 px-5">
           <Target className="w-4 h-4 text-accent-light/60" />
@@ -83,7 +105,7 @@ export default function Dashboard() {
               Active Profile
             </p>
             <p className="text-sm font-semibold text-text-primary leading-tight">
-              General Focus
+              {activeProfile?.name ?? "No Profile"}
             </p>
           </div>
         </GlassCard>
@@ -91,7 +113,6 @@ export default function Dashboard() {
 
       {/* Timer Ring with Ripple behind it */}
       <motion.div variants={staggerItem} className="relative">
-        {/* Ripple effect behind the timer */}
         {isRunning && (
           <Ripple
             mainCircleSize={180}
@@ -106,21 +127,21 @@ export default function Dashboard() {
             style={{ height: 280 }}
           >
             <PomodoroRing
-              secondsRemaining={state.secondsRemaining}
+              secondsRemaining={pomodoroState.secondsRemaining}
               totalSeconds={totalSeconds}
-              phase={state.phase}
-              status={state.status}
-              currentCycle={state.currentCycle}
+              phase={pomodoroState.phase}
+              status={pomodoroState.status}
+              currentCycle={pomodoroState.currentCycle}
               cyclesBeforeLong={config.cyclesBeforeLong}
             />
           </motion.div>
         ) : (
           <PomodoroRing
-            secondsRemaining={state.secondsRemaining}
+            secondsRemaining={pomodoroState.secondsRemaining}
             totalSeconds={totalSeconds}
-            phase={state.phase}
-            status={state.status}
-            currentCycle={state.currentCycle}
+            phase={pomodoroState.phase}
+            status={pomodoroState.status}
+            currentCycle={pomodoroState.currentCycle}
             cyclesBeforeLong={config.cyclesBeforeLong}
           />
         )}
@@ -129,7 +150,7 @@ export default function Dashboard() {
       {/* Timer Controls */}
       <motion.div variants={staggerItem}>
         <TimerControls
-          status={state.status}
+          status={pomodoroState.status}
           onStart={handleStart}
           onPause={handlePause}
           onResume={handleResume}
@@ -138,7 +159,94 @@ export default function Dashboard() {
         />
       </motion.div>
 
-      {/* Quick Stats Row — clean glass cards */}
+      {/* Detection Status Panel */}
+      {!isIdle && (
+        <motion.div
+          variants={staggerItem}
+          className="w-full max-w-sm"
+        >
+          <GlassCard className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Monitor className="w-3.5 h-3.5 text-accent-light/50" strokeWidth={1.5} />
+              <span className="text-[10px] text-text-muted uppercase tracking-[0.15em] font-light">
+                Detection Status
+              </span>
+            </div>
+
+            {/* Status badge */}
+            <DetectionStatus
+              detectionState={detectionState}
+              graceRemaining={graceRemaining}
+              alarmLevel={alarmLevel}
+              lastWindow={lastCheckedWindow}
+            />
+
+            {/* Last checked window */}
+            {lastCheckedWindow && (
+              <div className="mt-3 flex items-start gap-2 py-2 px-3 rounded-lg bg-white/[0.02] border border-white/[0.05]">
+                <Eye className="w-3.5 h-3.5 text-text-muted flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                <div className="min-w-0">
+                  <p className="text-[10px] text-text-muted uppercase tracking-wider mb-0.5">
+                    Active Window
+                  </p>
+                  <p className="text-xs text-text-primary font-medium leading-tight">
+                    {lastCheckedWindow.app_name || lastCheckedWindow.process_name}
+                  </p>
+                  <p className="text-[10px] text-text-muted leading-tight truncate">
+                    {truncate(lastCheckedWindow.title, 60)}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Recent checks log */}
+            {recentChecks.length > 0 && (
+              <div className="mt-3">
+                <p className="text-[10px] text-text-muted uppercase tracking-wider mb-1.5 px-1">
+                  Recent Checks
+                </p>
+                <div className="space-y-1">
+                  {recentChecks.map((check, i) => (
+                    <motion.div
+                      key={`${check.timestamp}-${i}`}
+                      className="flex items-center gap-2 py-1 px-2 rounded-md bg-white/[0.02]"
+                      initial={i === 0 ? { opacity: 0, x: -8 } : false}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                          check.result === "on_task"
+                            ? "bg-emerald-400"
+                            : check.result === "off_task"
+                              ? "bg-red-400"
+                              : "bg-amber-400"
+                        }`}
+                      />
+                      <span className={`text-[10px] font-medium ${resultColors[check.result]}`}>
+                        {resultLabels[check.result]}
+                      </span>
+                      <span className="text-[10px] text-text-muted truncate flex-1 min-w-0">
+                        {check.window
+                          ? truncate(
+                              check.window.app_name || check.window.process_name,
+                              20
+                            )
+                          : "---"}
+                      </span>
+                      <span className="text-[10px] text-text-muted/60 font-mono flex-shrink-0">
+                        {formatTimestamp(check.timestamp)}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </GlassCard>
+        </motion.div>
+      )}
+
+      {/* Quick Stats Row */}
       <motion.div
         variants={staggerItem}
         className="flex items-center gap-4 flex-wrap justify-center"
@@ -148,7 +256,7 @@ export default function Dashboard() {
           <span className="text-xs text-text-secondary">
             Cycle{" "}
             <span className="text-text-primary font-semibold">
-              {state.currentCycle}/{config.cyclesBeforeLong}
+              {pomodoroState.currentCycle}/{config.cyclesBeforeLong}
             </span>
           </span>
         </div>
@@ -158,7 +266,7 @@ export default function Dashboard() {
           <span className="text-xs text-text-secondary">
             Streak{" "}
             <span className="text-text-primary font-semibold">
-              {state.totalCyclesCompleted}
+              {currentStreak}
             </span>
           </span>
         </div>

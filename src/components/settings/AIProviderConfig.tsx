@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Brain, Loader2 } from "lucide-react";
+import { Brain, Loader2, Server } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { NeonButton } from "@/components/ui/NeonButton";
 import { NeonInput } from "@/components/ui/NeonInput";
 import { NeonToggle } from "@/components/ui/NeonToggle";
+import {
+  loadAISettings,
+  saveAIEnabled,
+  saveApiKey,
+  saveOllamaSettings,
+} from "@/services/settingsService";
+import { isOllamaAvailable } from "@/services/visionService";
 
 type ConnectionStatus = "idle" | "testing" | "connected" | "error";
 
@@ -21,6 +28,13 @@ const PROVIDERS = [
 ] as const;
 
 type ProviderKey = (typeof PROVIDERS)[number]["key"];
+
+// Map UI keys to settingsService keys
+const PROVIDER_SAVE_KEY: Record<ProviderKey, "gemini" | "groq" | "openRouter"> = {
+  gemini: "gemini",
+  groq: "groq",
+  openrouter: "openRouter",
+};
 
 function StatusDot({ status }: { status: ConnectionStatus }) {
   const colors: Record<ConnectionStatus, string> = {
@@ -49,6 +63,7 @@ function StatusDot({ status }: { status: ConnectionStatus }) {
 
 export function AIProviderConfig() {
   const [aiEnabled, setAiEnabled] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [providers, setProviders] = useState<Record<ProviderKey, ProviderState>>(
     {
       gemini: { apiKey: "", status: "idle" },
@@ -56,32 +71,100 @@ export function AIProviderConfig() {
       openrouter: { apiKey: "", status: "idle" },
     }
   );
+  const [ollamaModel, setOllamaModel] = useState("llava");
+  const [ollamaEndpoint, setOllamaEndpoint] = useState("http://localhost:11434");
+  const [ollamaStatus, setOllamaStatus] = useState<ConnectionStatus>("idle");
 
-  const updateProviderKey = (key: ProviderKey, apiKey: string) => {
-    setProviders((prev) => ({
-      ...prev,
-      [key]: { ...prev[key], apiKey, status: apiKey ? prev[key].status : "idle" },
-    }));
-  };
+  // Load saved settings on mount
+  useEffect(() => {
+    loadAISettings()
+      .then((settings) => {
+        setAiEnabled(settings.enabled);
+        setProviders({
+          gemini: {
+            apiKey: settings.keys.gemini || "",
+            status: settings.keys.gemini ? "connected" : "idle",
+          },
+          groq: {
+            apiKey: settings.keys.groq || "",
+            status: settings.keys.groq ? "connected" : "idle",
+          },
+          openrouter: {
+            apiKey: settings.keys.openRouter || "",
+            status: settings.keys.openRouter ? "connected" : "idle",
+          },
+        });
+        setOllamaModel(settings.keys.ollamaModel || "llava");
+        setOllamaEndpoint(settings.keys.ollamaEndpoint || "http://localhost:11434");
+        setLoaded(true);
+      })
+      .catch((err) => {
+        console.warn("Failed to load AI settings:", err);
+        setLoaded(true);
+      });
+  }, []);
 
-  const testConnection = async (key: ProviderKey) => {
-    setProviders((prev) => ({
-      ...prev,
-      [key]: { ...prev[key], status: "testing" },
-    }));
+  // Check Ollama connectivity on mount and when endpoint changes
+  useEffect(() => {
+    if (!loaded) return;
+    setOllamaStatus("testing");
+    isOllamaAvailable(ollamaEndpoint).then((available) => {
+      setOllamaStatus(available ? "connected" : "idle");
+    });
+  }, [ollamaEndpoint, loaded]);
 
-    // Simulate connection test
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+  const handleToggleAI = useCallback(
+    (enabled: boolean) => {
+      setAiEnabled(enabled);
+      saveAIEnabled(enabled).catch(console.warn);
+    },
+    []
+  );
 
-    const hasKey = providers[key].apiKey.trim().length > 0;
-    setProviders((prev) => ({
-      ...prev,
-      [key]: {
-        ...prev[key],
-        status: hasKey ? "connected" : "error",
-      },
-    }));
-  };
+  const updateProviderKey = useCallback(
+    (key: ProviderKey, apiKey: string) => {
+      setProviders((prev) => ({
+        ...prev,
+        [key]: { ...prev[key], apiKey, status: apiKey ? prev[key].status : "idle" },
+      }));
+    },
+    []
+  );
+
+  const saveProviderKey = useCallback(
+    (key: ProviderKey) => {
+      const value = providers[key].apiKey.trim();
+      if (!value) return;
+
+      setProviders((prev) => ({
+        ...prev,
+        [key]: { ...prev[key], status: "testing" },
+      }));
+
+      saveApiKey(PROVIDER_SAVE_KEY[key], value)
+        .then(() => {
+          setProviders((prev) => ({
+            ...prev,
+            [key]: { ...prev[key], status: "connected" },
+          }));
+        })
+        .catch(() => {
+          setProviders((prev) => ({
+            ...prev,
+            [key]: { ...prev[key], status: "error" },
+          }));
+        });
+    },
+    [providers]
+  );
+
+  const testOllama = useCallback(async () => {
+    setOllamaStatus("testing");
+    // Save settings first
+    await saveOllamaSettings(ollamaModel, ollamaEndpoint).catch(console.warn);
+    const available = await isOllamaAvailable(ollamaEndpoint);
+    setOllamaStatus(available ? "connected" : "error");
+  }, [ollamaModel, ollamaEndpoint]);
 
   return (
     <GlassCard>
@@ -93,7 +176,7 @@ export function AIProviderConfig() {
       <div className="flex flex-col gap-6">
         <NeonToggle
           checked={aiEnabled}
-          onChange={setAiEnabled}
+          onChange={handleToggleAI}
           label="Enable AI Vision"
         />
 
@@ -102,6 +185,50 @@ export function AIProviderConfig() {
           animate={{ opacity: aiEnabled ? 1 : 0.4 }}
           style={{ pointerEvents: aiEnabled ? "auto" : "none" }}
         >
+          {/* Ollama (Local) — shown first */}
+          <div className="rounded-lg p-4 border border-white/[0.06] bg-white/[0.02] flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Server className="w-3.5 h-3.5 text-accent-light/60" strokeWidth={1.5} />
+                <span className="text-sm font-medium text-text-primary">
+                  Ollama (Local)
+                </span>
+              </div>
+              <StatusDot status={ollamaStatus} />
+            </div>
+
+            <NeonInput
+              type="text"
+              placeholder="Model name (e.g., llava, qwen-vl)"
+              value={ollamaModel}
+              onChange={(e) => setOllamaModel(e.target.value)}
+            />
+
+            <NeonInput
+              type="text"
+              placeholder="http://localhost:11434"
+              value={ollamaEndpoint}
+              onChange={(e) => setOllamaEndpoint(e.target.value)}
+            />
+
+            <NeonButton
+              variant="ghost"
+              size="sm"
+              onClick={testOllama}
+              disabled={ollamaStatus === "testing"}
+            >
+              {ollamaStatus === "testing" ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 mr-1.5 inline animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                "Test Connection"
+              )}
+            </NeonButton>
+          </div>
+
+          {/* Cloud Providers */}
           {PROVIDERS.map(({ key, label, placeholder }) => (
             <div
               key={key}
@@ -124,7 +251,7 @@ export function AIProviderConfig() {
               <NeonButton
                 variant="ghost"
                 size="sm"
-                onClick={() => testConnection(key)}
+                onClick={() => saveProviderKey(key)}
                 disabled={
                   !providers[key].apiKey.trim() ||
                   providers[key].status === "testing"
@@ -133,10 +260,10 @@ export function AIProviderConfig() {
                 {providers[key].status === "testing" ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 mr-1.5 inline animate-spin" />
-                    Testing...
+                    Saving...
                   </>
                 ) : (
-                  "Test Connection"
+                  "Save & Test"
                 )}
               </NeonButton>
             </div>

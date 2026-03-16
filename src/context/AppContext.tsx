@@ -12,12 +12,21 @@ import { useProfiles } from "@/hooks/useProfiles";
 import { useDetection } from "@/hooks/useDetection";
 import type { PomodoroConfig, PomodoroState } from "@/types/pomodoro";
 import type { Profile } from "@/types/profile";
+import type { ActiveWindowInfo } from "@/services/detectionService";
+import type { MatchResult } from "@/services/matchingEngine";
+import type { DetectionState } from "@/hooks/useDetection";
+
+export interface DetectionCheckEntry {
+  timestamp: number;
+  result: MatchResult;
+  window: ActiveWindowInfo | null;
+}
 
 interface AppContextValue {
   // Profiles
   profiles: Profile[];
   activeProfile: Profile | null;
-  setActiveProfile: (id: string) => void;
+  setActiveProfile: (id: string) => Promise<void>;
   createProfile: (profile: Omit<Profile, "id">) => Promise<Profile>;
   updateProfile: (id: string, updates: Partial<Profile>) => Promise<void>;
   deleteProfile: (id: string) => Promise<void>;
@@ -31,10 +40,12 @@ interface AppContextValue {
   skipPhase: () => void;
 
   // Detection
-  detectionState: "idle" | "checking" | "grace" | "alarm";
+  detectionState: DetectionState;
   graceRemaining: number;
   alarmLevel: number;
   dismissAlarm: () => void;
+  lastCheckedWindow: ActiveWindowInfo | null;
+  recentChecks: DetectionCheckEntry[];
 
   // Session
   todayFocusMinutes: number;
@@ -49,6 +60,8 @@ const DEFAULT_CONFIG: PomodoroConfig = {
   longBreak: 15,
   cyclesBeforeLong: 4,
 };
+
+const MAX_RECENT_CHECKS = 5;
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const {
@@ -72,19 +85,49 @@ export function AppProvider({ children }: { children: ReactNode }) {
     detectionState,
     graceRemaining,
     alarmLevel,
+    lastCheck,
+    lastWindowInfo,
     start: startDetection,
     stop: stopDetection,
     pause: pauseDetection,
     resume: resumeDetection,
   } = useDetection();
 
+  const [lastCheckedWindow, setLastCheckedWindow] =
+    useState<ActiveWindowInfo | null>(null);
+  const [recentChecks, setRecentChecks] = useState<DetectionCheckEntry[]>([]);
   const [todayFocusMinutes, setTodayFocusMinutes] = useState(0);
   const [currentStreak] = useState(0);
   const focusStartRef = useRef<number | null>(null);
 
+  // Sync lastWindowInfo from detection hook into context state
+  useEffect(() => {
+    if (lastWindowInfo) {
+      setLastCheckedWindow(lastWindowInfo);
+    }
+  }, [lastWindowInfo]);
+
+  // Track recent checks from detection hook
+  useEffect(() => {
+    if (lastCheck && lastWindowInfo) {
+      setRecentChecks((prev) => {
+        const entry: DetectionCheckEntry = {
+          timestamp: Date.now(),
+          result: lastCheck,
+          window: lastWindowInfo,
+        };
+        const updated = [entry, ...prev].slice(0, MAX_RECENT_CHECKS);
+        return updated;
+      });
+    }
+  }, [lastCheck, lastWindowInfo]);
+
   // Track focus time
   useEffect(() => {
-    if (pomodoroState.state.status === "running" && pomodoroState.state.phase === "work") {
+    if (
+      pomodoroState.state.status === "running" &&
+      pomodoroState.state.phase === "work"
+    ) {
       focusStartRef.current = Date.now();
     } else if (focusStartRef.current) {
       const elapsed = (Date.now() - focusStartRef.current) / 60000;
@@ -130,6 +173,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const stopTimer = useCallback(() => {
     pomodoroState.stop();
     stopDetection();
+    setRecentChecks([]);
+    setLastCheckedWindow(null);
   }, [pomodoroState, stopDetection]);
 
   const skipPhase = useCallback(() => {
@@ -159,6 +204,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         graceRemaining,
         alarmLevel,
         dismissAlarm,
+        lastCheckedWindow,
+        recentChecks,
         todayFocusMinutes,
         currentStreak,
       }}

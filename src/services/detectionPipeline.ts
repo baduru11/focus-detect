@@ -1,10 +1,16 @@
 import type { Profile } from "@/types/profile";
 import type { MatchResult } from "@/services/matchingEngine";
-import { getActiveWindowInfo } from "@/services/detectionService";
+import {
+  getActiveWindowInfo,
+  type ActiveWindowInfo,
+} from "@/services/detectionService";
 import { matchWindowAgainstProfile } from "@/services/matchingEngine";
+import { captureScreenshot } from "@/services/screenshotService";
+import { analyzeScreenshot } from "@/services/visionService";
+import { getAIConfig } from "@/services/settingsService";
 
 export interface DetectionCallbacks {
-  onCheck: (result: MatchResult) => void;
+  onCheck: (result: MatchResult, windowInfo: ActiveWindowInfo) => void;
   onGraceStart: (seconds: number) => void;
   onGraceTick: (remaining: number) => void;
   onAlarm: (level: 1 | 2 | 3) => void;
@@ -110,11 +116,16 @@ export class DetectionPipeline {
       const windowInfo = await getActiveWindowInfo();
       const result = matchWindowAgainstProfile(windowInfo, this.profile);
 
-      this.callbacks.onCheck(result);
+      this.callbacks.onCheck(result, windowInfo);
 
       if (result === "ambiguous") {
-        // Treat ambiguous as on_task for now (vision needs API keys)
-        this.handleOnTask();
+        // Ambiguous match — use AI vision to decide
+        const resolved = await this.resolveAmbiguous();
+        if (resolved === "off_task") {
+          this.handleOffTask();
+        } else {
+          this.handleOnTask();
+        }
         return;
       }
 
@@ -198,6 +209,45 @@ export class DetectionPipeline {
       this.escalationLevel = Math.max(0, this.escalationLevel - 1);
       this.callbacks.onBackOnTask();
       return;
+    }
+  }
+
+  /**
+   * When the rule match is ambiguous (e.g., browser open but unknown site),
+   * capture a screenshot and ask the AI vision service to decide.
+   * Falls back to "on_task" if screenshot or vision is unavailable.
+   */
+  private async resolveAmbiguous(): Promise<"on_task" | "off_task"> {
+    try {
+      const apiKeys = await getAIConfig();
+
+      // If no providers are available, default to on_task
+      const hasAnyProvider =
+        apiKeys.gemini || apiKeys.groq || apiKeys.openRouter || apiKeys.ollamaModel;
+      if (!hasAnyProvider) {
+        return "on_task";
+      }
+
+      const screenshot = await captureScreenshot();
+      const profileContext = this.profile
+        ? `Profile "${this.profile.name}" (${this.profile.mode} mode)`
+        : "general focus";
+
+      const visionResult = await analyzeScreenshot(
+        screenshot,
+        profileContext,
+        apiKeys
+      );
+
+      // Use confidence threshold: if confidence < 0.5, treat as on_task
+      if (visionResult.confidence < 0.5) {
+        return "on_task";
+      }
+
+      return visionResult.onTask ? "on_task" : "off_task";
+    } catch (error) {
+      console.warn("Vision analysis failed for ambiguous result:", error);
+      return "on_task";
     }
   }
 
