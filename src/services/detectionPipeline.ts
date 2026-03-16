@@ -31,6 +31,9 @@ export class DetectionPipeline {
   private callbacks: DetectionCallbacks | null = null;
   private inGrace: boolean = false;
   private inAlarm: boolean = false;
+  private lastAICheckTime: number = 0;
+  private lastAIResult: "on_task" | "off_task" = "on_task";
+  private aiCheckRunning: boolean = false;
   private graceRemaining: number = 0;
 
   start(profile: Profile, callbacks: DetectionCallbacks): void {
@@ -114,12 +117,26 @@ export class DetectionPipeline {
       const windowInfo = await getActiveWindowInfo();
       const result = matchWindowAgainstProfile(windowInfo, this.profile);
 
-      this.callbacks.onCheck(result, windowInfo);
-
       if (result === "ambiguous") {
-        // Ambiguous match — use AI vision to decide
-        const resolved = await this.resolveAmbiguous();
-        if (resolved === "off_task") {
+        // Ambiguous — use cached AI result, only re-check every 30s
+        const now = Date.now();
+        const AI_COOLDOWN = (this.profile.detection.checkInterval || 30) * 1000;
+
+        if (!this.aiCheckRunning && now - this.lastAICheckTime > AI_COOLDOWN) {
+          // Time for a fresh AI check (runs in background, doesn't block)
+          this.aiCheckRunning = true;
+          this.resolveAmbiguous().then((resolved) => {
+            this.lastAIResult = resolved;
+            this.lastAICheckTime = Date.now();
+            this.aiCheckRunning = false;
+          }).catch(() => {
+            this.aiCheckRunning = false;
+          });
+        }
+
+        // Use cached result for now
+        this.callbacks.onCheck(this.lastAIResult === "off_task" ? "off_task" : "on_task", windowInfo);
+        if (this.lastAIResult === "off_task") {
           this.handleOffTask();
         } else {
           this.handleOnTask();
@@ -127,14 +144,14 @@ export class DetectionPipeline {
         return;
       }
 
+      // Clear/definitive result from title matching
+      this.callbacks.onCheck(result, windowInfo);
       if (result === "off_task") {
         this.handleOffTask();
       } else {
         this.handleOnTask();
       }
     } catch (error) {
-      // If we can't get window info (e.g., app is not running in Tauri),
-      // silently skip this check cycle
       console.warn("Detection check failed:", error);
     }
   }
