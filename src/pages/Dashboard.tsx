@@ -98,15 +98,15 @@ export default function Dashboard() {
     >
       {/* Active Profile Card */}
       <motion.div variants={staggerItem}>
-        <GlassCard className="flex items-center gap-3 py-3 px-5">
-          <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
-            <Target className="w-3.5 h-3.5 text-accent-light" />
+        <GlassCard className="flex items-center gap-4 py-4 px-6">
+          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+            <Target className="w-5 h-5 text-accent-light" />
           </div>
           <div>
-            <p className="text-[10px] text-text-muted uppercase tracking-[0.15em] leading-none mb-1 font-medium">
+            <p className="text-xs text-text-muted uppercase tracking-[0.12em] leading-none mb-1.5 font-medium">
               Active Profile
             </p>
-            <p className="text-sm font-semibold text-text-primary leading-tight">
+            <p className="text-base font-semibold text-text-primary leading-tight">
               {activeProfile?.name ?? "No Profile"}
             </p>
           </div>
@@ -255,42 +255,42 @@ export default function Dashboard() {
       {/* Quick Stats Row */}
       <motion.div
         variants={staggerItem}
-        className="flex items-center gap-3 flex-wrap justify-center"
+        className="flex items-center gap-4 flex-wrap justify-center"
       >
-        <div className="card flex items-center gap-2.5 py-2.5 px-4 rounded-xl">
-          <div className="w-6 h-6 rounded-md bg-accent/10 flex items-center justify-center">
-            <Zap className="w-3 h-3 text-accent-light" strokeWidth={1.8} />
+        <div className="card flex items-center gap-3 py-3.5 px-5 rounded-xl">
+          <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center">
+            <Zap className="w-4 h-4 text-accent-light" strokeWidth={1.8} />
           </div>
-          <span className="text-[13px] text-text-secondary">
-            Cycle{" "}
-            <span className="text-text-primary font-semibold tabular-nums">
+          <div>
+            <span className="text-xs text-text-muted block mb-0.5">Cycle</span>
+            <span className="text-base text-text-primary font-semibold tabular-nums">
               {pomodoroState.currentCycle}/{config.cyclesBeforeLong}
             </span>
-          </span>
+          </div>
         </div>
 
-        <div className="card flex items-center gap-2.5 py-2.5 px-4 rounded-xl">
-          <div className="w-6 h-6 rounded-md bg-warning/10 flex items-center justify-center">
-            <Flame className="w-3 h-3 text-warning" strokeWidth={1.8} />
+        <div className="card flex items-center gap-3 py-3.5 px-5 rounded-xl">
+          <div className="w-9 h-9 rounded-lg bg-warning/10 flex items-center justify-center">
+            <Flame className="w-4 h-4 text-warning" strokeWidth={1.8} />
           </div>
-          <span className="text-[13px] text-text-secondary">
-            Streak{" "}
-            <span className="text-text-primary font-semibold tabular-nums">
+          <div>
+            <span className="text-xs text-text-muted block mb-0.5">Streak</span>
+            <span className="text-base text-text-primary font-semibold tabular-nums">
               {currentStreak}
             </span>
-          </span>
+          </div>
         </div>
 
-        <div className="card flex items-center gap-2.5 py-2.5 px-4 rounded-xl">
-          <div className="w-6 h-6 rounded-md bg-accent/10 flex items-center justify-center">
-            <Clock className="w-3 h-3 text-accent" strokeWidth={1.8} />
+        <div className="card flex items-center gap-3 py-3.5 px-5 rounded-xl">
+          <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center">
+            <Clock className="w-4 h-4 text-accent" strokeWidth={1.8} />
           </div>
-          <span className="text-[13px] text-text-secondary">
-            Today{" "}
-            <span className="text-text-primary font-semibold tabular-nums">
+          <div>
+            <span className="text-xs text-text-muted block mb-0.5">Today</span>
+            <span className="text-base text-text-primary font-semibold tabular-nums">
               {todayHours}h {todayMins}m
             </span>
-          </span>
+          </div>
         </div>
       </motion.div>
     </motion.div>

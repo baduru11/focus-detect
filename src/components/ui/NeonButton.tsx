@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
   [
-    "relative overflow-hidden font-medium text-[13px] leading-none",
+    "relative overflow-hidden font-medium leading-none",
     "transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
     "cursor-pointer select-none",
     "disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none",
@@ -41,9 +41,9 @@ const buttonVariants = cva(
         ].join(" "),
       },
       size: {
-        sm: "h-8 px-3 text-xs rounded-lg gap-1.5",
-        md: "h-9 px-4 text-[13px] rounded-[10px] gap-2",
-        lg: "h-10 px-5 text-sm rounded-[10px] gap-2",
+        sm: "h-9 px-4 text-[13px] rounded-lg gap-2",
+        md: "h-11 px-6 text-sm rounded-xl gap-2.5",
+        lg: "h-12 px-7 text-[15px] rounded-xl gap-3",
       },
     },
     defaultVariants: {

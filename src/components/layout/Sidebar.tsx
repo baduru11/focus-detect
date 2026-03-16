@@ -38,9 +38,9 @@ export function Sidebar() {
       }}
     >
       {/* Logo area */}
-      <div className="flex items-center h-14 px-5 border-b border-white/[0.06] overflow-hidden">
-        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-accent to-accent-light flex items-center justify-center flex-shrink-0">
-          <span className="text-xs font-bold text-white leading-none">F</span>
+      <div className="flex items-center h-16 px-5 border-b border-white/[0.06] overflow-hidden">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-accent-light flex items-center justify-center flex-shrink-0">
+          <span className="text-sm font-bold text-white leading-none">F</span>
         </div>
         <motion.span
           className="ml-3 text-sm font-semibold text-text-primary whitespace-nowrap"
@@ -63,7 +63,7 @@ export function Sidebar() {
             <NavLink key={to} to={to} className="block">
               <motion.div
                 className={cn(
-                  "relative flex items-center gap-3 h-9 px-3 rounded-[10px] overflow-hidden",
+                  "relative flex items-center gap-3 h-11 px-3.5 rounded-xl overflow-hidden",
                   "transition-colors duration-150",
                   isActive
                     ? "text-text-primary bg-white/[0.07]"
@@ -79,10 +79,10 @@ export function Sidebar() {
                   />
                 )}
 
-                <Icon className="flex-shrink-0 w-[18px] h-[18px]" strokeWidth={1.6} />
+                <Icon className="flex-shrink-0 w-5 h-5" strokeWidth={1.6} />
 
                 <motion.span
-                  className="text-[13px] whitespace-nowrap font-medium"
+                  className="text-sm whitespace-nowrap font-medium"
                   animate={{ opacity: expanded ? 1 : 0 }}
                   transition={{ duration: 0.12 }}
                 >
