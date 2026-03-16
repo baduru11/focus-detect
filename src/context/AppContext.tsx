@@ -202,13 +202,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [pomodoroState.state, detectionState, graceRemaining]);
 
   // Listen for widget actions
+  const lastProcessedRef = useRef(0);
   useEffect(() => {
     const interval = setInterval(() => {
       try {
         const raw = localStorage.getItem("widget-action");
         if (!raw) return;
         const { action, ts } = JSON.parse(raw);
-        if (Date.now() - ts > 2000) return; // stale
+        if (ts <= lastProcessedRef.current) return; // already processed
+        if (Date.now() - ts > 3000) {
+          localStorage.removeItem("widget-action");
+          return;
+        }
+        lastProcessedRef.current = ts;
         localStorage.removeItem("widget-action");
         if (action === "start") startTimer();
         else if (action === "pause") pauseTimer();
