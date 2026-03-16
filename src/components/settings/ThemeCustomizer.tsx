@@ -18,79 +18,63 @@ export function ThemeCustomizer() {
 
   return (
     <GlassCard>
-      <div className="flex items-center gap-3 mb-5">
-        <Palette className="w-5 h-5 text-neon-purple" />
-        <h2 className="text-lg font-semibold text-text-primary">Theme</h2>
+      <div className="flex items-center gap-3 mb-6">
+        <Palette className="w-4 h-4 text-neon-purple/60" />
+        <h2 className="text-base font-semibold text-text-primary">Theme</h2>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <span className="text-sm text-text-secondary">Accent Color</span>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
+          <span className="text-xs text-text-muted uppercase tracking-wider">Accent Color</span>
           <div className="flex gap-3">
             {ACCENT_COLORS.map((color) => (
               <motion.button
                 key={color.hex}
                 type="button"
                 className={cn(
-                  "relative w-9 h-9 rounded-full transition-all duration-200",
+                  "relative w-7 h-7 rounded-full transition-all duration-200",
                   selectedColor === color.hex
                     ? "ring-2 ring-offset-2 ring-offset-void"
                     : "hover:scale-110"
                 )}
                 style={{
                   background: color.hex,
+                  opacity: selectedColor === color.hex ? 1 : 0.6,
                   boxShadow:
                     selectedColor === color.hex
-                      ? `0 0 20px ${color.hex}80, 0 0 40px ${color.hex}40`
-                      : `0 0 8px ${color.hex}30`,
-                  // Ring color set via className ring utility
+                      ? `0 0 10px ${color.hex}40`
+                      : "none",
                 }}
-                whileHover={{ scale: 1.15 }}
+                whileHover={{ scale: 1.15, opacity: 0.9 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setSelectedColor(color.hex)}
                 title={color.name}
-              >
-                {selectedColor === color.hex && (
-                  <motion.div
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      boxShadow: `0 0 20px ${color.hex}80, 0 0 40px ${color.hex}40`,
-                    }}
-                    animate={{
-                      boxShadow: [
-                        `0 0 15px ${color.hex}60, 0 0 30px ${color.hex}30`,
-                        `0 0 25px ${color.hex}80, 0 0 50px ${color.hex}50`,
-                        `0 0 15px ${color.hex}60, 0 0 30px ${color.hex}30`,
-                      ],
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                )}
-              </motion.button>
+              />
             ))}
           </div>
         </div>
 
         {/* Preview Swatch */}
-        <div className="flex flex-col gap-2">
-          <span className="text-sm text-text-secondary">Preview</span>
+        <div className="flex flex-col gap-3">
+          <span className="text-xs text-text-muted uppercase tracking-wider">Preview</span>
           <div
-            className="h-12 rounded-xl border border-white/10 flex items-center justify-center gap-3"
+            className="h-11 rounded-lg border border-white/[0.06] flex items-center justify-center gap-3"
             style={{
-              background: `linear-gradient(135deg, ${selectedColor}15, ${selectedColor}05)`,
-              borderColor: `${selectedColor}30`,
+              background: `linear-gradient(135deg, ${selectedColor}08, ${selectedColor}03)`,
+              borderColor: `${selectedColor}15`,
             }}
           >
             <div
-              className="w-3 h-3 rounded-full"
+              className="w-2.5 h-2.5 rounded-full"
               style={{
                 background: selectedColor,
-                boxShadow: `0 0 8px ${selectedColor}80`,
+                opacity: 0.7,
+                boxShadow: `0 0 6px ${selectedColor}40`,
               }}
             />
             <span
-              className="text-sm font-semibold"
-              style={{ color: selectedColor }}
+              className="text-xs font-medium"
+              style={{ color: selectedColor, opacity: 0.7 }}
             >
               {ACCENT_COLORS.find((c) => c.hex === selectedColor)?.name ?? "Custom"} Accent
             </span>

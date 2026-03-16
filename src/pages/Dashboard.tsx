@@ -2,6 +2,8 @@ import { useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Target, Flame, Clock, Zap } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { NeonGradientCard } from "@/components/magicui/NeonGradientCard";
+import { Ripple } from "@/components/magicui/Ripple";
 import { PomodoroRing } from "@/components/timer/PomodoroRing";
 import { TimerControls } from "@/components/timer/TimerControls";
 import { usePomodoro } from "@/hooks/usePomodoro";
@@ -49,6 +51,7 @@ export default function Dashboard() {
 
   const totalSeconds = phaseTotalSeconds(state.phase, config);
   const isIdle = state.status === "idle";
+  const isRunning = state.status === "running";
 
   const handleStart = useCallback(() => start(), [start]);
   const handlePause = useCallback(() => pause(), [pause]);
@@ -64,7 +67,7 @@ export default function Dashboard() {
 
   return (
     <motion.div
-      className="h-full flex flex-col items-center justify-center gap-6 p-6 overflow-y-auto"
+      className="h-full flex flex-col items-center justify-center gap-8 p-8 overflow-y-auto"
       variants={{
         hidden: { opacity: 0 },
         show: { opacity: 1, transition: { staggerChildren: 0.08 } },
@@ -72,23 +75,53 @@ export default function Dashboard() {
       initial="hidden"
       animate="show"
     >
-      {/* Active Profile Card */}
+      {/* Active Profile Card — uses NeonGradientCard when running */}
       <motion.div variants={staggerItem}>
-        <GlassCard glow="cyan" className="flex items-center gap-3 py-3 px-5">
-          <Target className="w-5 h-5 text-neon-cyan" />
-          <div>
-            <p className="text-[10px] text-text-muted uppercase tracking-[0.15em] leading-none mb-0.5">
-              Active Profile
-            </p>
-            <p className="text-sm font-semibold text-text-primary leading-tight">
-              General Focus
-            </p>
-          </div>
-        </GlassCard>
+        {isRunning ? (
+          <NeonGradientCard
+            borderSize={1}
+            borderRadius={14}
+            neonColors={{ firstColor: "#00f0ff", secondColor: "#bf00ff" }}
+            className="inline-block"
+          >
+            <div className="flex items-center gap-3 py-1 px-1">
+              <Target className="w-4 h-4 text-neon-cyan/80" />
+              <div>
+                <p className="text-[10px] text-text-muted uppercase tracking-[0.15em] leading-none mb-0.5">
+                  Active Profile
+                </p>
+                <p className="text-sm font-semibold text-text-primary leading-tight">
+                  General Focus
+                </p>
+              </div>
+            </div>
+          </NeonGradientCard>
+        ) : (
+          <GlassCard className="flex items-center gap-3 py-3 px-5">
+            <Target className="w-4 h-4 text-neon-cyan/60" />
+            <div>
+              <p className="text-[10px] text-text-muted uppercase tracking-[0.15em] leading-none mb-0.5">
+                Active Profile
+              </p>
+              <p className="text-sm font-semibold text-text-primary leading-tight">
+                General Focus
+              </p>
+            </div>
+          </GlassCard>
+        )}
       </motion.div>
 
-      {/* Timer Ring */}
-      <motion.div variants={staggerItem}>
+      {/* Timer Ring with Ripple behind it */}
+      <motion.div variants={staggerItem} className="relative">
+        {/* Ripple effect behind the timer */}
+        {isRunning && (
+          <Ripple
+            mainCircleSize={180}
+            mainCircleOpacity={0.08}
+            numCircles={5}
+          />
+        )}
+
         {isIdle ? (
           <motion.div
             className="flex flex-col items-center justify-center"
@@ -127,40 +160,40 @@ export default function Dashboard() {
         />
       </motion.div>
 
-      {/* Quick Stats Row */}
+      {/* Quick Stats Row — elegant small cards */}
       <motion.div
         variants={staggerItem}
-        className="flex items-center gap-3 flex-wrap justify-center"
+        className="flex items-center gap-4 flex-wrap justify-center"
       >
-        <GlassCard className="flex items-center gap-2 py-2.5 px-4 !rounded-xl">
-          <Zap className="w-4 h-4 text-neon-cyan" />
+        <div className="card flex items-center gap-2.5 py-2.5 px-4 rounded-xl">
+          <Zap className="w-3.5 h-3.5 text-neon-cyan/60" />
           <span className="text-xs text-text-secondary">
             Cycle{" "}
             <span className="text-text-primary font-semibold">
               {state.currentCycle}/{config.cyclesBeforeLong}
             </span>
           </span>
-        </GlassCard>
+        </div>
 
-        <GlassCard className="flex items-center gap-2 py-2.5 px-4 !rounded-xl">
-          <Flame className="w-4 h-4 text-neon-orange" />
+        <div className="card flex items-center gap-2.5 py-2.5 px-4 rounded-xl">
+          <Flame className="w-3.5 h-3.5 text-neon-orange/60" />
           <span className="text-xs text-text-secondary">
             Streak{" "}
             <span className="text-text-primary font-semibold">
               {state.totalCyclesCompleted}
             </span>
           </span>
-        </GlassCard>
+        </div>
 
-        <GlassCard className="flex items-center gap-2 py-2.5 px-4 !rounded-xl">
-          <Clock className="w-4 h-4 text-neon-purple" />
+        <div className="card flex items-center gap-2.5 py-2.5 px-4 rounded-xl">
+          <Clock className="w-3.5 h-3.5 text-neon-purple/60" />
           <span className="text-xs text-text-secondary">
             Today{" "}
             <span className="text-text-primary font-semibold">
               {todayHours}h {todayMins}m
             </span>
           </span>
-        </GlassCard>
+        </div>
       </motion.div>
     </motion.div>
   );

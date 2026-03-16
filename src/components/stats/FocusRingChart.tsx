@@ -7,8 +7,8 @@ interface FocusRingChartProps {
 }
 
 export function FocusRingChart({ focusPercent, className }: FocusRingChartProps) {
-  const size = 180;
-  const strokeWidth = 14;
+  const size = 160;
+  const strokeWidth = 6;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const focusArc = (focusPercent / 100) * circumference;
@@ -23,10 +23,10 @@ export function FocusRingChart({ focusPercent, className }: FocusRingChartProps)
         viewBox={`0 0 ${size} ${size}`}
         className="transform -rotate-90"
       >
-        {/* SVG filter for neon glow */}
+        {/* SVG filter for subtle glow */}
         <defs>
           <filter id="focusGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feGaussianBlur stdDeviation="2" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -44,18 +44,18 @@ export function FocusRingChart({ focusPercent, className }: FocusRingChartProps)
           cy={center}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,0.06)"
+          stroke="rgba(255,255,255,0.04)"
           strokeWidth={strokeWidth}
         />
 
-        {/* Distraction arc (red) */}
+        {/* Distraction arc */}
         {focusPercent < 100 && (
           <motion.circle
             cx={center}
             cy={center}
             r={radius}
             fill="none"
-            stroke="#ff003c"
+            stroke="rgba(255,0,60,0.3)"
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeDasharray={`${distractionArc} ${circumference}`}
@@ -63,11 +63,10 @@ export function FocusRingChart({ focusPercent, className }: FocusRingChartProps)
             initial={{ strokeDasharray: `0 ${circumference}` }}
             animate={{ strokeDasharray: `${distractionArc} ${circumference}` }}
             transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }}
-            style={{ opacity: 0.6 }}
           />
         )}
 
-        {/* Focus arc (cyan/green gradient) with glow */}
+        {/* Focus arc with subtle glow */}
         <motion.circle
           cx={center}
           cy={center}
@@ -81,13 +80,14 @@ export function FocusRingChart({ focusPercent, className }: FocusRingChartProps)
           initial={{ strokeDasharray: `0 ${circumference}` }}
           animate={{ strokeDasharray: `${focusArc} ${circumference}` }}
           transition={{ duration: 1.2, ease: "easeOut" }}
+          style={{ opacity: 0.85 }}
         />
       </svg>
 
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <motion.span
-          className="text-3xl font-bold font-mono text-text-primary"
+          className="text-2xl font-bold font-mono text-text-primary"
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.4 }}
@@ -95,7 +95,7 @@ export function FocusRingChart({ focusPercent, className }: FocusRingChartProps)
           {focusPercent}%
         </motion.span>
         <motion.span
-          className="text-xs text-text-secondary uppercase tracking-widest mt-1"
+          className="text-[10px] text-text-muted uppercase tracking-widest mt-1"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.8 }}

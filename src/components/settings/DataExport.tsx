@@ -30,36 +30,36 @@ export function DataExport() {
 
   return (
     <GlassCard>
-      <div className="flex items-center gap-3 mb-5">
-        <Database className="w-5 h-5 text-neon-red" />
-        <h2 className="text-lg font-semibold text-text-primary">
+      <div className="flex items-center gap-3 mb-6">
+        <Database className="w-4 h-4 text-neon-red/60" />
+        <h2 className="text-base font-semibold text-text-primary">
           Data & Export
         </h2>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         {/* Export Buttons */}
         <div className="flex flex-col gap-3">
-          <span className="text-sm text-text-secondary">Export Sessions</span>
+          <span className="text-xs text-text-muted uppercase tracking-wider">Export Sessions</span>
           <div className="flex gap-3">
             <NeonButton variant="ghost" size="sm" onClick={handleExportJSON}>
-              <FileJson className="w-4 h-4 mr-2 inline" />
+              <FileJson className="w-3.5 h-3.5 mr-2 inline" />
               Export JSON
             </NeonButton>
             <NeonButton variant="ghost" size="sm" onClick={handleExportCSV}>
-              <FileSpreadsheet className="w-4 h-4 mr-2 inline" />
+              <FileSpreadsheet className="w-3.5 h-3.5 mr-2 inline" />
               Export CSV
             </NeonButton>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="border-t border-border-glow" />
+        <div className="border-t border-white/[0.04]" />
 
         {/* Clear Data */}
         <div className="flex flex-col gap-3">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 text-neon-red/60 mt-0.5 shrink-0" />
+            <AlertTriangle className="w-3.5 h-3.5 text-neon-red/40 mt-0.5 shrink-0" />
             <p className="text-xs text-text-muted leading-relaxed">
               Clearing all data will permanently remove all session history,
               statistics, and cached AI analysis results. This action cannot be
@@ -76,7 +76,7 @@ export function DataExport() {
                 exit={{ opacity: 0, y: -5 }}
                 className="flex items-center gap-3"
               >
-                <span className="text-sm text-neon-red font-semibold">
+                <span className="text-sm text-neon-red/80 font-semibold">
                   Are you sure?
                 </span>
                 <NeonButton

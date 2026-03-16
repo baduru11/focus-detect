@@ -44,20 +44,19 @@ export function StreakCard({ current, best, className }: StreakCardProps) {
 
   return (
     <GlassCard
-      glow={hasStreak ? "green" : undefined}
       className={cn("relative overflow-hidden", className)}
     >
       <div className="flex flex-col items-center text-center gap-2">
         {/* Fire animation */}
         <motion.div
-          className="text-4xl"
+          className="text-3xl"
           animate={
             hasStreak
               ? {
-                  scale: [1, 1.15, 1],
+                  scale: [1, 1.1, 1],
                   filter: [
                     "brightness(1)",
-                    "brightness(1.4)",
+                    "brightness(1.2)",
                     "brightness(1)",
                   ],
                 }
@@ -75,14 +74,14 @@ export function StreakCard({ current, best, className }: StreakCardProps) {
         {/* Current streak number */}
         <motion.span
           className={cn(
-            "text-5xl font-bold font-mono",
-            hasStreak ? "text-neon-green" : "text-text-muted"
+            "text-4xl font-bold font-mono",
+            hasStreak ? "text-neon-green/80" : "text-text-muted"
           )}
           style={
             hasStreak
               ? {
                   textShadow:
-                    "0 0 20px rgba(0,255,136,0.6), 0 0 40px rgba(0,255,136,0.3)",
+                    "0 0 12px rgba(0,255,136,0.3)",
                 }
               : undefined
           }
@@ -93,12 +92,12 @@ export function StreakCard({ current, best, className }: StreakCardProps) {
           {displayCount}
         </motion.span>
 
-        <span className="text-xs text-text-secondary uppercase tracking-wider">
+        <span className="text-xs text-text-muted uppercase tracking-wider">
           Day Streak
         </span>
 
         {/* Best streak */}
-        <div className="mt-2 px-3 py-1 rounded-full bg-white/5 border border-border-glow">
+        <div className="mt-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.06]">
           <span className="text-[10px] text-text-muted">
             Best: <span className="text-text-primary font-mono">{best}</span>
           </span>

@@ -12,14 +12,15 @@ import {
   Loader2,
 } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { NeonButton } from "@/components/ui/NeonButton";
 import { FocusRingChart } from "@/components/stats/FocusRingChart";
 import { TimelineBar } from "@/components/stats/TimelineBar";
 import { WeeklyBarChart } from "@/components/stats/WeeklyBarChart";
 import { StreakCard } from "@/components/stats/StreakCard";
 import { AchievementCard } from "@/components/stats/AchievementCard";
 import { DistractorLeaderboard } from "@/components/stats/DistractorLeaderboard";
+import { AnimatedGradientText } from "@/components/magicui/AnimatedGradientText";
 import { useStats } from "@/hooks/useStats";
+import { cn } from "@/lib/utils";
 
 type Tab = "today" | "weekly" | "alltime";
 
@@ -55,8 +56,7 @@ export default function Stats() {
           className="flex flex-col items-center gap-3"
         >
           <Loader2
-            className="w-8 h-8 animate-spin"
-            style={{ color: "#00f0ff" }}
+            className="w-6 h-6 animate-spin text-text-muted"
           />
           <span className="text-sm text-text-muted">Loading stats...</span>
         </motion.div>
@@ -72,35 +72,48 @@ export default function Stats() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h1 className="text-3xl font-bold text-text-primary tracking-tight">
-          Statistics
+        <h1 className="text-2xl font-bold text-text-primary tracking-tight">
+          <AnimatedGradientText speed={1} colorFrom="#00f0ff" colorTo="#bf00ff" className="text-2xl font-bold">
+            Statistics
+          </AnimatedGradientText>
         </h1>
         <motion.button
-          className="text-xs text-text-muted hover:text-neon-cyan transition-colors cursor-pointer"
+          className="text-xs text-text-muted hover:text-text-secondary transition-colors cursor-pointer px-3 py-1.5 rounded-lg hover:bg-white/[0.03]"
           onClick={stats.refreshStats}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           Refresh
         </motion.button>
       </motion.div>
 
-      {/* Tab bar */}
+      {/* Tab bar — pill style */}
       <motion.div
-        className="flex gap-2 mb-6 flex-shrink-0"
+        className="flex gap-1 mb-6 flex-shrink-0 bg-white/[0.03] rounded-lg p-1 w-fit"
         initial={{ opacity: 0, y: -5 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
         {tabs.map((tab) => (
-          <NeonButton
+          <button
             key={tab.id}
-            variant={activeTab === tab.id ? "primary" : "ghost"}
-            size="sm"
+            className={cn(
+              "relative px-4 py-1.5 text-xs font-medium rounded-md transition-all duration-200 cursor-pointer",
+              activeTab === tab.id
+                ? "text-neon-cyan"
+                : "text-text-muted hover:text-text-secondary"
+            )}
             onClick={() => setActiveTab(tab.id)}
           >
-            {tab.label}
-          </NeonButton>
+            {activeTab === tab.id && (
+              <motion.div
+                className="absolute inset-0 rounded-md bg-neon-cyan/[0.08] border border-neon-cyan/[0.12]"
+                layoutId="stats-tab-bg"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10">{tab.label}</span>
+          </button>
         ))}
       </motion.div>
 
@@ -119,12 +132,12 @@ export default function Stats() {
             >
               {/* Ring chart + Timeline */}
               <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6 items-start">
-                <GlassCard className="flex items-center justify-center p-8">
+                <GlassCard className="flex items-center justify-center p-6">
                   <FocusRingChart focusPercent={stats.focusPercent} />
                 </GlassCard>
                 <GlassCard>
-                  <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider">
-                    Today&apos;s Timeline
+                  <h3 className="text-xs font-semibold text-text-muted mb-4 uppercase tracking-wider">
+                    Today's Timeline
                   </h3>
                   <TimelineBar sessions={stats.todayTimeline} />
                 </GlassCard>
@@ -133,19 +146,19 @@ export default function Stats() {
               {/* Stat cards row */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <AchievementCard
-                  icon={<Clock className="w-5 h-5" />}
+                  icon={<Clock className="w-4 h-4" />}
                   title="Focus Time"
                   value={formatMinutes(stats.todaySummary.focusMinutes)}
                   glowColor="cyan"
                 />
                 <AchievementCard
-                  icon={<Bell className="w-5 h-5" />}
+                  icon={<Bell className="w-4 h-4" />}
                   title="Alarms Triggered"
                   value={String(stats.todaySummary.alarms)}
                   glowColor="red"
                 />
                 <AchievementCard
-                  icon={<Target className="w-5 h-5" />}
+                  icon={<Target className="w-4 h-4" />}
                   title="Cycles Completed"
                   value={String(stats.todaySummary.cycles)}
                   glowColor="green"
@@ -169,7 +182,7 @@ export default function Stats() {
             >
               {/* Weekly bar chart */}
               <GlassCard>
-                <h3 className="text-sm font-semibold text-text-secondary mb-6 uppercase tracking-wider">
+                <h3 className="text-xs font-semibold text-text-muted mb-6 uppercase tracking-wider">
                   Focus Hours This Week
                 </h3>
                 <WeeklyBarChart data={stats.weeklyBars} />
@@ -182,7 +195,7 @@ export default function Stats() {
                   best={stats.streak.best}
                 />
                 <AchievementCard
-                  icon={<TrendingUp className="w-5 h-5" />}
+                  icon={<TrendingUp className="w-4 h-4" />}
                   title="Weekly Focus Total"
                   value={formatMinutes(
                     stats.weekSummary.reduce(
@@ -196,7 +209,7 @@ export default function Stats() {
 
               {/* Weekly totals summary */}
               <GlassCard>
-                <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider">
+                <h3 className="text-xs font-semibold text-text-muted mb-4 uppercase tracking-wider">
                   Weekly Summary
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -252,19 +265,19 @@ export default function Stats() {
               {/* Big numbers */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <AchievementCard
-                  icon={<Clock className="w-5 h-5" />}
+                  icon={<Clock className="w-4 h-4" />}
                   title="Total Hours Focused"
                   value={`${stats.allTimeSummary.totalFocusHours}h`}
                   glowColor="cyan"
                 />
                 <AchievementCard
-                  icon={<Zap className="w-5 h-5" />}
+                  icon={<Zap className="w-4 h-4" />}
                   title="Best Streak"
                   value={`${stats.streak.best} days`}
                   glowColor="green"
                 />
                 <AchievementCard
-                  icon={<BarChart3 className="w-5 h-5" />}
+                  icon={<BarChart3 className="w-4 h-4" />}
                   title="Total Sessions"
                   value={String(stats.allTimeSummary.totalSessions)}
                   glowColor="purple"
@@ -273,12 +286,12 @@ export default function Stats() {
 
               {/* Achievement records */}
               <GlassCard>
-                <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider">
+                <h3 className="text-xs font-semibold text-text-muted mb-4 uppercase tracking-wider">
                   Personal Records
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <AchievementCard
-                    icon={<Trophy className="w-5 h-5" />}
+                    icon={<Trophy className="w-4 h-4" />}
                     title="Best Focus Day"
                     value={formatMinutes(
                       stats.allTimeSummary.bestDayMinutes
@@ -286,7 +299,7 @@ export default function Stats() {
                     glowColor="cyan"
                   />
                   <AchievementCard
-                    icon={<Calendar className="w-5 h-5" />}
+                    icon={<Calendar className="w-4 h-4" />}
                     title="Best Day Date"
                     value={
                       stats.allTimeSummary.bestDayDate
@@ -313,7 +326,7 @@ export default function Stats() {
   );
 }
 
-// ─── Helper sub-component ──────────────────────────────────────────────────
+// --- Helper sub-component ---
 
 function SummaryItem({
   label,
@@ -326,12 +339,12 @@ function SummaryItem({
 }) {
   return (
     <motion.div
-      className="flex flex-col items-center text-center gap-1"
+      className="flex flex-col items-center text-center gap-1.5 p-3 rounded-lg bg-white/[0.02]"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
     >
-      <span className="text-xl font-bold font-mono" style={{ color }}>
+      <span className="text-lg font-bold font-mono" style={{ color, opacity: 0.8 }}>
         {value}
       </span>
       <span className="text-[10px] text-text-muted uppercase tracking-wider">

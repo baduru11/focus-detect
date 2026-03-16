@@ -4,7 +4,53 @@ import { Plus, Loader2 } from "lucide-react";
 import { useProfiles } from "@/hooks/useProfiles";
 import { ProfileCard } from "@/components/profiles/ProfileCard";
 import { ProfileEditor } from "@/components/profiles/ProfileEditor";
+import { MagicCard } from "@/components/magicui/MagicCard";
+import { BorderBeam } from "@/components/magicui/BorderBeam";
+import { AnimatedGradientText } from "@/components/magicui/AnimatedGradientText";
 import type { Profile } from "@/types/profile";
+
+const MOCK_PROFILES: Profile[] = [
+  {
+    id: "mock-deep-work",
+    name: "Deep Work",
+    icon: "\uD83D\uDCBB",
+    mode: "blacklist",
+    apps: [
+      { name: "Twitter", process: "twitter.exe", allowed: false },
+      { name: "YouTube", process: "youtube.exe", allowed: false },
+      { name: "Reddit", process: "reddit.exe", allowed: false },
+    ],
+    pomodoro: { work: 50, shortBreak: 10, longBreak: 30, cyclesBeforeLong: 4 },
+    detection: { checkInterval: 5, graceCountdown: 10, alarmLockDuration: 30 },
+    monitors: { detection: "all", alarm: "primary" },
+  },
+  {
+    id: "mock-study-mode",
+    name: "Study Mode",
+    icon: "\uD83D\uDCDA",
+    mode: "whitelist",
+    apps: [
+      { name: "Notion", process: "notion.exe", allowed: true },
+      { name: "Anki", process: "anki.exe", allowed: true },
+    ],
+    pomodoro: { work: 25, shortBreak: 5, longBreak: 15, cyclesBeforeLong: 4 },
+    detection: { checkInterval: 5, graceCountdown: 10, alarmLockDuration: 30 },
+    monitors: { detection: "all", alarm: "all" },
+  },
+  {
+    id: "mock-creative-flow",
+    name: "Creative Flow",
+    icon: "\uD83C\uDFA8",
+    mode: "blacklist",
+    apps: [
+      { name: "Slack", process: "slack.exe", allowed: false },
+      { name: "Email", process: "outlook.exe", allowed: false },
+    ],
+    pomodoro: { work: 45, shortBreak: 10, longBreak: 20, cyclesBeforeLong: 3 },
+    detection: { checkInterval: 10, graceCountdown: 15, alarmLockDuration: 20 },
+    monitors: { detection: "primary", alarm: "primary" },
+  },
+];
 
 const container = {
   hidden: { opacity: 0 },
@@ -21,7 +67,7 @@ const item = {
 
 export default function Profiles() {
   const {
-    profiles,
+    profiles: dbProfiles,
     activeProfile,
     loading,
     setActiveProfile,
@@ -29,6 +75,10 @@ export default function Profiles() {
     updateProfile,
     deleteProfile,
   } = useProfiles();
+
+  // Use mock profiles when DB returns empty
+  const profiles = dbProfiles.length > 0 ? dbProfiles : MOCK_PROFILES;
+  const activeId = activeProfile?.id ?? (profiles.length > 0 ? profiles[0].id : null);
 
   const [editorState, setEditorState] = useState<
     | { mode: "closed" }
@@ -60,7 +110,7 @@ export default function Profiles() {
           animate={{ opacity: 1 }}
           className="flex flex-col items-center gap-3"
         >
-          <Loader2 className="w-8 h-8 text-neon-cyan animate-spin" />
+          <Loader2 className="w-6 h-6 text-text-muted animate-spin" />
           <span className="text-sm text-text-muted">Loading profiles...</span>
         </motion.div>
       </div>
@@ -71,17 +121,13 @@ export default function Profiles() {
     <div className="h-full p-8 overflow-y-auto">
       {/* Title */}
       <motion.h1
-        className="text-3xl font-bold tracking-tight mb-8"
-        style={{
-          background: "linear-gradient(135deg, #00f0ff, #bf00ff)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-        }}
+        className="text-2xl font-bold tracking-tight mb-8"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        Activity Profiles
+        <AnimatedGradientText speed={1} colorFrom="#00f0ff" colorTo="#bf00ff" className="text-2xl font-bold">
+          Activity Profiles
+        </AnimatedGradientText>
       </motion.h1>
 
       {/* Profile Grid */}
@@ -92,46 +138,69 @@ export default function Profiles() {
         animate="show"
       >
         <AnimatePresence mode="popLayout">
-          {profiles.map((profile) => (
-            <motion.div
-              key={profile.id}
-              variants={item}
-              layout
-              exit={{ opacity: 0, scale: 0.9 }}
-            >
-              <ProfileCard
-                profile={profile}
-                isActive={activeProfile?.id === profile.id}
-                onSelect={() => setActiveProfile(profile.id)}
-                onEdit={() =>
-                  setEditorState({ mode: "edit", profile })
-                }
-                onDelete={() => handleDelete(profile.id)}
-              />
-            </motion.div>
-          ))}
+          {profiles.map((profile) => {
+            const isActive = profile.id === activeId;
+
+            return (
+              <motion.div
+                key={profile.id}
+                variants={item}
+                layout
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="relative"
+              >
+                {/* Use MagicCard for mouse spotlight */}
+                <MagicCard
+                  gradientSize={250}
+                  gradientFrom="#00f0ff"
+                  gradientTo="#bf00ff"
+                  gradientOpacity={0.6}
+                  className="!rounded-xl"
+                >
+                  <ProfileCard
+                    profile={profile}
+                    isActive={isActive}
+                    onSelect={() => setActiveProfile(profile.id)}
+                    onEdit={() =>
+                      setEditorState({ mode: "edit", profile })
+                    }
+                    onDelete={() => handleDelete(profile.id)}
+                  />
+                  {/* BorderBeam for active profile */}
+                  {isActive && (
+                    <BorderBeam
+                      size={60}
+                      duration={4}
+                      colorFrom="#00f0ff"
+                      colorTo="#bf00ff"
+                      borderWidth={1.5}
+                    />
+                  )}
+                </MagicCard>
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
 
         {/* Add New Profile Card */}
         <motion.div variants={item} layout>
           <motion.div
-            className="glass-panel rounded-2xl p-5 cursor-pointer flex items-center justify-center min-h-[140px] border border-dashed border-text-muted/20 hover:border-neon-cyan/30 transition-colors"
+            className="rounded-xl p-5 cursor-pointer flex items-center justify-center min-h-[140px] border border-dashed border-white/[0.08] hover:border-neon-cyan/20 transition-colors bg-white/[0.01]"
             whileHover={{
               scale: 1.02,
-              borderColor: "rgba(0, 240, 255, 0.4)",
+              borderColor: "rgba(0, 240, 255, 0.2)",
             }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setEditorState({ mode: "create" })}
           >
             <div className="flex flex-col items-center gap-3 text-text-muted">
               <motion.div
-                className="w-12 h-12 rounded-xl border border-dashed border-text-muted/30 flex items-center justify-center"
+                className="w-11 h-11 rounded-lg border border-dashed border-white/[0.1] flex items-center justify-center"
                 whileHover={{
-                  borderColor: "rgba(0, 240, 255, 0.5)",
-                  boxShadow: "0 0 15px rgba(0, 240, 255, 0.15)",
+                  borderColor: "rgba(0, 240, 255, 0.25)",
                 }}
               >
-                <Plus className="w-6 h-6" />
+                <Plus className="w-5 h-5" />
               </motion.div>
               <span className="text-sm font-medium">New Profile</span>
             </div>

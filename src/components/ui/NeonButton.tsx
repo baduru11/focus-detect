@@ -4,23 +4,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "relative overflow-hidden rounded-xl px-6 py-3 font-semibold text-sm tracking-wide transition-colors duration-200 cursor-pointer border backdrop-blur-md select-none",
+  "relative overflow-hidden rounded-lg px-5 py-2.5 font-semibold text-sm tracking-wide transition-all duration-200 cursor-pointer border backdrop-blur-md select-none",
   {
     variants: {
       variant: {
         primary:
-          "bg-neon-cyan/10 border-neon-cyan/40 text-neon-cyan hover:bg-neon-cyan/20",
+          "bg-gradient-to-r from-neon-cyan/15 to-neon-cyan/5 border-neon-cyan/20 text-neon-cyan hover:from-neon-cyan/20 hover:to-neon-cyan/10 hover:border-neon-cyan/30",
         danger:
-          "bg-neon-red/10 border-neon-red/40 text-neon-red hover:bg-neon-red/20",
+          "bg-gradient-to-r from-neon-red/15 to-neon-red/5 border-neon-red/20 text-neon-red hover:from-neon-red/20 hover:to-neon-red/10 hover:border-neon-red/30",
         success:
-          "bg-neon-green/10 border-neon-green/40 text-neon-green hover:bg-neon-green/20",
+          "bg-gradient-to-r from-neon-green/15 to-neon-green/5 border-neon-green/20 text-neon-green hover:from-neon-green/20 hover:to-neon-green/10 hover:border-neon-green/30",
         ghost:
-          "bg-transparent border-border-glow text-text-primary hover:bg-white/5",
+          "bg-transparent border-white/[0.06] text-text-primary hover:bg-white/[0.04] hover:border-white/[0.1]",
       },
       size: {
-        sm: "px-4 py-2 text-xs",
-        md: "px-6 py-3 text-sm",
-        lg: "px-8 py-4 text-base",
+        sm: "px-3.5 py-1.5 text-xs rounded-lg",
+        md: "px-5 py-2.5 text-sm rounded-lg",
+        lg: "px-7 py-3 text-sm rounded-lg",
       },
     },
     defaultVariants: {
@@ -31,17 +31,17 @@ const buttonVariants = cva(
 );
 
 const glowMap = {
-  primary: "0 0 20px rgba(0, 240, 255, 0.5), inset 0 0 20px rgba(0, 240, 255, 0.08)",
-  danger: "0 0 20px rgba(255, 0, 60, 0.5), inset 0 0 20px rgba(255, 0, 60, 0.08)",
-  success: "0 0 20px rgba(0, 255, 136, 0.5), inset 0 0 20px rgba(0, 255, 136, 0.08)",
-  ghost: "0 0 15px rgba(0, 240, 255, 0.2)",
+  primary: "0 0 12px rgba(0, 240, 255, 0.2), 0 0 2px rgba(0, 240, 255, 0.3)",
+  danger: "0 0 12px rgba(255, 0, 60, 0.2), 0 0 2px rgba(255, 0, 60, 0.3)",
+  success: "0 0 12px rgba(0, 255, 136, 0.2), 0 0 2px rgba(0, 255, 136, 0.3)",
+  ghost: "0 0 8px rgba(255, 255, 255, 0.05)",
 };
 
 const rippleColorMap = {
-  primary: "rgba(0, 240, 255, 0.3)",
-  danger: "rgba(255, 0, 60, 0.3)",
-  success: "rgba(0, 255, 136, 0.3)",
-  ghost: "rgba(255, 255, 255, 0.15)",
+  primary: "rgba(0, 240, 255, 0.2)",
+  danger: "rgba(255, 0, 60, 0.2)",
+  success: "rgba(0, 255, 136, 0.2)",
+  ghost: "rgba(255, 255, 255, 0.1)",
 };
 
 interface Ripple {
@@ -92,7 +92,7 @@ export function NeonButton({
       whileHover={{
         boxShadow: glowMap[v],
       }}
-      whileTap={{ scale: 0.95 }}
+      whileTap={{ scale: 0.97 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       onClick={handleClick}
     >
@@ -106,7 +106,7 @@ export function NeonButton({
             backgroundColor: rippleColorMap[v],
             transform: "translate(-50%, -50%)",
           }}
-          initial={{ width: 0, height: 0, opacity: 0.6 }}
+          initial={{ width: 0, height: 0, opacity: 0.5 }}
           animate={{ width: 200, height: 200, opacity: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         />

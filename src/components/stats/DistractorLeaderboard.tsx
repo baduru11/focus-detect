@@ -21,7 +21,7 @@ export function DistractorLeaderboard({
   if (items.length === 0) {
     return (
       <GlassCard className={className}>
-        <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider">
+        <h3 className="text-xs font-semibold text-text-muted mb-4 uppercase tracking-wider">
           Top Distractors
         </h3>
         <p className="text-xs text-text-muted text-center py-4">
@@ -33,7 +33,7 @@ export function DistractorLeaderboard({
 
   return (
     <GlassCard className={className}>
-      <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider">
+      <h3 className="text-xs font-semibold text-text-muted mb-4 uppercase tracking-wider">
         Top Distractors
       </h3>
       <div className="flex flex-col gap-3">
@@ -53,7 +53,7 @@ export function DistractorLeaderboard({
               <span
                 className={cn(
                   "w-5 text-right text-xs font-mono font-bold flex-shrink-0",
-                  isWorst ? "text-neon-red" : "text-text-muted"
+                  isWorst ? "text-neon-red/70" : "text-text-muted"
                 )}
               >
                 {i + 1}
@@ -61,11 +61,11 @@ export function DistractorLeaderboard({
 
               {/* Name + bar */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between mb-1.5">
                   <span
                     className={cn(
                       "text-xs font-medium truncate",
-                      isWorst ? "text-neon-red" : "text-text-primary"
+                      isWorst ? "text-neon-red/80" : "text-text-primary"
                     )}
                   >
                     {item.name}
@@ -74,20 +74,14 @@ export function DistractorLeaderboard({
                     {item.count}
                   </span>
                 </div>
-                <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                <div className="h-[3px] rounded-full bg-white/[0.04] overflow-hidden">
                   <motion.div
-                    className={cn(
-                      "h-full rounded-full",
-                      isWorst ? "bg-neon-red" : "bg-neon-cyan/60"
-                    )}
-                    style={
-                      isWorst
-                        ? {
-                            boxShadow:
-                              "0 0 8px rgba(255,0,60,0.5)",
-                          }
-                        : undefined
-                    }
+                    className="h-full rounded-full"
+                    style={{
+                      background: isWorst
+                        ? "linear-gradient(90deg, rgba(255,0,60,0.6), rgba(255,0,60,0.3))"
+                        : "linear-gradient(90deg, rgba(0,240,255,0.4), rgba(0,240,255,0.15))",
+                    }}
                     initial={{ width: 0 }}
                     animate={{ width: `${proportion}%` }}
                     transition={{

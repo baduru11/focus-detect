@@ -1,7 +1,6 @@
 import { type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { GlassCard } from "@/components/ui/GlassCard";
 
 interface AchievementCardProps {
   icon: ReactNode;
@@ -10,13 +9,6 @@ interface AchievementCardProps {
   glowColor?: "cyan" | "purple" | "red" | "green";
   className?: string;
 }
-
-const borderColorMap: Record<string, string> = {
-  cyan: "border-neon-cyan/40",
-  purple: "border-neon-purple/40",
-  red: "border-neon-red/40",
-  green: "border-neon-green/40",
-};
 
 const iconColorMap: Record<string, string> = {
   cyan: "#00f0ff",
@@ -34,7 +26,7 @@ export function AchievementCard({
 }: AchievementCardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
+      initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{
         type: "spring",
@@ -43,16 +35,19 @@ export function AchievementCard({
         delay: 0.1,
       }}
     >
-      <GlassCard
-        glow={glowColor}
-        className={cn("border", borderColorMap[glowColor], className)}
+      <div
+        className={cn(
+          "rounded-xl p-4 border border-white/[0.06] backdrop-blur-2xl",
+          "bg-[rgba(14,14,26,0.55)]",
+          "shadow-[0_1px_2px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.2)]",
+          className
+        )}
       >
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div
-            className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center bg-white/5"
+            className="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center bg-white/[0.04]"
             style={{
               color: iconColorMap[glowColor],
-              boxShadow: `0 0 12px ${iconColorMap[glowColor]}33`,
             }}
           >
             {icon}
@@ -61,12 +56,12 @@ export function AchievementCard({
             <span className="text-[10px] text-text-muted uppercase tracking-wider truncate">
               {title}
             </span>
-            <span className="text-lg font-bold font-mono text-text-primary">
+            <span className="text-base font-bold font-mono text-text-primary">
               {value}
             </span>
           </div>
         </div>
-      </GlassCard>
+      </div>
     </motion.div>
   );
 }

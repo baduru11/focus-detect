@@ -3,10 +3,10 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const glowColors = {
-  cyan: "shadow-[0_0_20px_rgba(0,240,255,0.4),inset_0_0_20px_rgba(0,240,255,0.06)]",
-  purple: "shadow-[0_0_20px_rgba(191,0,255,0.4),inset_0_0_20px_rgba(191,0,255,0.06)]",
-  red: "shadow-[0_0_20px_rgba(255,0,60,0.4),inset_0_0_20px_rgba(255,0,60,0.06)]",
-  green: "shadow-[0_0_20px_rgba(0,255,136,0.4),inset_0_0_20px_rgba(0,255,136,0.06)]",
+  cyan: "shadow-[0_0_8px_rgba(0,240,255,0.1)]",
+  purple: "shadow-[0_0_8px_rgba(191,0,255,0.1)]",
+  red: "shadow-[0_0_8px_rgba(255,0,60,0.1)]",
+  green: "shadow-[0_0_8px_rgba(0,255,136,0.1)]",
 } as const;
 
 interface GlassCardProps {
@@ -25,21 +25,18 @@ export function GlassCard({
   return (
     <motion.div
       className={cn(
-        "glass-panel rounded-2xl p-6",
+        "rounded-xl p-5 border border-white/[0.06] backdrop-blur-2xl",
+        "bg-[rgba(14,14,26,0.55)]",
+        "shadow-[0_1px_2px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.2),inset_0_0_0_0.5px_rgba(255,255,255,0.04)]",
         glow && glowColors[glow],
-        hoverable && "cursor-pointer",
+        hoverable && "cursor-pointer transition-all duration-200",
         className
       )}
-      style={{ perspective: 800 }}
       whileHover={
         hoverable
           ? {
-              scale: 1.02,
-              rotateX: 2,
-              rotateY: -2,
-              boxShadow: glow
-                ? undefined
-                : "0 0 25px rgba(0, 240, 255, 0.3), inset 0 0 25px rgba(0, 240, 255, 0.05)",
+              y: -2,
+              transition: { type: "spring", stiffness: 400, damping: 25 },
             }
           : undefined
       }

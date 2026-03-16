@@ -4,8 +4,10 @@
 
 @theme {
   --color-void: #0a0a0f;
-  --color-surface: rgba(15, 15, 35, 0.6);
+  --color-void-light: #0e0e1a;
+  --color-surface: rgba(14, 14, 26, 0.55);
   --color-surface-solid: #0f0f23;
+  --color-surface-raised: rgba(20, 20, 40, 0.5);
   --color-neon-cyan: #00f0ff;
   --color-neon-purple: #bf00ff;
   --color-neon-red: #ff003c;
@@ -15,6 +17,7 @@
   --color-text-secondary: #8888aa;
   --color-text-muted: #555577;
   --color-border-glow: rgba(0, 240, 255, 0.15);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
 
   --font-sans: "Chakra Petch", system-ui, sans-serif;
   --font-heading: "Russo One", system-ui, sans-serif;
@@ -34,7 +37,7 @@ html, body, #root {
 }
 
 body {
-  background-color: var(--color-void);
+  background: linear-gradient(145deg, #0a0a0f 0%, #0d0d1a 40%, #0a0e14 70%, #0a0a0f 100%);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -43,40 +46,62 @@ body {
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 240, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 240, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
 }
 
-/* Glass panel base */
+/* Glass panel base — more subtle, layered depth */
 .glass-panel {
   background: var(--color-surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--color-border-glow);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 16px;
 }
 
-/* Neon glow utilities */
+/* Modern card — premium, no neon by default */
+.card {
+  background: rgba(14, 14, 26, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 0 0 0.5px rgba(255, 255, 255, 0.04) inset;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 0 0 0.5px rgba(255, 255, 255, 0.06) inset;
+}
+
+/* Neon glow utilities — MUCH more subtle */
 .neon-cyan {
-  box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.05);
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.12), 0 0 1px rgba(0, 240, 255, 0.2);
 }
 .neon-purple {
-  box-shadow: 0 0 15px rgba(191, 0, 255, 0.3), inset 0 0 15px rgba(191, 0, 255, 0.05);
+  box-shadow: 0 0 8px rgba(191, 0, 255, 0.12), 0 0 1px rgba(191, 0, 255, 0.2);
 }
 .neon-red {
-  box-shadow: 0 0 15px rgba(255, 0, 60, 0.3), inset 0 0 15px rgba(255, 0, 60, 0.05);
+  box-shadow: 0 0 8px rgba(255, 0, 60, 0.12), 0 0 1px rgba(255, 0, 60, 0.2);
 }
 .neon-green {
-  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3), inset 0 0 15px rgba(0, 255, 136, 0.05);
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.12), 0 0 1px rgba(0, 255, 136, 0.2);
 }
 
 /* Animated gradient border */
@@ -92,7 +117,7 @@ body {
   background-size: 200% 200%;
   animation: gradient-shift 3s ease infinite;
   z-index: -1;
-  opacity: 0.5;
+  opacity: 0.3;
 }
 @keyframes gradient-shift {
   0%, 100% { background-position: 0% 50%; }

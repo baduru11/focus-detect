@@ -23,28 +23,29 @@ export function Sidebar() {
 
   return (
     <motion.aside
-      className="relative h-full flex flex-col glass-panel rounded-none rounded-r-2xl border-l-0 border-t-0 border-b-0 z-20"
-      animate={{ width: expanded ? 240 : 72 }}
+      className={cn(
+        "relative h-full flex flex-col z-20",
+        "border-r border-white/[0.04]",
+        "backdrop-blur-2xl"
+      )}
+      animate={{ width: expanded ? 200 : 56 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
       style={{
         background:
-          "linear-gradient(180deg, rgba(15,15,35,0.8) 0%, rgba(10,10,25,0.9) 100%)",
+          "linear-gradient(180deg, rgba(12,12,24,0.85) 0%, rgba(8,8,18,0.95) 100%)",
       }}
     >
       {/* Top logo area */}
-      <div className="flex items-center gap-3 px-4 h-16 border-b border-border-glow overflow-hidden">
+      <div className="flex items-center gap-2.5 px-3.5 h-14 border-b border-white/[0.04] overflow-hidden">
         <div
-          className="flex-shrink-0 w-9 h-9 rounded-lg bg-neon-cyan/10 flex items-center justify-center"
-          style={{
-            boxShadow: "0 0 12px rgba(0, 240, 255, 0.2)",
-          }}
+          className="flex-shrink-0 w-7 h-7 rounded-md bg-neon-cyan/8 flex items-center justify-center"
         >
-          <Zap className="w-5 h-5 text-neon-cyan" />
+          <Zap className="w-4 h-4 text-neon-cyan/80" />
         </div>
         <motion.span
-          className="text-sm font-semibold text-text-primary whitespace-nowrap"
+          className="text-sm font-heading text-text-primary whitespace-nowrap"
           animate={{ opacity: expanded ? 1 : 0 }}
           transition={{ duration: 0.15 }}
         >
@@ -53,7 +54,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation items */}
-      <nav className="flex-1 flex flex-col gap-1 py-4 px-2">
+      <nav className="flex-1 flex flex-col gap-0.5 py-3 px-1.5">
         {navItems.map(({ to, icon: Icon, label }) => {
           const isActive =
             to === "/"
@@ -64,44 +65,25 @@ export function Sidebar() {
             <NavLink key={to} to={to} className="block">
               <motion.div
                 className={cn(
-                  "relative flex items-center gap-3 px-3 py-2.5 rounded-xl overflow-hidden transition-colors duration-150",
+                  "relative flex items-center gap-2.5 px-3 py-2 rounded-lg overflow-hidden transition-colors duration-150",
                   isActive
-                    ? "bg-neon-cyan/10 text-neon-cyan"
-                    : "text-text-secondary hover:text-text-primary hover:bg-white/5"
+                    ? "text-neon-cyan bg-neon-cyan/[0.06]"
+                    : "text-text-muted hover:text-text-secondary hover:bg-white/[0.03]"
                 )}
-                whileHover={
-                  !isActive
-                    ? {
-                        backgroundColor: "rgba(0, 240, 255, 0.05)",
-                      }
-                    : undefined
-                }
               >
-                {/* Active indicator bar */}
+                {/* Active indicator — thin left bar */}
                 {isActive && (
                   <motion.div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-neon-cyan"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-r-full bg-neon-cyan/70"
                     layoutId="sidebar-indicator"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    style={{
-                      boxShadow: "0 0 8px rgba(0, 240, 255, 0.6)",
-                    }}
                   />
                 )}
 
-                <Icon
-                  className="flex-shrink-0 w-5 h-5"
-                  style={
-                    isActive
-                      ? {
-                          filter: "drop-shadow(0 0 6px rgba(0, 240, 255, 0.5))",
-                        }
-                      : undefined
-                  }
-                />
+                <Icon className="flex-shrink-0 w-[18px] h-[18px]" />
 
                 <motion.span
-                  className="text-sm whitespace-nowrap"
+                  className="text-[13px] whitespace-nowrap font-medium"
                   animate={{ opacity: expanded ? 1 : 0 }}
                   transition={{ duration: 0.15 }}
                 >
@@ -113,11 +95,14 @@ export function Sidebar() {
         })}
       </nav>
 
+      {/* Separator */}
+      <div className="mx-3 border-t border-white/[0.04]" />
+
       {/* Bottom branding */}
-      <div className="px-4 py-4 border-t border-border-glow overflow-hidden">
+      <div className="px-3.5 py-3 overflow-hidden">
         <motion.div
           className="flex items-center gap-2"
-          animate={{ opacity: expanded ? 1 : 0 }}
+          animate={{ opacity: expanded ? 0.5 : 0 }}
           transition={{ duration: 0.15 }}
         >
           <span className="text-[10px] text-text-muted tracking-widest uppercase">

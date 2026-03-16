@@ -20,29 +20,7 @@ export function WeeklyBarChart({ data, className }: WeeklyBarChartProps) {
 
   return (
     <div className={cn("w-full", className)}>
-      {/* SVG definitions for gradients */}
-      <svg width="0" height="0" className="absolute">
-        <defs>
-          <linearGradient id="barGradient" x1="0" y1="1" x2="0" y2="0">
-            <stop offset="0%" stopColor="#00f0ff" />
-            <stop offset="100%" stopColor="#bf00ff" />
-          </linearGradient>
-          <linearGradient id="barGradientToday" x1="0" y1="1" x2="0" y2="0">
-            <stop offset="0%" stopColor="#00f0ff" />
-            <stop offset="50%" stopColor="#bf00ff" />
-            <stop offset="100%" stopColor="#ff003c" />
-          </linearGradient>
-          <filter id="barGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="6" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-      </svg>
-
-      <div className="flex items-end justify-between gap-2" style={{ height: chartHeight }}>
+      <div className="flex items-end justify-between gap-3" style={{ height: chartHeight }}>
         {data.map((bar, i) => {
           const barHeight = maxHours > 0 ? (bar.hours / maxHours) * (chartHeight - 32) : 0;
           const isToday = i === todayIdx;
@@ -58,33 +36,32 @@ export function WeeklyBarChart({ data, className }: WeeklyBarChartProps) {
               {/* Hours label on hover */}
               <motion.span
                 className={cn(
-                  "text-[10px] font-mono mb-1 transition-opacity",
-                  isHovered || isToday ? "text-text-primary" : "text-transparent"
+                  "text-[10px] font-mono mb-1.5 transition-opacity",
+                  isHovered || isToday ? "text-text-secondary" : "text-transparent"
                 )}
                 animate={{ opacity: isHovered || isToday ? 1 : 0 }}
               >
                 {bar.hours}h
               </motion.span>
 
-              {/* Bar */}
+              {/* Bar — thin with rounded tops */}
               <div className="relative w-full flex justify-center">
                 <motion.div
                   className={cn(
-                    "w-full max-w-[36px] rounded-t-lg cursor-pointer relative",
-                    isToday ? "opacity-100" : "opacity-80"
+                    "w-full max-w-[24px] rounded-t-md cursor-pointer relative"
                   )}
                   style={{
                     background: isToday
-                      ? "linear-gradient(to top, #00f0ff, #bf00ff, #ff003c)"
-                      : "linear-gradient(to top, #00f0ff, #bf00ff)",
+                      ? "linear-gradient(to top, rgba(0,240,255,0.5), rgba(191,0,255,0.4))"
+                      : "linear-gradient(to top, rgba(0,240,255,0.25), rgba(191,0,255,0.15))",
                     boxShadow: isToday
-                      ? "0 0 16px rgba(0,240,255,0.5), 0 0 32px rgba(191,0,255,0.3)"
+                      ? "0 0 8px rgba(0,240,255,0.15)"
                       : isHovered
-                      ? "0 0 12px rgba(0,240,255,0.4)"
+                      ? "0 0 6px rgba(0,240,255,0.1)"
                       : "none",
                   }}
                   initial={{ height: 0 }}
-                  animate={{ height: Math.max(barHeight, 4) }}
+                  animate={{ height: Math.max(barHeight, 3) }}
                   transition={{
                     duration: 0.8,
                     delay: i * 0.08,
@@ -96,8 +73,8 @@ export function WeeklyBarChart({ data, className }: WeeklyBarChartProps) {
               {/* Day label */}
               <span
                 className={cn(
-                  "text-[11px] mt-2 font-medium",
-                  isToday ? "text-neon-cyan" : "text-text-muted"
+                  "text-[10px] mt-2 font-medium",
+                  isToday ? "text-neon-cyan/70" : "text-text-muted"
                 )}
               >
                 {bar.day}

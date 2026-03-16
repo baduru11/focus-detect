@@ -24,10 +24,10 @@ type ProviderKey = (typeof PROVIDERS)[number]["key"];
 
 function StatusDot({ status }: { status: ConnectionStatus }) {
   const colors: Record<ConnectionStatus, string> = {
-    idle: "bg-text-muted",
-    testing: "bg-neon-orange animate-pulse",
-    connected: "bg-neon-green",
-    error: "bg-neon-red",
+    idle: "bg-text-muted/50",
+    testing: "bg-neon-orange/60 animate-pulse",
+    connected: "bg-neon-green/60",
+    error: "bg-neon-red/60",
   };
 
   const labels: Record<ConnectionStatus, string> = {
@@ -40,16 +40,9 @@ function StatusDot({ status }: { status: ConnectionStatus }) {
   return (
     <div className="flex items-center gap-2">
       <motion.div
-        className={cn("w-2.5 h-2.5 rounded-full", colors[status])}
-        style={
-          status === "connected"
-            ? { boxShadow: "0 0 8px rgba(0, 255, 136, 0.6)" }
-            : status === "error"
-              ? { boxShadow: "0 0 8px rgba(255, 0, 60, 0.6)" }
-              : undefined
-        }
+        className={cn("w-2 h-2 rounded-full", colors[status])}
       />
-      <span className="text-xs text-text-muted">{labels[status]}</span>
+      <span className="text-[10px] text-text-muted">{labels[status]}</span>
     </div>
   );
 }
@@ -92,12 +85,12 @@ export function AIProviderConfig() {
 
   return (
     <GlassCard>
-      <div className="flex items-center gap-3 mb-5">
-        <Brain className="w-5 h-5 text-neon-cyan" />
-        <h2 className="text-lg font-semibold text-text-primary">AI Provider</h2>
+      <div className="flex items-center gap-3 mb-6">
+        <Brain className="w-4 h-4 text-neon-cyan/60" />
+        <h2 className="text-base font-semibold text-text-primary">AI Provider</h2>
       </div>
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-6">
         <NeonToggle
           checked={aiEnabled}
           onChange={setAiEnabled}
@@ -105,17 +98,17 @@ export function AIProviderConfig() {
         />
 
         <motion.div
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-5"
           animate={{ opacity: aiEnabled ? 1 : 0.4 }}
           style={{ pointerEvents: aiEnabled ? "auto" : "none" }}
         >
           {PROVIDERS.map(({ key, label, placeholder }) => (
             <div
               key={key}
-              className="glass-panel rounded-xl p-4 border border-border-glow flex flex-col gap-3"
+              className="rounded-lg p-4 border border-white/[0.04] bg-white/[0.02] flex flex-col gap-3"
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-text-primary">
+                <span className="text-sm font-medium text-text-primary">
                   {label}
                 </span>
                 <StatusDot status={providers[key].status} />

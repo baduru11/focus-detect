@@ -13,10 +13,16 @@ interface TimelineBarProps {
   className?: string;
 }
 
-const typeStyles: Record<string, { bg: string; label: string }> = {
-  focus: { bg: "bg-neon-green", label: "Focus" },
-  alarm: { bg: "bg-neon-red", label: "Alarm" },
-  break: { bg: "bg-neon-purple/60", label: "Break" },
+const typeStyles: Record<string, { color: string; label: string }> = {
+  focus: { color: "rgba(0, 240, 255, 0.5)", label: "Focus" },
+  alarm: { color: "rgba(255, 0, 60, 0.45)", label: "Alarm" },
+  break: { color: "rgba(0, 255, 136, 0.3)", label: "Break" },
+};
+
+const legendDots: Record<string, string> = {
+  focus: "bg-neon-cyan/50",
+  alarm: "bg-neon-red/45",
+  break: "bg-neon-green/30",
 };
 
 function formatTime(minutes: number): string {
@@ -33,7 +39,7 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
   if (sessions.length === 0) {
     return (
       <div className={cn("w-full", className)}>
-        <div className="h-8 rounded-full bg-white/5 flex items-center justify-center">
+        <div className="h-5 rounded-full bg-white/[0.03] flex items-center justify-center">
           <span className="text-xs text-text-muted">No sessions today</span>
         </div>
       </div>
@@ -56,8 +62,8 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
         </span>
       </div>
 
-      {/* Timeline bar */}
-      <div className="relative h-8 rounded-full bg-white/5 overflow-hidden">
+      {/* Timeline bar — thin and elegant */}
+      <div className="relative h-[5px] rounded-full bg-white/[0.04] overflow-hidden">
         {sessions.map((seg, i) => {
           const left = ((seg.startMinute - minStart) / totalSpan) * 100;
           const width = ((seg.endMinute - seg.startMinute) / totalSpan) * 100;
@@ -68,18 +74,18 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
             <motion.div
               key={`${seg.type}-${seg.startMinute}-${i}`}
               className={cn(
-                "absolute top-0 h-full rounded-sm cursor-pointer",
-                style.bg,
+                "absolute top-0 h-full rounded-full cursor-pointer",
                 isAlarm && "z-10"
               )}
               style={{
                 left: `${left}%`,
-                minWidth: isAlarm ? "4px" : "2px",
+                minWidth: isAlarm ? "3px" : "2px",
+                backgroundColor: style.color,
               }}
               initial={{ width: 0, opacity: 0 }}
               animate={{
                 width: `${Math.max(width, isAlarm ? 0.5 : 0.3)}%`,
-                opacity: seg.type === "focus" ? 0.8 : seg.type === "alarm" ? 1 : 0.5,
+                opacity: 1,
               }}
               transition={{ duration: 0.8, delay: i * 0.05, ease: "easeOut" }}
               onMouseEnter={() => setHoveredIdx(i)}
@@ -91,7 +97,7 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
         {/* Tooltip */}
         {hoveredIdx !== null && (
           <motion.div
-            className="absolute -top-10 z-20 px-2 py-1 rounded-md glass-panel border border-border-glow text-[10px] text-text-primary whitespace-nowrap pointer-events-none"
+            className="absolute -top-9 z-20 px-2 py-1 rounded-md bg-surface-solid border border-white/[0.08] text-[10px] text-text-primary whitespace-nowrap pointer-events-none shadow-lg"
             style={{
               left: `${((sessions[hoveredIdx].startMinute - minStart) / totalSpan) * 100}%`,
               transform: "translateX(-25%)",
@@ -107,14 +113,13 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
       </div>
 
       {/* Legend */}
-      <div className="flex gap-4 mt-2">
+      <div className="flex gap-4 mt-3">
         {(["focus", "break", "alarm"] as const).map((t) => (
           <div key={t} className="flex items-center gap-1.5">
             <div
               className={cn(
-                "w-2.5 h-2.5 rounded-full",
-                typeStyles[t].bg,
-                t === "break" && "opacity-60"
+                "w-2 h-2 rounded-full",
+                legendDots[t]
               )}
             />
             <span className="text-[10px] text-text-muted capitalize">{t}</span>

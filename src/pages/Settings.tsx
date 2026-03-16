@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ThemeCustomizer } from "@/components/settings/ThemeCustomizer";
 import { AIProviderConfig } from "@/components/settings/AIProviderConfig";
 import { DataExport } from "@/components/settings/DataExport";
+import { AnimatedGradientText } from "@/components/magicui/AnimatedGradientText";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 15 },
@@ -20,21 +21,17 @@ export default function Settings() {
   return (
     <div className="h-full p-8 overflow-y-auto">
       <motion.h1
-        className="text-3xl font-bold tracking-tight mb-8"
-        style={{
-          background: "linear-gradient(135deg, #00f0ff, #bf00ff)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-        }}
+        className="text-2xl font-bold tracking-tight mb-8"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        Settings
+        <AnimatedGradientText speed={1} colorFrom="#00f0ff" colorTo="#bf00ff" className="text-2xl font-bold">
+          Settings
+        </AnimatedGradientText>
       </motion.h1>
 
       <motion.div
-        className="flex flex-col gap-6 max-w-3xl"
+        className="flex flex-col gap-8 max-w-3xl"
         variants={container}
         initial="hidden"
         animate="show"
