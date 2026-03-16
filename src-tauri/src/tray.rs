@@ -1,7 +1,7 @@
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
     tray::TrayIconBuilder,
-    Emitter, Manager,
+    Emitter, Manager, WebviewUrl, WebviewWindowBuilder,
 };
 
 pub fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
@@ -21,6 +21,10 @@ pub fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         .tooltip("Focus Detector")
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "show" => {
+                // Hide widget, show main window
+                if let Some(widget) = app.get_webview_window("widget") {
+                    let _ = widget.close();
+                }
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.show();
                     let _ = window.set_focus();
@@ -51,6 +55,32 @@ pub fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+/// Create the small floating widget window (like Zoom mini-window)
+pub fn create_widget_window(app: &tauri::AppHandle) -> Result<(), String> {
+    // Don't create if already exists
+    if app.get_webview_window("widget").is_some() {
+        return Ok(());
+    }
+
+    let _widget = WebviewWindowBuilder::new(
+        app,
+        "widget",
+        WebviewUrl::App("/widget".into()),
+    )
+    .title("")
+    .inner_size(220.0, 80.0)
+    .position(20.0, 20.0)
+    .decorations(false)
+    .transparent(true)
+    .always_on_top(true)
+    .resizable(false)
+    .skip_taskbar(true)
+    .build()
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 #[tauri::command]
 pub async fn update_tray_tooltip(
     app: tauri::AppHandle,
@@ -64,12 +94,23 @@ pub async fn update_tray_tooltip(
 
 #[tauri::command]
 pub async fn toggle_widget(app: tauri::AppHandle, visible: bool) -> Result<(), String> {
-    if let Some(window) = app.get_webview_window("widget") {
-        if visible {
-            window.show().map_err(|e| e.to_string())?;
-        } else {
-            window.hide().map_err(|e| e.to_string())?;
-        }
+    if visible {
+        create_widget_window(&app)?;
+    } else if let Some(widget) = app.get_webview_window("widget") {
+        widget.close().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+/// Called from widget: close widget, show main window
+#[tauri::command]
+pub async fn widget_open_main(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(widget) = app.get_webview_window("widget") {
+        let _ = widget.close();
+    }
+    if let Some(main) = app.get_webview_window("main") {
+        main.show().map_err(|e| e.to_string())?;
+        main.set_focus().map_err(|e| e.to_string())?;
     }
     Ok(())
 }
