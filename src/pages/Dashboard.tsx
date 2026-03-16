@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Target, Flame, Clock, Zap, Eye, Monitor } from "lucide-react";
+import { Target, Eye, Monitor } from "lucide-react";
+import { FlickeringGrid } from "@/components/magicui/FlickeringGrid";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { Ripple } from "@/components/magicui/Ripple";
 import { PomodoroRing } from "@/components/timer/PomodoroRing";
 import { TimerControls } from "@/components/timer/TimerControls";
 import { DetectionStatus } from "@/components/detection/DetectionStatus";
@@ -107,40 +107,16 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
-      {/* Timer Ring with Ripple */}
+      {/* Timer Ring */}
       <motion.div variants={staggerItem} className="relative">
-        {isRunning && (
-          <Ripple
-            mainCircleSize={180}
-            mainCircleOpacity={0.05}
-            numCircles={5}
-          />
-        )}
-
-        {isIdle ? (
-          <motion.div
-            className="flex flex-col items-center justify-center"
-            style={{ height: 280 }}
-          >
-            <PomodoroRing
-              secondsRemaining={pomodoroState.secondsRemaining}
-              totalSeconds={totalSeconds}
-              phase={pomodoroState.phase}
-              status={pomodoroState.status}
-              currentCycle={pomodoroState.currentCycle}
-              cyclesBeforeLong={config.cyclesBeforeLong}
-            />
-          </motion.div>
-        ) : (
-          <PomodoroRing
-            secondsRemaining={pomodoroState.secondsRemaining}
-            totalSeconds={totalSeconds}
-            phase={pomodoroState.phase}
-            status={pomodoroState.status}
-            currentCycle={pomodoroState.currentCycle}
-            cyclesBeforeLong={config.cyclesBeforeLong}
-          />
-        )}
+        <PomodoroRing
+          secondsRemaining={pomodoroState.secondsRemaining}
+          totalSeconds={totalSeconds}
+          phase={pomodoroState.phase}
+          status={pomodoroState.status}
+          currentCycle={pomodoroState.currentCycle}
+          cyclesBeforeLong={config.cyclesBeforeLong}
+        />
       </motion.div>
 
       {/* Timer Controls */}
@@ -199,18 +175,12 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Last check — single row, updates live */}
+            {/* Last check — single row, updates live, no jarring animation */}
             {recentChecks.length > 0 && (() => {
               const latest = recentChecks[0];
               return (
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={latest.timestamp}
-                    className="mt-3 flex items-center gap-2 py-2 px-3 rounded-lg bg-white/[0.03] border border-white/[0.05]"
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.15 }}
+                  <div
+                    className="mt-3 flex items-center gap-2 py-2 px-3 rounded-lg bg-white/[0.03] border border-white/[0.05] transition-all duration-300"
                   >
                     <span
                       className={`w-2 h-2 rounded-full flex-shrink-0 ${
@@ -232,8 +202,7 @@ export default function Dashboard() {
                     <span className="text-[11px] text-text-muted/60 font-mono flex-shrink-0 tabular-nums">
                       {formatTimestamp(latest.timestamp)}
                     </span>
-                  </motion.div>
-                </AnimatePresence>
+                  </div>
               );
             })()}
           </GlassCard>

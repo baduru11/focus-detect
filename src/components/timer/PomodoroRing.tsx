@@ -129,18 +129,23 @@ export function PomodoroRing({
 
       {/* Center content */}
       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center">
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={timeDisplay}
-            className="text-[48px] font-light text-text-primary tracking-[0.04em] font-mono leading-none"
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.12 }}
-          >
-            {timeDisplay}
-          </motion.span>
-        </AnimatePresence>
+        {/* Per-digit animation — only the changing digit animates */}
+        <div className="flex items-center text-[48px] font-light text-text-primary tracking-[0.04em] font-mono leading-none">
+          {timeDisplay.split("").map((char, i) => (
+            <AnimatePresence mode="wait" key={i}>
+              <motion.span
+                key={`${i}-${char}`}
+                className="inline-block"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+              >
+                {char}
+              </motion.span>
+            </AnimatePresence>
+          ))}
+        </div>
 
         <AnimatePresence mode="wait">
           <motion.span
