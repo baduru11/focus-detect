@@ -46,16 +46,15 @@ export function StreakCard({ current, best, className }: StreakCardProps) {
     <GlassCard
       className={cn("relative overflow-hidden", className)}
     >
-      <div className="flex flex-col items-center text-center gap-2">
-        {/* Simple text indicator instead of animated emoji */}
-        <span className="text-xs text-text-muted uppercase tracking-wider font-light">
+      <div className="flex flex-col items-center text-center gap-2.5">
+        <span className="text-[11px] text-text-muted uppercase tracking-[0.1em] font-medium">
           {hasStreak ? "Active Streak" : "No Streak"}
         </span>
 
         {/* Current streak number */}
         <motion.span
           className={cn(
-            "text-4xl font-semibold",
+            "text-4xl font-semibold tabular-nums",
             hasStreak ? "text-accent-light" : "text-text-muted"
           )}
           initial={{ opacity: 0, y: 10 }}
@@ -65,14 +64,14 @@ export function StreakCard({ current, best, className }: StreakCardProps) {
           {displayCount}
         </motion.span>
 
-        <span className="text-xs text-text-muted uppercase tracking-wider font-light">
+        <span className="text-[11px] text-text-muted uppercase tracking-[0.1em] font-medium">
           Day Streak
         </span>
 
         {/* Best streak */}
-        <div className="mt-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.06]">
-          <span className="text-[10px] text-text-muted">
-            Best: <span className="text-text-primary font-mono">{best}</span>
+        <div className="mt-1 px-3.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+          <span className="text-[11px] text-text-muted">
+            Best: <span className="text-text-primary font-mono tabular-nums font-medium">{best}</span>
           </span>
         </div>
       </div>
