@@ -69,6 +69,7 @@ export default function Dashboard() {
     alarmLevel,
     lastCheckedWindow,
     recentChecks,
+    lastVision,
     todayFocusMinutes,
     currentStreak,
   } = useApp();
@@ -205,6 +206,39 @@ export default function Dashboard() {
                   </div>
               );
             })()}
+          </GlassCard>
+        </motion.div>
+      )}
+
+      {/* AI Vision Live Feed */}
+      {lastVision && (
+        <motion.div
+          variants={staggerItem}
+          className="w-full max-w-lg"
+        >
+          <GlassCard className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Eye className="w-4 h-4 text-accent" />
+              <span className="text-xs text-text-muted uppercase tracking-wider font-medium">AI Vision</span>
+              <span className={`ml-auto text-xs font-medium ${lastVision.result.onTask ? "text-emerald-400" : "text-red-400"}`}>
+                {lastVision.result.onTask ? "On Task" : "Off Task"} ({Math.round(lastVision.result.confidence * 100)}%)
+              </span>
+            </div>
+            <div className="flex gap-3">
+              <img
+                src={`data:image/png;base64,${lastVision.screenshot}`}
+                alt="Last screenshot"
+                className="w-40 h-24 object-cover rounded-lg border border-white/[0.08]"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-text-primary leading-relaxed">
+                  {lastVision.result.reason}
+                </p>
+                <p className="text-[11px] text-text-muted mt-2 font-mono tabular-nums">
+                  {new Date(lastVision.timestamp).toLocaleTimeString()}
+                </p>
+              </div>
+            </div>
           </GlassCard>
         </motion.div>
       )}

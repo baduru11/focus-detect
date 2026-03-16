@@ -46,6 +46,7 @@ interface AppContextValue {
   dismissAlarm: () => void;
   lastCheckedWindow: ActiveWindowInfo | null;
   recentChecks: DetectionCheckEntry[];
+  lastVision: { screenshot: string; result: { onTask: boolean; confidence: number; reason: string }; timestamp: number } | null;
 
   // Session
   todayFocusMinutes: number;
@@ -87,6 +88,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     alarmLevel,
     lastCheck,
     lastWindowInfo,
+    lastVision,
     start: startDetection,
     stop: stopDetection,
     pause: pauseDetection,
@@ -206,6 +208,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         dismissAlarm,
         lastCheckedWindow,
         recentChecks,
+        lastVision,
         todayFocusMinutes,
         currentStreak,
       }}

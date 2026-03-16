@@ -9,12 +9,19 @@ import { captureScreenshot } from "@/services/screenshotService";
 import { analyzeScreenshot } from "@/services/visionService";
 import { getAIConfig } from "@/services/settingsService";
 
+export interface VisionEvent {
+  screenshot: string; // base64
+  result: { onTask: boolean; confidence: number; reason: string };
+  timestamp: number;
+}
+
 export interface DetectionCallbacks {
   onCheck: (result: MatchResult, windowInfo: ActiveWindowInfo) => void;
   onGraceStart: (seconds: number) => void;
   onGraceTick: (remaining: number) => void;
   onAlarm: (level: 1 | 2 | 3) => void;
   onBackOnTask: () => void;
+  onVisionAnalysis?: (event: VisionEvent) => void;
 }
 
 export type PipelineState = "idle" | "running" | "paused";
@@ -253,6 +260,13 @@ export class DetectionPipeline {
         profileContext,
         apiKeys
       );
+
+      // Notify UI about vision analysis
+      this.callbacks?.onVisionAnalysis?.({
+        screenshot,
+        result: visionResult,
+        timestamp: Date.now(),
+      });
 
       // Use confidence threshold: if confidence < 0.5, treat as on_task
       if (visionResult.confidence < 0.5) {

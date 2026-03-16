@@ -5,6 +5,7 @@ import type { ActiveWindowInfo } from "@/services/detectionService";
 import {
   DetectionPipeline,
   type DetectionCallbacks,
+  type VisionEvent,
 } from "@/services/detectionPipeline";
 
 export type DetectionState = "idle" | "checking" | "grace" | "alarm";
@@ -15,6 +16,7 @@ interface UseDetectionReturn {
   alarmLevel: number;
   lastCheck: MatchResult | null;
   lastWindowInfo: ActiveWindowInfo | null;
+  lastVision: VisionEvent | null;
   start: (profile: Profile) => void;
   stop: () => void;
   pause: () => void;
@@ -26,13 +28,12 @@ export function useDetection(): UseDetectionReturn {
   const [graceRemaining, setGraceRemaining] = useState(0);
   const [alarmLevel, setAlarmLevel] = useState(0);
   const [lastCheck, setLastCheck] = useState<MatchResult | null>(null);
-  const [lastWindowInfo, setLastWindowInfo] =
-    useState<ActiveWindowInfo | null>(null);
+  const [lastWindowInfo, setLastWindowInfo] = useState<ActiveWindowInfo | null>(null);
+  const [lastVision, setLastVision] = useState<VisionEvent | null>(null);
 
   const pipelineRef = useRef<DetectionPipeline | null>(null);
 
   const start = useCallback((profile: Profile) => {
-    // Clean up any existing pipeline
     if (pipelineRef.current) {
       pipelineRef.current.stop();
     }
@@ -65,6 +66,9 @@ export function useDetection(): UseDetectionReturn {
         setGraceRemaining(0);
         setAlarmLevel(0);
       },
+      onVisionAnalysis: (event: VisionEvent) => {
+        setLastVision(event);
+      },
     };
 
     setDetectionState("checking");
@@ -72,6 +76,7 @@ export function useDetection(): UseDetectionReturn {
     setGraceRemaining(0);
     setLastCheck(null);
     setLastWindowInfo(null);
+    setLastVision(null);
 
     pipeline.start(profile, callbacks);
   }, []);
@@ -86,6 +91,7 @@ export function useDetection(): UseDetectionReturn {
     setAlarmLevel(0);
     setLastCheck(null);
     setLastWindowInfo(null);
+    setLastVision(null);
   }, []);
 
   const pause = useCallback(() => {
@@ -106,6 +112,7 @@ export function useDetection(): UseDetectionReturn {
     alarmLevel,
     lastCheck,
     lastWindowInfo,
+    lastVision,
     start,
     stop,
     pause,
