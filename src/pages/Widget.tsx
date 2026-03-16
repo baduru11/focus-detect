@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Play, Pause, Square, Maximize2 } from "lucide-react";
+import { Play, Pause, Square, SkipForward, Maximize2 } from "lucide-react";
 
 interface WidgetState {
   time: string;
@@ -18,20 +18,22 @@ export default function Widget() {
     graceRemaining: 0,
   });
 
-  // Force always-on-top repeatedly (in case it gets lost)
   useEffect(() => {
-    const enforce = async () => {
+    (async () => {
       try {
         const { getCurrentWindow } = await import("@tauri-apps/api/window");
         await getCurrentWindow().setAlwaysOnTop(true);
       } catch { /* ignore */ }
-    };
-    enforce();
-    const interval = setInterval(enforce, 3000);
+    })();
+    const interval = setInterval(async () => {
+      try {
+        const { getCurrentWindow } = await import("@tauri-apps/api/window");
+        await getCurrentWindow().setAlwaysOnTop(true);
+      } catch { /* ignore */ }
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  // Sync state
   useEffect(() => {
     const interval = setInterval(() => {
       try {
@@ -42,7 +44,7 @@ export default function Widget() {
     return () => clearInterval(interval);
   }, []);
 
-  const sendAction = (action: string) => {
+  const send = (action: string) => {
     localStorage.setItem("widget-action", JSON.stringify({ action, ts: Date.now() }));
   };
 
@@ -53,21 +55,21 @@ export default function Widget() {
     } catch { /* ignore */ }
   };
 
-  const colors: Record<string, string> = {
+  const c: Record<string, string> = {
     work: "#818cf8", shortBreak: "#6ee7b7", longBreak: "#6ee7b7",
   };
-  const detColors: Record<string, string> = {
-    idle: "#555", checking: "#34d399", grace: "#fbbf24", alarm: "#f87171",
+  const dc: Record<string, string> = {
+    idle: "#444", checking: "#34d399", grace: "#fbbf24", alarm: "#f87171",
   };
 
   return (
     <div style={{
       width: "100%", height: "100%", background: "#0d0d1a",
-      display: "flex", flexDirection: "column",
+      display: "flex", alignItems: "center", gap: 12,
+      padding: "0 16px",
       fontFamily: "'Inter', system-ui, sans-serif", color: "#f0f0f5",
-      overflow: "hidden",
     }}>
-      {/* Drag region — click and drag to move */}
+      {/* Drag area: dot + timer */}
       <div
         onMouseDown={async () => {
           try {
@@ -75,74 +77,50 @@ export default function Widget() {
             await getCurrentWindow().startDragging();
           } catch { /* ignore */ }
         }}
-        style={{
-          flex: 1, display: "flex", flexDirection: "column",
-          justifyContent: "center", padding: "12px 16px",
-          cursor: "grab",
-        }}
+        style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, cursor: "grab" }}
       >
-        {/* Timer row */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
-            background: state.status === "idle" ? "#555" : colors[state.phase],
-            boxShadow: state.status !== "idle" ? `0 0 6px ${colors[state.phase]}` : "none",
-          }} />
+        {/* Detection dot */}
+        <div style={{
+          width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
+          background: state.status === "idle" ? "#444" : dc[state.detection],
+          boxShadow: state.detection !== "idle" ? `0 0 6px ${dc[state.detection]}` : "none",
+        }} />
 
-          <span style={{
-            fontSize: 24, fontWeight: 600, flex: 1,
-            fontFamily: "'SF Mono', 'JetBrains Mono', monospace",
-            fontVariantNumeric: "tabular-nums",
-            color: colors[state.phase] || "#f0f0f5",
-          }}>
-            {state.time}
+        {/* Timer */}
+        <span style={{
+          fontSize: 22, fontWeight: 600,
+          fontFamily: "'SF Mono', 'JetBrains Mono', monospace",
+          fontVariantNumeric: "tabular-nums",
+          color: c[state.phase] || "#f0f0f5",
+        }}>
+          {state.time}
+        </span>
+
+        {/* Grace */}
+        {state.detection === "grace" && (
+          <span style={{ fontSize: 11, color: "#fbbf24", fontFamily: "monospace" }}>
+            {state.graceRemaining}s
           </span>
-
-          {state.detection === "grace" && (
-            <span style={{ fontSize: 12, color: "#fbbf24", fontFamily: "monospace" }}>
-              {state.graceRemaining}s
-            </span>
-          )}
-        </div>
-
-        {/* Status row */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
-          <span style={{ fontSize: 11, color: "#8b8ca0" }}>
-            {state.phase === "work" ? "Focus" : state.phase === "shortBreak" ? "Break" : "Long Break"}
-          </span>
-          {state.detection !== "idle" && (
-            <>
-              <span style={{ color: "#333" }}>·</span>
-              <span style={{ fontSize: 10, color: detColors[state.detection], fontWeight: 500 }}>
-                {state.detection === "checking" ? "Monitoring" : state.detection === "grace" ? "Grace" : state.detection === "alarm" ? "OFF TASK" : ""}
-              </span>
-            </>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Button bar — NOT draggable */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 4,
-        padding: "8px 12px",
-        borderTop: "1px solid rgba(255,255,255,0.06)",
-        background: "rgba(255,255,255,0.02)",
-      }}>
-        {state.status === "idle" && (
-          <Btn onClick={() => sendAction("start")}><Play size={14} color="#818cf8" /> Start</Btn>
-        )}
-        {state.status === "running" && (
-          <Btn onClick={() => sendAction("pause")}><Pause size={14} /> Pause</Btn>
-        )}
-        {state.status === "paused" && (
-          <Btn onClick={() => sendAction("resume")}><Play size={14} color="#34d399" /> Resume</Btn>
-        )}
-        {state.status !== "idle" && (
-          <Btn onClick={() => sendAction("stop")}><Square size={12} color="#f87171" /> Stop</Btn>
-        )}
-        <div style={{ flex: 1 }} />
-        <Btn onClick={openMain}><Maximize2 size={13} color="#888" /></Btn>
-      </div>
+      {/* Controls — inline next to timer */}
+      {state.status === "idle" ? (
+        <Btn onClick={() => send("start")}><Play size={14} /></Btn>
+      ) : (
+        <>
+          {state.status === "running" ? (
+            <Btn onClick={() => send("pause")}><Pause size={14} /></Btn>
+          ) : (
+            <Btn onClick={() => send("resume")}><Play size={14} color="#34d399" /></Btn>
+          )}
+          <Btn onClick={() => send("stop")}><Square size={12} color="#f87171" /></Btn>
+          <Btn onClick={() => send("skip")}><SkipForward size={13} /></Btn>
+        </>
+      )}
+
+      {/* Expand */}
+      <Btn onClick={openMain}><Maximize2 size={13} color="#666" /></Btn>
     </div>
   );
 }
@@ -152,14 +130,14 @@ function Btn({ children, onClick }: { children: React.ReactNode; onClick: () => 
     <button
       onClick={onClick}
       style={{
-        background: "rgba(255,255,255,0.05)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        borderRadius: 6, padding: "5px 10px",
-        cursor: "pointer", display: "flex", alignItems: "center", gap: 5,
-        color: "#ccc", fontSize: 12, fontFamily: "inherit",
+        background: "rgba(255,255,255,0.06)",
+        border: "none",
+        borderRadius: 6, padding: 6,
+        cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+        color: "#ccc",
       }}
-      onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
-      onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+      onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.12)")}
+      onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
     >
       {children}
     </button>

@@ -220,10 +220,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         else if (action === "pause") pauseTimer();
         else if (action === "resume") resumeTimer();
         else if (action === "stop") stopTimer();
+        else if (action === "skip") skipPhase();
       } catch { /* ignore */ }
     }, 200);
     return () => clearInterval(interval);
-  }, [startTimer, pauseTimer, resumeTimer, stopTimer]);
+  }, [startTimer, pauseTimer, resumeTimer, stopTimer, skipPhase]);
 
   return (
     <AppContext.Provider

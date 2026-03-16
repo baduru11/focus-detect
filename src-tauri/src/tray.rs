@@ -68,8 +68,8 @@ pub fn create_widget_window(app: &tauri::AppHandle) -> Result<(), String> {
         WebviewUrl::App("/widget".into()),
     )
     .title("Focus Detector")
-    .inner_size(320.0, 120.0)
-    .min_inner_size(200.0, 80.0)
+    .inner_size(340.0, 52.0)
+    .min_inner_size(280.0, 48.0)
     .position(100.0, 100.0)
     .decorations(false)
     .transparent(false)
