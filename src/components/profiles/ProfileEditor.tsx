@@ -1,12 +1,13 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Globe, Monitor } from "lucide-react";
+import { X, Plus, Globe, Monitor, Search, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { NeonButton } from "@/components/ui/NeonButton";
 import { NeonInput } from "@/components/ui/NeonInput";
 import { NeonSlider } from "@/components/ui/NeonSlider";
 import { NeonToggle } from "@/components/ui/NeonToggle";
+import { listRunningApps, type RunningApp } from "@/services/detectionService";
 import type { Profile, AppRule } from "@/types/profile";
 
 const BROWSER_PROCESS = "__browser__";
@@ -373,47 +374,27 @@ export function ProfileEditor({
                 ))}
               </AnimatePresence>
 
-              {/* New App Form */}
+              {/* Running Apps Picker */}
               <AnimatePresence>
                 {showNewAppForm && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="glass-panel rounded-xl p-3 border border-accent/20"
-                  >
-                    <div className="flex flex-col gap-2">
-                      <NeonInput
-                        placeholder="App name (e.g. Discord)"
-                        value={newApp.name}
-                        onChange={(e) =>
-                          setNewApp((p) => ({ ...p, name: e.target.value }))
-                        }
-                      />
-                      <NeonInput
-                        placeholder="Process name (e.g. discord.exe)"
-                        value={newApp.process}
-                        onChange={(e) =>
-                          setNewApp((p) => ({ ...p, process: e.target.value }))
-                        }
-                      />
-                      <div className="flex gap-2 justify-end">
-                        <NeonButton
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setShowNewAppForm(false);
-                            setNewApp({ name: "", process: "" });
-                          }}
-                        >
-                          Cancel
-                        </NeonButton>
-                        <NeonButton size="sm" onClick={handleAddApp}>
-                          Add
-                        </NeonButton>
-                      </div>
-                    </div>
-                  </motion.div>
+                  <RunningAppsPicker
+                    onSelect={(app) => {
+                      setAppRules((prev) => [
+                        ...prev,
+                        { name: app.app_name, process: app.process_name, allowed: true },
+                      ]);
+                      setShowNewAppForm(false);
+                    }}
+                    onManualAdd={(name, process) => {
+                      setAppRules((prev) => [
+                        ...prev,
+                        { name, process, allowed: true },
+                      ]);
+                      setShowNewAppForm(false);
+                    }}
+                    onCancel={() => setShowNewAppForm(false)}
+                    existingProcesses={appRules.map((a) => a.process.toLowerCase())}
+                  />
                 )}
               </AnimatePresence>
 
@@ -654,5 +635,132 @@ function SiteRules({ sites, onAdd, onRemove }: SiteRulesProps) {
         </div>
       )}
     </div>
+  );
+}
+
+/* ---- Running Apps Picker ---- */
+
+interface RunningAppsPickerProps {
+  onSelect: (app: RunningApp) => void;
+  onManualAdd: (name: string, process: string) => void;
+  onCancel: () => void;
+  existingProcesses: string[];
+}
+
+function RunningAppsPicker({ onSelect, onManualAdd, onCancel, existingProcesses }: RunningAppsPickerProps) {
+  const [apps, setApps] = useState<RunningApp[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [showManual, setShowManual] = useState(false);
+  const [manualName, setManualName] = useState("");
+  const [manualProcess, setManualProcess] = useState("");
+
+  useEffect(() => {
+    listRunningApps()
+      .then((result) => {
+        setApps(result);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return apps
+      .filter((a) => !existingProcesses.includes(a.process_name.toLowerCase()))
+      .filter((a) =>
+        a.app_name.toLowerCase().includes(q) || a.process_name.toLowerCase().includes(q)
+      );
+  }, [apps, search, existingProcesses]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: "auto" }}
+      exit={{ opacity: 0, height: 0 }}
+      className="glass-panel rounded-xl p-4 border border-accent/20"
+    >
+      {showManual ? (
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-text-muted mb-1">Add manually</p>
+          <NeonInput
+            placeholder="App name (e.g. Discord)"
+            value={manualName}
+            onChange={(e) => setManualName(e.target.value)}
+          />
+          <NeonInput
+            placeholder="Process name (e.g. discord.exe)"
+            value={manualProcess}
+            onChange={(e) => setManualProcess(e.target.value)}
+          />
+          <div className="flex gap-2 justify-end">
+            <NeonButton variant="ghost" size="sm" onClick={() => setShowManual(false)}>
+              Back
+            </NeonButton>
+            <NeonButton
+              size="sm"
+              onClick={() => {
+                if (manualName.trim() && manualProcess.trim()) {
+                  onManualAdd(manualName.trim(), manualProcess.trim());
+                }
+              }}
+            >
+              Add
+            </NeonButton>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <Search className="w-4 h-4 text-text-muted" />
+            <input
+              type="text"
+              placeholder="Search running apps..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none"
+              autoFocus
+            />
+            <NeonButton variant="ghost" size="sm" onClick={onCancel}>
+              <X className="w-3.5 h-3.5" />
+            </NeonButton>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="w-4 h-4 text-text-muted animate-spin" />
+              <span className="ml-2 text-xs text-text-muted">Scanning running apps...</span>
+            </div>
+          ) : (
+            <div className="max-h-48 overflow-y-auto flex flex-col gap-1">
+              {filtered.map((app) => (
+                <button
+                  key={app.process_name}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[0.06] transition-colors text-left cursor-pointer"
+                  onClick={() => onSelect(app)}
+                >
+                  <span className="text-sm text-text-primary">{app.app_name}</span>
+                  <span className="text-xs text-text-muted font-mono">{app.process_name}</span>
+                </button>
+              ))}
+              {filtered.length === 0 && (
+                <div className="text-center py-3 text-xs text-text-muted">
+                  No matches found
+                </div>
+              )}
+            </div>
+          )}
+
+          <button
+            className="text-xs text-accent hover:text-accent-light transition-colors cursor-pointer text-left"
+            onClick={() => setShowManual(true)}
+          >
+            + Add manually instead
+          </button>
+        </div>
+      )}
+    </motion.div>
   );
 }
