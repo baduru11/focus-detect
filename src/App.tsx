@@ -7,6 +7,7 @@ import Dashboard from "@/pages/Dashboard";
 import Profiles from "@/pages/Profiles";
 import Stats from "@/pages/Stats";
 import Settings from "@/pages/Settings";
+import AlarmPage from "@/pages/AlarmPage";
 
 function AlarmOverlay() {
   const { alarmLevel, dismissAlarm } = useApp();
@@ -18,6 +19,7 @@ function App() {
     <AppProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/alarm" element={<AlarmPage />} />
           <Route element={<AppShell />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/profiles" element={<Profiles />} />

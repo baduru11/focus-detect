@@ -1,5 +1,6 @@
 use tauri::Manager;
 
+mod alarm_overlay;
 mod detection;
 mod monitors;
 mod tray;
@@ -28,6 +29,8 @@ pub fn run() {
             monitors::get_monitors,
             tray::update_tray_tooltip,
             tray::toggle_widget,
+            alarm_overlay::show_alarm_overlay,
+            alarm_overlay::hide_alarm_overlay,
         ])
         .setup(|app| {
             tray::setup_tray(app)?;

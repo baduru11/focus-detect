@@ -117,24 +117,17 @@ export class DetectionPipeline {
     }
   }
 
-  private static readonly SELF_PROCESSES = [
-    "focus-detector.exe",
-    "focus detector.exe",
-    "focusdetector.exe",
-  ];
-
-  private isSelfWindow(processName: string): boolean {
-    return DetectionPipeline.SELF_PROCESSES.includes(processName.toLowerCase());
-  }
-
   private async runCheck(): Promise<void> {
     if (this.state !== "running" || !this.profile || !this.callbacks) return;
 
     try {
       const windowInfo = await getActiveWindowInfo();
 
-      // Skip detection when our own app is the active window (e.g., alarm is showing)
-      if (this.isSelfWindow(windowInfo.process_name)) {
+      // If the user clicked back to our app, treat as on-task (dismiss alarm)
+      const selfProcesses = ["focus-detector.exe", "focus detector.exe"];
+      if (selfProcesses.includes(windowInfo.process_name.toLowerCase())) {
+        this.callbacks.onCheck("on_task", windowInfo);
+        this.handleOnTask();
         return;
       }
 
