@@ -14,9 +14,9 @@ interface TimelineBarProps {
 }
 
 const typeStyles: Record<string, { color: string; label: string }> = {
-  focus: { color: "rgba(99, 102, 241, 0.5)", label: "Focus" },
-  alarm: { color: "rgba(239, 68, 68, 0.45)", label: "Alarm" },
-  break: { color: "rgba(34, 197, 94, 0.35)", label: "Break" },
+  focus: { color: "rgba(99, 102, 241, 0.55)", label: "Focus" },
+  alarm: { color: "rgba(239, 68, 68, 0.5)", label: "Alarm" },
+  break: { color: "rgba(34, 197, 94, 0.4)", label: "Break" },
 };
 
 const legendColors: Record<string, string> = {
@@ -39,8 +39,8 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
   if (sessions.length === 0) {
     return (
       <div className={cn("w-full", className)}>
-        <div className="h-5 rounded-full bg-white/[0.03] flex items-center justify-center">
-          <span className="text-xs text-text-muted">No sessions today</span>
+        <div className="h-6 rounded-lg bg-white/[0.025] flex items-center justify-center border border-white/[0.04]">
+          <span className="text-[11px] text-text-muted">No sessions today</span>
         </div>
       </div>
     );
@@ -53,17 +53,17 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
   return (
     <div className={cn("w-full", className)}>
       {/* Time labels */}
-      <div className="flex justify-between mb-2">
-        <span className="text-[10px] font-mono text-text-muted">
+      <div className="flex justify-between mb-2.5">
+        <span className="text-[10px] font-mono text-text-muted tabular-nums">
           {formatTime(minStart)}
         </span>
-        <span className="text-[10px] font-mono text-text-muted">
+        <span className="text-[10px] font-mono text-text-muted tabular-nums">
           {formatTime(maxEnd)}
         </span>
       </div>
 
-      {/* Timeline bar — thin, rounded, soft */}
-      <div className="relative h-[3px] rounded-full bg-white/[0.04] overflow-hidden">
+      {/* Timeline bar */}
+      <div className="relative h-[4px] rounded-full bg-white/[0.04] overflow-hidden">
         {sessions.map((seg, i) => {
           const left = ((seg.startMinute - minStart) / totalSpan) * 100;
           const width = ((seg.endMinute - seg.startMinute) / totalSpan) * 100;
@@ -87,7 +87,7 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
                 width: `${Math.max(width, isAlarm ? 0.5 : 0.3)}%`,
                 opacity: 1,
               }}
-              transition={{ duration: 0.8, delay: i * 0.05, ease: "easeOut" }}
+              transition={{ duration: 0.7, delay: i * 0.04, ease: "easeOut" }}
               onMouseEnter={() => setHoveredIdx(i)}
               onMouseLeave={() => setHoveredIdx(null)}
             />
@@ -97,7 +97,7 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
         {/* Tooltip */}
         {hoveredIdx !== null && (
           <motion.div
-            className="absolute -top-9 z-20 px-2 py-1 rounded-md bg-surface-solid border border-white/[0.1] text-[10px] text-text-primary whitespace-nowrap pointer-events-none shadow-lg"
+            className="absolute -top-10 z-20 px-2.5 py-1.5 rounded-lg bg-surface-solid border border-white/[0.1] text-[10px] text-text-primary whitespace-nowrap pointer-events-none shadow-lg"
             style={{
               left: `${((sessions[hoveredIdx].startMinute - minStart) / totalSpan) * 100}%`,
               transform: "translateX(-25%)",
@@ -113,7 +113,7 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
       </div>
 
       {/* Legend */}
-      <div className="flex gap-4 mt-3">
+      <div className="flex gap-5 mt-3.5">
         {(["focus", "break", "alarm"] as const).map((t) => (
           <div key={t} className="flex items-center gap-1.5">
             <div
@@ -122,7 +122,7 @@ export function TimelineBar({ sessions, className }: TimelineBarProps) {
                 legendColors[t]
               )}
             />
-            <span className="text-[10px] text-text-muted capitalize">{t}</span>
+            <span className="text-[10px] text-text-muted capitalize font-medium">{t}</span>
           </div>
         ))}
       </div>

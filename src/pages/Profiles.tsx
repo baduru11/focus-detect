@@ -53,12 +53,12 @@ const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.08 },
+    transition: { staggerChildren: 0.06 },
   },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  hidden: { opacity: 0, y: 16, scale: 0.97 },
   show: { opacity: 1, y: 0, scale: 1 },
 };
 
@@ -107,27 +107,27 @@ export default function Profiles() {
           animate={{ opacity: 1 }}
           className="flex flex-col items-center gap-3"
         >
-          <Loader2 className="w-6 h-6 text-text-muted animate-spin" />
-          <span className="text-sm text-text-muted">Loading profiles...</span>
+          <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
+          <span className="text-[13px] text-text-muted">Loading profiles...</span>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="h-full p-10 overflow-y-auto">
+    <div className="h-full px-8 py-8 overflow-y-auto">
       {/* Title */}
       <motion.h1
-        className="text-2xl font-semibold tracking-tight mb-8 text-text-primary"
+        className="text-xl font-semibold tracking-tight mb-7 text-text-primary"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
         Activity Profiles
       </motion.h1>
 
-      {/* Profile Grid — clean glass cards */}
+      {/* Profile Grid */}
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         variants={container}
         initial="hidden"
         animate="show"
@@ -141,15 +141,15 @@ export default function Profiles() {
                 key={profile.id}
                 variants={item}
                 layout
-                exit={{ opacity: 0, scale: 0.9 }}
+                exit={{ opacity: 0, scale: 0.95 }}
                 className="relative"
               >
                 <div
                   className={`rounded-2xl border transition-all duration-200 ${
                     isActive
-                      ? "border-accent/30 bg-white/[0.04]"
-                      : "border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.05] hover:border-white/[0.12]"
-                  } backdrop-blur-[40px]`}
+                      ? "border-accent/25 bg-gradient-to-br from-white/[0.05] via-white/[0.03] to-white/[0.04] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05),0_0_0_1px_rgba(99,102,241,0.08)]"
+                      : "border-white/[0.07] bg-gradient-to-br from-white/[0.04] to-white/[0.02] hover:from-white/[0.055] hover:to-white/[0.03] hover:border-white/[0.1]"
+                  } backdrop-blur-[32px]`}
                 >
                   <ProfileCard
                     profile={profile}
@@ -169,24 +169,24 @@ export default function Profiles() {
         {/* Add New Profile Card */}
         <motion.div variants={item} layout>
           <motion.div
-            className="rounded-2xl p-5 cursor-pointer flex items-center justify-center min-h-[140px] border border-dashed border-white/[0.08] hover:border-accent/30 transition-colors bg-white/[0.01]"
+            className="rounded-2xl p-5 cursor-pointer flex items-center justify-center min-h-[140px] border border-dashed border-white/[0.08] hover:border-accent/25 transition-all duration-200 bg-white/[0.015]"
             whileHover={{
               scale: 1.01,
-              borderColor: "rgba(99, 102, 241, 0.3)",
+              borderColor: "rgba(99, 102, 241, 0.25)",
             }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setEditorState({ mode: "create" })}
           >
             <div className="flex flex-col items-center gap-3 text-text-muted">
               <motion.div
-                className="w-11 h-11 rounded-lg border border-dashed border-white/[0.1] flex items-center justify-center"
+                className="w-10 h-10 rounded-xl border border-dashed border-white/[0.1] flex items-center justify-center bg-white/[0.02]"
                 whileHover={{
-                  borderColor: "rgba(99, 102, 241, 0.3)",
+                  borderColor: "rgba(99, 102, 241, 0.25)",
                 }}
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4.5 h-4.5" />
               </motion.div>
-              <span className="text-sm font-medium">New Profile</span>
+              <span className="text-[13px] font-medium">New Profile</span>
             </div>
           </motion.div>
         </motion.div>

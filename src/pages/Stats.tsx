@@ -55,27 +55,27 @@ export default function Stats() {
           className="flex flex-col items-center gap-3"
         >
           <Loader2
-            className="w-6 h-6 animate-spin text-text-muted"
+            className="w-5 h-5 animate-spin text-text-muted"
           />
-          <span className="text-sm text-text-muted">Loading stats...</span>
+          <span className="text-[13px] text-text-muted">Loading stats...</span>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col p-10 overflow-y-auto">
+    <div className="h-full flex flex-col px-8 py-8 overflow-y-auto">
       {/* Header */}
       <motion.div
         className="flex items-center justify-between mb-6 flex-shrink-0"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
+        <h1 className="text-xl font-semibold text-text-primary tracking-tight">
           Statistics
         </h1>
         <motion.button
-          className="text-xs text-text-muted hover:text-text-secondary transition-colors cursor-pointer px-3 py-1.5 rounded-lg hover:bg-white/[0.03]"
+          className="text-[13px] text-text-muted hover:text-text-secondary transition-colors duration-150 cursor-pointer px-3 py-1.5 rounded-lg hover:bg-white/[0.04]"
           onClick={stats.refreshStats}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -84,9 +84,9 @@ export default function Stats() {
         </motion.button>
       </motion.div>
 
-      {/* Tab bar — clean pill style */}
+      {/* Tab bar */}
       <motion.div
-        className="flex gap-1 mb-6 flex-shrink-0 bg-white/[0.03] rounded-lg p-1 w-fit"
+        className="flex gap-0.5 mb-7 flex-shrink-0 bg-white/[0.03] rounded-[10px] p-1 w-fit border border-white/[0.04]"
         initial={{ opacity: 0, y: -5 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -95,7 +95,7 @@ export default function Stats() {
           <button
             key={tab.id}
             className={cn(
-              "relative px-4 py-1.5 text-xs font-medium rounded-md transition-all duration-200 cursor-pointer",
+              "relative px-4 py-1.5 text-[13px] font-medium rounded-lg transition-all duration-200 cursor-pointer",
               activeTab === tab.id
                 ? "text-text-primary"
                 : "text-text-muted hover:text-text-secondary"
@@ -104,9 +104,9 @@ export default function Stats() {
           >
             {activeTab === tab.id && (
               <motion.div
-                className="absolute inset-0 rounded-md bg-white/[0.06] border border-white/[0.08]"
+                className="absolute inset-0 rounded-lg bg-white/[0.06] border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
                 layoutId="stats-tab-bg"
-                transition={{ duration: 0.25, ease: "easeOut" }}
+                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
               />
             )}
             <span className="relative z-10">{tab.label}</span>
@@ -124,16 +124,16 @@ export default function Stats() {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.25 }}
-              className="flex flex-col gap-6"
+              transition={{ duration: 0.2 }}
+              className="flex flex-col gap-5"
             >
               {/* Ring chart + Timeline */}
-              <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6 items-start">
+              <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-5 items-start">
                 <GlassCard className="flex items-center justify-center p-6">
                   <FocusRingChart focusPercent={stats.focusPercent} />
                 </GlassCard>
                 <GlassCard>
-                  <h3 className="text-xs font-semibold text-text-muted mb-4 uppercase tracking-wider">
+                  <h3 className="text-[11px] font-semibold text-text-muted mb-4 uppercase tracking-[0.1em]">
                     Today's Timeline
                   </h3>
                   <TimelineBar sessions={stats.todayTimeline} />
@@ -141,7 +141,7 @@ export default function Stats() {
               </div>
 
               {/* Stat cards row */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <AchievementCard
                   icon={<Clock className="w-4 h-4" />}
                   title="Focus Time"
@@ -174,19 +174,19 @@ export default function Stats() {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.25 }}
-              className="flex flex-col gap-6"
+              transition={{ duration: 0.2 }}
+              className="flex flex-col gap-5"
             >
               {/* Weekly bar chart */}
               <GlassCard>
-                <h3 className="text-xs font-semibold text-text-muted mb-6 uppercase tracking-wider">
+                <h3 className="text-[11px] font-semibold text-text-muted mb-6 uppercase tracking-[0.1em]">
                   Focus Hours This Week
                 </h3>
                 <WeeklyBarChart data={stats.weeklyBars} />
               </GlassCard>
 
               {/* Streak + Best achievement */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <StreakCard
                   current={stats.streak.current}
                   best={stats.streak.best}
@@ -206,10 +206,10 @@ export default function Stats() {
 
               {/* Weekly totals summary */}
               <GlassCard>
-                <h3 className="text-xs font-semibold text-text-muted mb-4 uppercase tracking-wider">
+                <h3 className="text-[11px] font-semibold text-text-muted mb-5 uppercase tracking-[0.1em]">
                   Weekly Summary
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <SummaryItem
                     label="Total Focus"
                     value={formatMinutes(
@@ -256,11 +256,11 @@ export default function Stats() {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.25 }}
-              className="flex flex-col gap-6"
+              transition={{ duration: 0.2 }}
+              className="flex flex-col gap-5"
             >
               {/* Big numbers */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <AchievementCard
                   icon={<Clock className="w-4 h-4" />}
                   title="Total Hours Focused"
@@ -283,10 +283,10 @@ export default function Stats() {
 
               {/* Achievement records */}
               <GlassCard>
-                <h3 className="text-xs font-semibold text-text-muted mb-4 uppercase tracking-wider">
+                <h3 className="text-[11px] font-semibold text-text-muted mb-5 uppercase tracking-[0.1em]">
                   Personal Records
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <AchievementCard
                     icon={<Trophy className="w-4 h-4" />}
                     title="Best Focus Day"
@@ -336,15 +336,18 @@ function SummaryItem({
 }) {
   return (
     <motion.div
-      className="flex flex-col items-center text-center gap-1.5 p-3 rounded-lg bg-white/[0.02]"
+      className="flex flex-col items-center text-center gap-2 p-4 rounded-xl bg-white/[0.025] border border-white/[0.05]"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
     >
-      <span className="text-lg font-semibold font-mono" style={{ color, opacity: 0.8 }}>
+      <span
+        className="text-lg font-semibold font-mono tabular-nums"
+        style={{ color, opacity: 0.85 }}
+      >
         {value}
       </span>
-      <span className="text-[10px] text-text-muted uppercase tracking-wider font-light">
+      <span className="text-[10px] text-text-muted uppercase tracking-[0.1em] font-medium">
         {label}
       </span>
     </motion.div>

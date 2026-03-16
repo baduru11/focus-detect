@@ -4,7 +4,7 @@ import { AIProviderConfig } from "@/components/settings/AIProviderConfig";
 import { DataExport } from "@/components/settings/DataExport";
 
 const sectionVariants = {
-  hidden: { opacity: 0, y: 15 },
+  hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0 },
 };
 
@@ -12,15 +12,15 @@ const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 },
+    transition: { staggerChildren: 0.08 },
   },
 };
 
 export default function Settings() {
   return (
-    <div className="h-full p-10 overflow-y-auto">
+    <div className="h-full px-8 py-8 overflow-y-auto">
       <motion.h1
-        className="text-2xl font-semibold tracking-tight mb-8 text-text-primary"
+        className="text-xl font-semibold tracking-tight mb-7 text-text-primary"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -28,7 +28,7 @@ export default function Settings() {
       </motion.h1>
 
       <motion.div
-        className="flex flex-col gap-8 max-w-3xl"
+        className="flex flex-col gap-6 max-w-2xl"
         variants={container}
         initial="hidden"
         animate="show"
