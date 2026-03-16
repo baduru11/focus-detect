@@ -43,13 +43,12 @@ export class DetectionPipeline {
     this.graceRemaining = 0;
     this.state = "running";
 
-    const intervalMs = profile.detection.checkInterval * 1000;
-
-    // Run an immediate check, then set up the interval
+    // Window check every 1 second (lightweight — just gets window title)
+    // AI vision only triggers on ambiguous matches (expensive)
     this.runCheck();
     this.intervalId = window.setInterval(() => {
       this.runCheck();
-    }, intervalMs);
+    }, 1000);
   }
 
   stop(): void {
@@ -73,12 +72,11 @@ export class DetectionPipeline {
     if (this.state !== "paused" || !this.profile || !this.callbacks) return;
 
     this.state = "running";
-    const intervalMs = this.profile.detection.checkInterval * 1000;
 
     this.runCheck();
     this.intervalId = window.setInterval(() => {
       this.runCheck();
-    }, intervalMs);
+    }, 1000);
   }
 
   resetEscalation(): void {
