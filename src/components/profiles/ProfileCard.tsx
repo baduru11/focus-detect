@@ -45,31 +45,31 @@ export function ProfileCard({
         "transition-colors duration-200"
       )}
       whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
+      transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
       onClick={onSelect}
     >
       {/* Action buttons */}
-      <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+      <div className="absolute top-3.5 right-3.5 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
         <motion.button
-          className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-text-muted hover:text-accent-light hover:border-accent/20 transition-colors"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          className="w-7 h-7 rounded-lg bg-white/[0.05] border border-white/[0.07] flex items-center justify-center text-text-muted hover:text-accent-light hover:border-accent/20 transition-colors duration-150"
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
           onClick={handleEdit}
         >
-          <Pencil className="w-3.5 h-3.5" />
+          <Pencil className="w-3 h-3" />
         </motion.button>
         <motion.button
           className={cn(
-            "w-7 h-7 rounded-lg border flex items-center justify-center transition-colors",
+            "w-7 h-7 rounded-lg border flex items-center justify-center transition-colors duration-150",
             showDeleteConfirm
               ? "bg-danger/10 border-danger/30 text-danger/80"
-              : "bg-white/[0.04] border-white/[0.06] text-text-muted hover:text-danger/70 hover:border-danger/20"
+              : "bg-white/[0.05] border-white/[0.07] text-text-muted hover:text-danger/70 hover:border-danger/20"
           )}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
           onClick={handleDelete}
         >
-          <Trash2 className="w-3.5 h-3.5" />
+          <Trash2 className="w-3 h-3" />
         </motion.button>
       </div>
 
@@ -79,21 +79,21 @@ export function ProfileCard({
         <div className="flex items-center gap-3">
           <div
             className={cn(
-              "w-10 h-10 rounded-lg flex items-center justify-center text-lg",
+              "w-10 h-10 rounded-xl flex items-center justify-center text-lg",
               "bg-white/[0.04] border border-white/[0.06]"
             )}
           >
             {profile.icon}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-text-primary truncate">
+            <h3 className="text-[13px] font-semibold text-text-primary truncate">
               {profile.name}
             </h3>
-            <div className="flex items-center gap-2 mt-0.5">
+            <div className="flex items-center gap-2 mt-1">
               {/* Mode badge */}
               <span
                 className={cn(
-                  "text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded-md border",
+                  "text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md border",
                   profile.mode === "whitelist"
                     ? "text-success/70 border-success/15 bg-success/[0.06]"
                     : "text-danger/70 border-danger/15 bg-danger/[0.06]"
@@ -107,12 +107,12 @@ export function ProfileCard({
 
         {/* Info row */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-text-muted font-light">
+          <span className="text-[12px] text-text-muted font-medium">
             {profile.apps.length} app{profile.apps.length !== 1 ? "s" : ""} monitored
           </span>
           {isActive && (
             <motion.span
-              className="text-[9px] font-semibold uppercase tracking-widest text-accent-light/60"
+              className="text-[9px] font-bold uppercase tracking-widest text-accent-light/70"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
             >
@@ -130,7 +130,7 @@ export function ProfileCard({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <span className="text-sm text-danger/80 font-semibold">
+          <span className="text-[13px] text-danger/80 font-semibold">
             Click again to confirm delete
           </span>
         </motion.div>

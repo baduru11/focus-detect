@@ -31,8 +31,10 @@ export function DataExport() {
   return (
     <GlassCard>
       <div className="flex items-center gap-3 mb-6">
-        <Database className="w-4 h-4 text-danger/60" strokeWidth={1.5} />
-        <h2 className="text-base font-semibold text-text-primary">
+        <div className="w-7 h-7 rounded-lg bg-danger/10 flex items-center justify-center">
+          <Database className="w-3.5 h-3.5 text-danger" strokeWidth={1.8} />
+        </div>
+        <h2 className="text-sm font-semibold text-text-primary">
           Data & Export
         </h2>
       </div>
@@ -40,7 +42,7 @@ export function DataExport() {
       <div className="flex flex-col gap-6">
         {/* Export Buttons */}
         <div className="flex flex-col gap-3">
-          <span className="text-xs text-text-muted uppercase tracking-wider font-light">Export Sessions</span>
+          <span className="text-[11px] text-text-muted uppercase tracking-[0.1em] font-medium">Export Sessions</span>
           <div className="flex gap-3">
             <NeonButton variant="ghost" size="sm" onClick={handleExportJSON}>
               <FileJson className="w-3.5 h-3.5 mr-2 inline" />
@@ -58,9 +60,9 @@ export function DataExport() {
 
         {/* Clear Data */}
         <div className="flex flex-col gap-3">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="w-3.5 h-3.5 text-danger/40 mt-0.5 shrink-0" strokeWidth={1.5} />
-            <p className="text-xs text-text-muted leading-relaxed">
+          <div className="flex items-start gap-2.5">
+            <AlertTriangle className="w-3.5 h-3.5 text-danger/50 mt-0.5 shrink-0" strokeWidth={1.8} />
+            <p className="text-[13px] text-text-muted leading-relaxed">
               Clearing all data will permanently remove all session history,
               statistics, and cached AI analysis results. This action cannot be
               undone.
@@ -76,7 +78,7 @@ export function DataExport() {
                 exit={{ opacity: 0, y: -5 }}
                 className="flex items-center gap-3"
               >
-                <span className="text-sm text-danger/80 font-semibold">
+                <span className="text-[13px] text-danger/80 font-semibold">
                   Are you sure?
                 </span>
                 <NeonButton

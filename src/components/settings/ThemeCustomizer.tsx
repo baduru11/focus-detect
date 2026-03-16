@@ -19,27 +19,30 @@ export function ThemeCustomizer() {
   return (
     <GlassCard>
       <div className="flex items-center gap-3 mb-6">
-        <Palette className="w-4 h-4 text-accent-light/60" strokeWidth={1.5} />
-        <h2 className="text-base font-semibold text-text-primary">Theme</h2>
+        <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
+          <Palette className="w-3.5 h-3.5 text-accent-light" strokeWidth={1.8} />
+        </div>
+        <h2 className="text-sm font-semibold text-text-primary">Theme</h2>
       </div>
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
-          <span className="text-xs text-text-muted uppercase tracking-wider font-light">Accent Color</span>
+          <span className="text-[11px] text-text-muted uppercase tracking-[0.1em] font-medium">Accent Color</span>
           <div className="flex gap-3">
             {ACCENT_COLORS.map((color) => (
               <motion.button
                 key={color.hex}
                 type="button"
                 className={cn(
-                  "relative w-6 h-6 rounded-full transition-all duration-200",
+                  "relative w-7 h-7 rounded-full transition-all duration-200",
                   selectedColor === color.hex
-                    ? "ring-2 ring-offset-2 ring-offset-base"
+                    ? "ring-2 ring-offset-2 ring-offset-base scale-110"
                     : "hover:scale-110"
                 )}
                 style={{
                   background: color.hex,
-                  opacity: selectedColor === color.hex ? 1 : 0.5,
+                  opacity: selectedColor === color.hex ? 1 : 0.55,
+                  ringColor: selectedColor === color.hex ? color.hex : undefined,
                 }}
                 whileHover={{ scale: 1.15, opacity: 0.85 }}
                 whileTap={{ scale: 0.9 }}
@@ -52,9 +55,9 @@ export function ThemeCustomizer() {
 
         {/* Preview Swatch */}
         <div className="flex flex-col gap-3">
-          <span className="text-xs text-text-muted uppercase tracking-wider font-light">Preview</span>
+          <span className="text-[11px] text-text-muted uppercase tracking-[0.1em] font-medium">Preview</span>
           <div
-            className="h-11 rounded-lg border border-white/[0.06] flex items-center justify-center gap-3"
+            className="h-11 rounded-xl border border-white/[0.06] flex items-center justify-center gap-3"
             style={{
               background: `linear-gradient(135deg, ${selectedColor}08, ${selectedColor}03)`,
               borderColor: `${selectedColor}15`,
@@ -64,12 +67,12 @@ export function ThemeCustomizer() {
               className="w-2 h-2 rounded-full"
               style={{
                 background: selectedColor,
-                opacity: 0.7,
+                opacity: 0.75,
               }}
             />
             <span
-              className="text-xs font-medium"
-              style={{ color: selectedColor, opacity: 0.7 }}
+              className="text-[13px] font-medium"
+              style={{ color: selectedColor, opacity: 0.75 }}
             >
               {ACCENT_COLORS.find((c) => c.hex === selectedColor)?.name ?? "Custom"} Accent
             </span>

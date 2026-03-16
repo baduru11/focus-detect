@@ -56,7 +56,7 @@ function StatusDot({ status }: { status: ConnectionStatus }) {
       <motion.div
         className={cn("w-2 h-2 rounded-full", colors[status])}
       />
-      <span className="text-[10px] text-text-muted">{labels[status]}</span>
+      <span className="text-[11px] text-text-muted font-medium">{labels[status]}</span>
     </div>
   );
 }
@@ -169,8 +169,10 @@ export function AIProviderConfig() {
   return (
     <GlassCard>
       <div className="flex items-center gap-3 mb-6">
-        <Brain className="w-4 h-4 text-accent-light/60" strokeWidth={1.5} />
-        <h2 className="text-base font-semibold text-text-primary">AI Provider</h2>
+        <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
+          <Brain className="w-3.5 h-3.5 text-accent-light" strokeWidth={1.8} />
+        </div>
+        <h2 className="text-sm font-semibold text-text-primary">AI Provider</h2>
       </div>
 
       <div className="flex flex-col gap-6">
@@ -181,16 +183,18 @@ export function AIProviderConfig() {
         />
 
         <motion.div
-          className="flex flex-col gap-5"
-          animate={{ opacity: aiEnabled ? 1 : 0.4 }}
+          className="flex flex-col gap-4"
+          animate={{ opacity: aiEnabled ? 1 : 0.35 }}
           style={{ pointerEvents: aiEnabled ? "auto" : "none" }}
         >
-          {/* Ollama (Local) — shown first */}
-          <div className="rounded-lg p-4 border border-white/[0.06] bg-white/[0.02] flex flex-col gap-3">
+          {/* Ollama (Local) */}
+          <div className="rounded-xl p-4 border border-white/[0.06] bg-white/[0.02] flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Server className="w-3.5 h-3.5 text-accent-light/60" strokeWidth={1.5} />
-                <span className="text-sm font-medium text-text-primary">
+              <div className="flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-md bg-accent/10 flex items-center justify-center">
+                  <Server className="w-3 h-3 text-accent-light" strokeWidth={1.8} />
+                </div>
+                <span className="text-[13px] font-medium text-text-primary">
                   Ollama (Local)
                 </span>
               </div>
@@ -232,10 +236,10 @@ export function AIProviderConfig() {
           {PROVIDERS.map(({ key, label, placeholder }) => (
             <div
               key={key}
-              className="rounded-lg p-4 border border-white/[0.06] bg-white/[0.02] flex flex-col gap-3"
+              className="rounded-xl p-4 border border-white/[0.06] bg-white/[0.02] flex flex-col gap-3"
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-text-primary">
+                <span className="text-[13px] font-medium text-text-primary">
                   {label}
                 </span>
                 <StatusDot status={providers[key].status} />

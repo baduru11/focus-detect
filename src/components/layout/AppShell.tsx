@@ -7,10 +7,10 @@ export function AppShell() {
     <div className="flex h-full w-full overflow-hidden bg-base relative">
       <Particles
         className="fixed inset-0 z-0"
-        quantity={30}
+        quantity={25}
         color="#6366f1"
         size={0.3}
-        staticity={80}
+        staticity={90}
         ease={80}
       />
       <Sidebar />
