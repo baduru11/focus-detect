@@ -207,12 +207,13 @@ export function AIProviderConfig() {
               className="w-full h-10 px-3 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-text-primary focus:outline-none focus:border-accent/50 transition-colors cursor-pointer appearance-none"
               style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b8ca0' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
             >
-              <option value="llava">llava (4.7GB — recommended)</option>
-              <option value="llava:13b">llava:13b (8GB — higher quality)</option>
+              <option value="gemma3:4b">gemma3:4b (2.6GB — best for this task)</option>
+              <option value="llama3.2-vision">llama3.2-vision (4.9GB — most accurate)</option>
+              <option value="qwen2.5-vl">qwen2.5-vl (4.4GB — great OCR)</option>
+              <option value="llava">llava (4.7GB — popular)</option>
               <option value="llava-phi3">llava-phi3 (2.9GB — fast)</option>
               <option value="moondream">moondream (1.7GB — lightweight)</option>
-              <option value="qwen2-vl">qwen2-vl (4.4GB — multilingual)</option>
-              <option value="minicpm-v">minicpm-v (5.5GB — balanced)</option>
+              <option value="smolvlm2:2.2b">smolvlm2:2.2b (2GB — smallest)</option>
             </select>
 
             <NeonInput
