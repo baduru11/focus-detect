@@ -69,15 +69,15 @@ export function useStats(): StatsData {
         allTime.totalSessions > 0;
 
       if (!hasData) {
-        const mock = getMockData();
-        setTodaySummary(mock.todaySummary);
-        setFocusPercent(mock.focusPercent);
-        setTodayTimeline(mock.todayTimeline);
-        setWeekSummary(mock.weekSummary);
-        setWeeklyBars(mock.weeklyBars);
-        setAllTimeSummary(mock.allTimeSummary);
-        setStreak(mock.streak);
-        setTopDistractors(mock.topDistractors);
+        // No data — show zeroes, not mock data
+        setTodaySummary({ date: new Date().toISOString().slice(0, 10), focusMinutes: 0, distractionMinutes: 0, alarms: 0, cycles: 0 });
+        setFocusPercent(0);
+        setTodayTimeline([]);
+        setWeekSummary([]);
+        setWeeklyBars([]);
+        setAllTimeSummary({ totalFocusHours: 0, totalSessions: 0, bestDayMinutes: 0, bestDayDate: null });
+        setStreak({ current: 0, best: 0 });
+        setTopDistractors([]);
       } else {
         // Today summary from sessions
         let focusSec = 0;
@@ -120,16 +120,16 @@ export function useStats(): StatsData {
         setTopDistractors(distractors);
       }
     } catch {
-      // Fallback to mock data on any error
-      const mock = getMockData();
-      setTodaySummary(mock.todaySummary);
-      setFocusPercent(mock.focusPercent);
-      setTodayTimeline(mock.todayTimeline);
-      setWeekSummary(mock.weekSummary);
-      setWeeklyBars(mock.weeklyBars);
-      setAllTimeSummary(mock.allTimeSummary);
-      setStreak(mock.streak);
-      setTopDistractors(mock.topDistractors);
+      // Fallback to empty on error
+      console.warn("Stats load error, showing empty:", err);
+      setTodaySummary({ date: new Date().toISOString().slice(0, 10), focusMinutes: 0, distractionMinutes: 0, alarms: 0, cycles: 0 });
+      setFocusPercent(0);
+      setTodayTimeline([]);
+      setWeekSummary([]);
+      setWeeklyBars([]);
+      setAllTimeSummary({ totalFocusHours: 0, totalSessions: 0, bestDayMinutes: 0, bestDayDate: null });
+      setStreak({ current: 0, best: 0 });
+      setTopDistractors([]);
     } finally {
       setLoading(false);
     }

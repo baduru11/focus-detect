@@ -17,6 +17,10 @@ async function setAlwaysOnTop(on: boolean) {
     await win.setAlwaysOnTop(on);
     if (on) {
       await win.show();
+      await win.maximize();
+      await win.setFocus();
+    } else {
+      await win.unmaximize();
     }
   } catch {
     // Not in Tauri
