@@ -114,7 +114,7 @@ export default function Dashboard() {
               const { invoke } = await import("@tauri-apps/api/core");
               await invoke("toggle_widget", { visible: true });
               const { getCurrentWindow } = await import("@tauri-apps/api/window");
-              await getCurrentWindow().minimize();
+              await getCurrentWindow().hide();
             } catch { /* Not in Tauri */ }
           }}
         >
