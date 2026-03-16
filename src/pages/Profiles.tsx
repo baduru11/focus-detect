@@ -87,16 +87,21 @@ export default function Profiles() {
     profileData: Omit<Profile, "id"> | Profile
   ) => {
     try {
+      console.log("[Profile Save] Data:", JSON.stringify(profileData, null, 2));
       if ("id" in profileData) {
         const { id, ...updates } = profileData;
+        console.log("[Profile Save] Updating id:", id, "updates:", Object.keys(updates));
         await updateProfile(id, updates);
+        console.log("[Profile Save] Update successful");
       } else {
+        console.log("[Profile Save] Creating new profile");
         await createProfile(profileData);
+        console.log("[Profile Save] Create successful");
       }
       setEditorState({ mode: "closed" });
     } catch (err) {
-      console.error("Failed to save profile:", err);
-      // Don't close editor on error
+      console.error("[Profile Save] FAILED:", err);
+      alert(`Save failed: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
