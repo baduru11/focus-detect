@@ -27,21 +27,24 @@ export function NeonToggle({
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={cn(
-          "relative w-9 h-5 rounded-full transition-colors duration-200",
+          "relative w-10 h-[22px] rounded-full transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
+          "shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]",
           checked
-            ? "bg-accent"
-            : "bg-white/[0.1]"
+            ? "bg-accent shadow-[inset_0_1px_2px_rgba(0,0,0,0.15),0_0_8px_rgba(99,102,241,0.15)]"
+            : "bg-white/[0.08]"
         )}
       >
         <motion.div
-          className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"
+          className="absolute top-[3px] w-4 h-4 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.25)]"
           animate={{
-            left: checked ? 18 : 2,
+            left: checked ? 21 : 3,
           }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
         />
       </button>
-      {label && <span className="text-sm text-text-secondary">{label}</span>}
+      {label && (
+        <span className="text-[13px] text-text-secondary font-medium">{label}</span>
+      )}
     </label>
   );
 }

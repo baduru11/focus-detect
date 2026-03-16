@@ -57,11 +57,11 @@ export function NeonSlider({
   };
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
+    <div className={cn("flex flex-col gap-2.5", className)}>
       {label && (
         <div className="flex items-center justify-between">
-          <span className="text-sm text-text-secondary">{label}</span>
-          <span className="text-sm font-mono text-accent-light">
+          <span className="text-[13px] text-text-secondary font-medium">{label}</span>
+          <span className="text-[13px] font-mono text-accent-light tabular-nums">
             {value}
             {unit}
           </span>
@@ -69,7 +69,7 @@ export function NeonSlider({
       )}
       <div
         ref={trackRef}
-        className="relative h-6 flex items-center cursor-pointer"
+        className="relative h-7 flex items-center cursor-pointer"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -77,37 +77,37 @@ export function NeonSlider({
         onMouseLeave={() => setHovering(false)}
       >
         {/* Track background */}
-        <div className="absolute inset-x-0 h-1.5 rounded-full bg-white/[0.08]" />
+        <div className="absolute inset-x-0 h-[5px] rounded-full bg-white/[0.06]" />
 
-        {/* Filled track — indigo gradient */}
+        {/* Filled track */}
         <div
-          className="absolute left-0 h-1.5 rounded-full"
+          className="absolute left-0 h-[5px] rounded-full"
           style={{
             width: `${percent}%`,
             background: "linear-gradient(90deg, #6366f1, #818cf8)",
           }}
         />
 
-        {/* Thumb — small white circle */}
+        {/* Thumb */}
         <motion.div
-          className="absolute w-3.5 h-3.5 rounded-full bg-white border-2 border-accent shadow-sm"
+          className="absolute w-4 h-4 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.1)]"
           style={{
-            left: `calc(${percent}% - 7px)`,
+            left: `calc(${percent}% - 8px)`,
           }}
-          animate={{ scale: dragging ? 1.2 : 1 }}
-          transition={{ duration: 0.15, ease: "easeOut" }}
+          animate={{ scale: dragging ? 1.15 : 1 }}
+          transition={{ duration: 0.12, ease: "easeOut" }}
         />
 
         {/* Tooltip */}
         <AnimatePresence>
           {showTooltip && (
             <motion.div
-              className="absolute -top-9 px-2 py-1 rounded-md bg-surface-solid border border-white/[0.1] text-xs font-mono text-text-primary whitespace-nowrap pointer-events-none"
+              className="absolute -top-9 px-2.5 py-1 rounded-lg bg-surface-solid border border-white/[0.1] text-xs font-mono text-text-primary whitespace-nowrap pointer-events-none shadow-lg"
               style={{ left: `calc(${percent}% - 20px)` }}
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 4 }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: 0.12 }}
             >
               {value}
               {unit}

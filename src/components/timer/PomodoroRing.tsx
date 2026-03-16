@@ -41,7 +41,7 @@ export function PomodoroRing({
   cyclesBeforeLong,
 }: PomodoroRingProps) {
   const radius = 120;
-  const strokeWidth = 6;
+  const strokeWidth = 5;
   const svgSize = (radius + strokeWidth) * 2;
   const center = svgSize / 2;
   const circumference = 2 * Math.PI * radius;
@@ -54,6 +54,7 @@ export function PomodoroRing({
 
   const config = phaseConfig[phase];
   const gradientId = `ring-gradient-${phase}`;
+  const glowId = `ring-glow-${phase}`;
   const isRunning = status === "running";
 
   return (
@@ -62,18 +63,18 @@ export function PomodoroRing({
       <motion.div
         className="absolute rounded-full"
         style={{
-          width: svgSize + 40,
-          height: svgSize + 40,
-          background: `radial-gradient(circle, ${config.gradient[0]}06 0%, transparent 70%)`,
+          width: svgSize + 60,
+          height: svgSize + 60,
+          background: `radial-gradient(circle, ${config.gradient[0]}08 0%, transparent 65%)`,
         }}
         animate={
           isRunning
-            ? { opacity: [0.3, 0.6, 0.3] }
-            : { opacity: 0.2 }
+            ? { opacity: [0.4, 0.7, 0.4] }
+            : { opacity: 0.25 }
         }
         transition={
           isRunning
-            ? { duration: 3, repeat: Infinity, ease: "easeInOut" }
+            ? { duration: 3.5, repeat: Infinity, ease: "easeInOut" }
             : { duration: 0.5 }
         }
       />
@@ -89,6 +90,10 @@ export function PomodoroRing({
             <stop offset="0%" stopColor={config.gradient[0]} />
             <stop offset="100%" stopColor={config.gradient[1]} />
           </linearGradient>
+          <filter id={glowId}>
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
         </defs>
 
         {/* Track ring */}
@@ -97,11 +102,11 @@ export function PomodoroRing({
           cy={center}
           r={radius}
           fill="none"
-          stroke="rgba(255, 255, 255, 0.06)"
+          stroke="rgba(255, 255, 255, 0.05)"
           strokeWidth={strokeWidth}
         />
 
-        {/* Progress ring — clean gradient stroke with subtle shadow */}
+        {/* Progress ring with subtle glow */}
         <motion.circle
           cx={center}
           cy={center}
@@ -114,8 +119,8 @@ export function PomodoroRing({
           initial={false}
           animate={{ strokeDashoffset: offset }}
           transition={{ duration: 0.4, ease: "easeOut" }}
+          filter={`url(#${glowId})`}
           style={{
-            filter: `drop-shadow(0 0 2px ${config.gradient[0]}26)`,
             transform: "rotate(-90deg)",
             transformOrigin: "center",
           }}
@@ -127,11 +132,11 @@ export function PomodoroRing({
         <AnimatePresence mode="wait">
           <motion.span
             key={timeDisplay}
-            className="text-5xl font-light text-text-primary tracking-wider font-mono"
+            className="text-[48px] font-light text-text-primary tracking-[0.04em] font-mono leading-none"
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: 0.12 }}
           >
             {timeDisplay}
           </motion.span>
@@ -141,19 +146,19 @@ export function PomodoroRing({
           <motion.span
             key={phase}
             className={cn(
-              "text-xs font-medium uppercase tracking-[0.2em] mt-2",
+              "text-[10px] font-semibold uppercase tracking-[0.2em] mt-3",
               phaseLabelColor[phase]
             )}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.15 }}
           >
             {config.label}
           </motion.span>
         </AnimatePresence>
 
-        <span className="text-[11px] text-text-muted mt-1.5 tracking-wide font-light">
+        <span className="text-[11px] text-text-muted mt-2 tracking-wide font-medium">
           Cycle {currentCycle} of {cyclesBeforeLong}
         </span>
       </div>
