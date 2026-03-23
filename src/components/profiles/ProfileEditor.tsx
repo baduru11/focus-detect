@@ -522,7 +522,7 @@ export function ProfileEditor({
           </GlassCard>
 
           {/* Detection Settings */}
-          <GlassCard>
+          <GlassCard interactive>
             <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
               Detection Settings
             </h3>
