@@ -40,7 +40,7 @@ export function DataExport() {
   };
 
   return (
-    <GlassCard>
+    <GlassCard interactive>
       <div className="flex items-center gap-3 mb-6">
         <div className="w-7 h-7 rounded-lg bg-danger/10 flex items-center justify-center">
           <DatabaseIcon className="w-3.5 h-3.5 text-danger" strokeWidth={1.8} />

@@ -167,7 +167,7 @@ export function AIProviderConfig() {
   }, [ollamaModel, ollamaEndpoint]);
 
   return (
-    <GlassCard>
+    <GlassCard interactive>
       <div className="flex items-center gap-3 mb-6">
         <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
           <Brain className="w-3.5 h-3.5 text-accent-light" strokeWidth={1.8} />
