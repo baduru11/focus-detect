@@ -253,7 +253,7 @@ export function ProfileEditor({
 
         <div className="p-6 flex flex-col gap-6">
           {/* Basic Info Section */}
-          <GlassCard>
+          <GlassCard interactive>
             <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
               Basic Info
             </h3>
@@ -313,7 +313,7 @@ export function ProfileEditor({
           </GlassCard>
 
           {/* ======== Apps Section ======== */}
-          <GlassCard>
+          <GlassCard interactive>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Monitor className="w-4 h-4 text-accent/70" />
@@ -413,7 +413,7 @@ export function ProfileEditor({
           </GlassCard>
 
           {/* ======== Sites Section ======== */}
-          <GlassCard>
+          <GlassCard interactive>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Globe className="w-4 h-4 text-accent/70" />
@@ -435,7 +435,7 @@ export function ProfileEditor({
           </GlassCard>
 
           {/* Pomodoro Settings */}
-          <GlassCard>
+          <GlassCard interactive>
             <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
               Pomodoro Settings
             </h3>
