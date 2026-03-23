@@ -1,0 +1,80 @@
+[    4721ms] [ERROR] %o
+
+%s
+
+%s
+ TypeError: Cannot read properties of undefined (reading 'metadata')
+    at getCurrentWindow (http://localhost:1420/node_modules/.vite/deps/@tauri-apps_api_window.js?v=ab24ef01:379:48)
+    at Titlebar (http://localhost:1420/src/components/layout/Titlebar.tsx:20:15)
+    at Object.react_stack_bottom_frame (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:18509:20)
+    at renderWithHooks (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:5654:24)
+    at updateFunctionComponent (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:7475:21)
+    at beginWork (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:8525:20)
+    at runWithFiberInDEV (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:997:72)
+    at performUnitOfWork (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:12561:98)
+    at workLoopSync (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:12424:43)
+    at renderRootSync (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:12408:13) The above error occurred in the <Titlebar> component. React will try to recreate this component tree from scratch using the error boundary you provided, AppErrorBoundary. @ http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:7000
+[    4721ms] [ERROR] App error boundary caught: TypeError: Cannot read properties of undefined (reading 'metadata')
+    at getCurrentWindow (http://localhost:1420/node_modules/.vite/deps/@tauri-apps_api_window.js?v=ab24ef01:379:48)
+    at Titlebar (http://localhost:1420/src/components/layout/Titlebar.tsx:20:15)
+    at Object.react_stack_bottom_frame (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:18509:20)
+    at renderWithHooks (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:5654:24)
+    at updateFunctionComponent (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:7475:21)
+    at beginWork (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:8525:20)
+    at runWithFiberInDEV (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:997:72)
+    at performUnitOfWork (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:12561:98)
+    at workLoopSync (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:12424:43)
+    at renderRootSync (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:12408:13) 
+    at Titlebar (http://localhost:1420/src/components/layout/Titlebar.tsx:20:15)
+    at div (<anonymous>)
+    at div (<anonymous>)
+    at AppShell (<anonymous>)
+    at RenderedRoute (http://localhost:1420/node_modules/.vite/deps/react-router-dom.js?v=ab24ef01:6355:26)
+    at Routes (http://localhost:1420/node_modules/.vite/deps/react-router-dom.js?v=ab24ef01:7222:3)
+    at AppErrorBoundary (http://localhost:1420/src/App.tsx?t=1774260236644:32:5)
+    at Router (http://localhost:1420/node_modules/.vite/deps/react-router-dom.js?v=ab24ef01:7152:13)
+    at BrowserRouter (http://localhost:1420/node_modules/.vite/deps/react-router-dom.js?v=ab24ef01:10363:3)
+    at AppProvider (http://localhost:1420/src/context/AppContext.tsx?t=1774259836687:46:31)
+    at App (<anonymous>) @ http://localhost:1420/src/App.tsx?t=1774260236644:38
+[    4734ms] [ERROR] Failed to load profiles: Cannot read properties of undefined (reading 'invoke') @ http://localhost:1420/src/hooks/useProfiles.ts:35
+[    4734ms] [ERROR] Failed to load profiles: Cannot read properties of undefined (reading 'invoke') @ http://localhost:1420/src/hooks/useProfiles.ts:35
+[   78799ms] [ERROR] %o
+
+%s
+
+%s
+ TypeError: Cannot read properties of undefined (reading 'metadata')
+    at getCurrentWindow (http://localhost:1420/node_modules/.vite/deps/@tauri-apps_api_window.js?v=ab24ef01:379:48)
+    at Titlebar (http://localhost:1420/src/components/layout/Titlebar.tsx:20:15)
+    at Object.react_stack_bottom_frame (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:18509:20)
+    at renderWithHooks (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:5654:24)
+    at updateFunctionComponent (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:7475:21)
+    at beginWork (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:8525:20)
+    at runWithFiberInDEV (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:997:72)
+    at performUnitOfWork (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:12561:98)
+    at workLoopSync (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:12424:43)
+    at renderRootSync (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:12408:13) The above error occurred in the <Titlebar> component. React will try to recreate this component tree from scratch using the error boundary you provided, AppErrorBoundary. @ http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:7000
+[   78799ms] [ERROR] App error boundary caught: TypeError: Cannot read properties of undefined (reading 'metadata')
+    at getCurrentWindow (http://localhost:1420/node_modules/.vite/deps/@tauri-apps_api_window.js?v=ab24ef01:379:48)
+    at Titlebar (http://localhost:1420/src/components/layout/Titlebar.tsx:20:15)
+    at Object.react_stack_bottom_frame (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:18509:20)
+    at renderWithHooks (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:5654:24)
+    at updateFunctionComponent (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:7475:21)
+    at beginWork (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:8525:20)
+    at runWithFiberInDEV (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:997:72)
+    at performUnitOfWork (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:12561:98)
+    at workLoopSync (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:12424:43)
+    at renderRootSync (http://localhost:1420/node_modules/.vite/deps/react-dom_client.js?v=ab24ef01:12408:13) 
+    at Titlebar (http://localhost:1420/src/components/layout/Titlebar.tsx:20:15)
+    at div (<anonymous>)
+    at div (<anonymous>)
+    at AppShell (<anonymous>)
+    at RenderedRoute (http://localhost:1420/node_modules/.vite/deps/react-router-dom.js?v=ab24ef01:6355:26)
+    at Routes (http://localhost:1420/node_modules/.vite/deps/react-router-dom.js?v=ab24ef01:7222:3)
+    at AppErrorBoundary (http://localhost:1420/src/App.tsx?t=1774260236644:32:5)
+    at Router (http://localhost:1420/node_modules/.vite/deps/react-router-dom.js?v=ab24ef01:7152:13)
+    at BrowserRouter (http://localhost:1420/node_modules/.vite/deps/react-router-dom.js?v=ab24ef01:10363:3)
+    at AppProvider (http://localhost:1420/src/context/AppContext.tsx?t=1774259836687:46:31)
+    at App (<anonymous>) @ http://localhost:1420/src/App.tsx?t=1774260236644:38
+[   79003ms] [ERROR] Failed to load profiles: Cannot read properties of undefined (reading 'invoke') @ http://localhost:1420/src/hooks/useProfiles.ts:35
+[   79003ms] [ERROR] Failed to load profiles: Cannot read properties of undefined (reading 'invoke') @ http://localhost:1420/src/hooks/useProfiles.ts:35
