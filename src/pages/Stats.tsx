@@ -129,10 +129,10 @@ export default function Stats() {
             >
               {/* Ring chart + Timeline */}
               <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-5 items-start">
-                <GlassCard className="flex items-center justify-center p-6">
+                <GlassCard interactive className="flex items-center justify-center p-6">
                   <FocusRingChart focusPercent={stats.focusPercent} />
                 </GlassCard>
-                <GlassCard>
+                <GlassCard interactive>
                   <h3 className="text-[11px] font-semibold text-text-muted mb-4 uppercase tracking-[0.1em]">
                     Today's Timeline
                   </h3>
@@ -178,7 +178,7 @@ export default function Stats() {
               className="flex flex-col gap-5"
             >
               {/* Weekly bar chart */}
-              <GlassCard>
+              <GlassCard interactive>
                 <h3 className="text-[11px] font-semibold text-text-muted mb-6 uppercase tracking-[0.1em]">
                   Focus Hours This Week
                 </h3>
@@ -205,7 +205,7 @@ export default function Stats() {
               </div>
 
               {/* Weekly totals summary */}
-              <GlassCard>
+              <GlassCard interactive>
                 <h3 className="text-[11px] font-semibold text-text-muted mb-5 uppercase tracking-[0.1em]">
                   Weekly Summary
                 </h3>
