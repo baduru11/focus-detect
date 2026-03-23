@@ -16,7 +16,12 @@ cargo build          # Build Rust backend only (run from src-tauri/)
 cargo check          # Type-check Rust without building (run from src-tauri/)
 ```
 
-No test framework is configured. No linter is configured.
+```bash
+npm test             # Vitest test suite (140+ tests)
+npm run test:watch   # Vitest watch mode
+```
+
+No linter is configured.
 
 ## Architecture
 
@@ -34,11 +39,13 @@ The core loop runs every 1 second during a work phase:
 4. Off-task triggers grace countdown (default 10s) → then alarm at profile-configured level (1, 2, or 3)
 5. Return to on-task immediately dismisses alarm
 
+**Note:** Alarm level is a per-profile preset (1, 2, or 3) — NOT auto-escalating at runtime. The `AlarmPage.tsx` / alarm overlay window is currently dead code (never invoked from frontend). L3 alarm renders in-window via `AlarmController` with `setAlwaysOnTop(true)`.
+
 ### State Management
 
 - **AppContext** (`src/context/AppContext.tsx`): Single React Context holds all global state — profiles, timer, detection, alarm level, recent checks. This is the central coordination point.
 - **Hooks**: `usePomodoro` (timer FSM), `useDetection` (pipeline lifecycle), `useProfiles` (CRUD), `useStats` (SQLite queries)
-- **Widget sync**: Main window ↔ Widget communicate via `localStorage` polling (1000ms), not Tauri IPC. Keys: `widget-sync` (state), `widget-action` (commands). Deduplication via timestamps.
+- **Widget sync**: Main window ↔ Widget communicate via `localStorage` polling (1000ms), not Tauri IPC. Keys: `widget-sync` (state), `widget-action` (commands). Deduplication via timestamps. Widget always-on-top enforced every 5s.
 
 ### Multi-Window Setup
 

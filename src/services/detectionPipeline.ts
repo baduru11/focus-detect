@@ -233,8 +233,19 @@ export class DetectionPipeline {
         timestamp: Date.now(),
       });
 
-      if (visionResult.confidence < 0.5) {
+      // Guard: malformed response — missing or non-numeric confidence
+      const confidence = typeof visionResult.confidence === "number" && !isNaN(visionResult.confidence)
+        ? visionResult.confidence
+        : 0.5;
+
+      if (confidence < 0.5) {
         return "on_task";
+      }
+
+      // Guard: empty/undefined onTask field
+      if (typeof visionResult.onTask !== "boolean") {
+        console.warn("Vision returned non-boolean onTask:", visionResult.onTask);
+        return "on_task"; // benefit of the doubt
       }
 
       return visionResult.onTask ? "on_task" : "off_task";

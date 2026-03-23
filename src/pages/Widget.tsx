@@ -34,12 +34,24 @@ export default function Widget() {
     return () => clearInterval(interval);
   }, []);
 
+  const [stale, setStale] = useState(false);
+
   useEffect(() => {
     const interval = setInterval(() => {
       try {
         const data = localStorage.getItem("widget-sync");
-        if (data) setState(JSON.parse(data));
-      } catch { /* ignore */ }
+        if (!data) return;
+        const parsed = JSON.parse(data);
+        // Ignore stale data older than 5s (main window may have closed)
+        if (parsed.lastUpdated && Date.now() - parsed.lastUpdated > 5000) {
+          setStale(true);
+          return;
+        }
+        setStale(false);
+        setState(parsed);
+      } catch (e) {
+        console.warn("Widget sync parse error:", e);
+      }
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -79,11 +91,12 @@ export default function Widget() {
         }}
         style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, cursor: "grab" }}
       >
-        {/* Detection dot */}
+        {/* Detection dot — dims when stale (main window disconnected) */}
         <div style={{
           width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
-          background: state.status === "idle" ? "#444" : dc[state.detection],
-          boxShadow: state.detection !== "idle" ? `0 0 6px ${dc[state.detection]}` : "none",
+          background: stale ? "#666" : (state.status === "idle" ? "#444" : dc[state.detection]),
+          boxShadow: !stale && state.detection !== "idle" ? `0 0 6px ${dc[state.detection]}` : "none",
+          opacity: stale ? 0.5 : 1,
         }} />
 
         {/* Timer */}

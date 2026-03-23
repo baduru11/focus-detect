@@ -231,7 +231,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       for (const s of sessions) focusSec += s.focus_seconds;
       setTodayFocusMinutes(Math.round(focusSec / 60));
       setCurrentStreak(streakData.current);
-    } catch { /* ignore */ }
+    } catch (e) { console.warn("Failed to refresh today stats:", e); }
   }, []);
 
   // Load stats + theme on mount
@@ -239,6 +239,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     refreshTodayStats();
     loadSavedTheme();
   }, [refreshTodayStats]);
+
+  // Lifecycle cleanup — stop detection + alarm sound on window close
+  useEffect(() => {
+    const cleanup = () => {
+      stopDetection();
+      import("@/services/alarmSound").then(({ stop }) => stop()).catch(() => {});
+    };
+    window.addEventListener("beforeunload", cleanup);
+    return () => window.removeEventListener("beforeunload", cleanup);
+  }, [stopDetection]);
 
   // Sync detection with timer phase
   useEffect(() => {
@@ -335,6 +345,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       status: pomodoroState.state.status,
       detection: detectionState,
       graceRemaining,
+      lastUpdated: Date.now(),
     }));
   }, [pomodoroState.state, detectionState, graceRemaining]);
 
@@ -358,7 +369,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         else if (action === "resume") resumeTimer();
         else if (action === "stop") stopTimer();
         else if (action === "skip") skipPhase();
-      } catch { /* ignore */ }
+      } catch (e) { console.warn("Widget action parse error:", e); }
     }, 1000);
     return () => clearInterval(interval);
   }, [startTimer, pauseTimer, resumeTimer, stopTimer, skipPhase]);
