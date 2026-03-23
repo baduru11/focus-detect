@@ -13,6 +13,7 @@ import { useDetection } from "@/hooks/useDetection";
 import {
   startSession,
   endSession,
+  updateSessionProgress,
   addDistraction,
   getTodaySessions,
   getStreakInfo,
@@ -169,11 +170,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [pomodoroState.state.status, pomodoroState.state.phase]);
 
-  // Track focus/distraction seconds for DB session (1s interval during work)
+  // Track focus/distraction seconds — persist to DB every tick
   // sessionActive (state) is the trigger — sessionIdRef alone is a ref and won't re-fire this effect
   useEffect(() => {
     const { status, phase } = pomodoroState.state;
     if (status !== "running" || phase !== "work" || !sessionIdRef.current) return;
+    const sid = sessionIdRef.current;
     const interval = setInterval(() => {
       const ds = detectionStateRef.current;
       if (ds === "grace" || ds === "alarm") {
@@ -181,6 +183,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } else {
         sessionStatsRef.current.focusSeconds++;
       }
+      const { focusSeconds, distractionSeconds } = sessionStatsRef.current;
+      updateSessionProgress(sid, focusSeconds, distractionSeconds).catch(() => {});
     }, 1000);
     return () => clearInterval(interval);
   }, [pomodoroState.state.status, pomodoroState.state.phase, sessionActive]);

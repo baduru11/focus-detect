@@ -122,6 +122,18 @@ export async function endSession(
   );
 }
 
+export async function updateSessionProgress(
+  sessionId: string,
+  focusSeconds: number,
+  distractionSeconds: number
+): Promise<void> {
+  const database = await getDb();
+  await database.execute(
+    `UPDATE sessions SET focus_seconds = $1, distraction_seconds = $2 WHERE id = $3`,
+    [focusSeconds, distractionSeconds, sessionId]
+  );
+}
+
 export async function addDistraction(
   sessionId: string,
   appName: string,
