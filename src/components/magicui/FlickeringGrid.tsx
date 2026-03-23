@@ -111,7 +111,7 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
     const canvas = canvasRef.current
     const container = containerRef.current
     const ctx = canvas?.getContext("2d") ?? null
-    let animationFrameId: number | null = null
+    let tickId: ReturnType<typeof setInterval> | null = null
     let resizeObserver: ResizeObserver | null = null
     let intersectionObserver: IntersectionObserver | null = null
     let gridParams: ReturnType<typeof setupCanvas> | null = null
@@ -126,30 +126,20 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
 
       updateCanvasSize()
 
-      let lastTime = 0
-      const FRAME_INTERVAL = 1000 / 15 // ~15fps is enough for flicker
-      let elapsed = 0
-      const animate = (time: number) => {
+      const TICK_MS = 200 // 5fps — plenty for subtle flicker
+      const tick = () => {
         if (!isInView || !gridParams) return
-
-        const deltaTime = (time - lastTime) / 1000
-        elapsed += time - lastTime
-        lastTime = time
-
-        if (elapsed >= FRAME_INTERVAL) {
-          elapsed = elapsed % FRAME_INTERVAL
-          updateSquares(gridParams.squares, deltaTime)
-          drawGrid(
-            ctx,
-            canvas.width,
-            canvas.height,
-            gridParams.cols,
-            gridParams.rows,
-            gridParams.squares,
-            gridParams.dpr
-          )
-        }
-        animationFrameId = requestAnimationFrame(animate)
+        const deltaTime = TICK_MS / 1000
+        updateSquares(gridParams.squares, deltaTime)
+        drawGrid(
+          ctx,
+          canvas.width,
+          canvas.height,
+          gridParams.cols,
+          gridParams.rows,
+          gridParams.squares,
+          gridParams.dpr
+        )
       }
 
       resizeObserver = new ResizeObserver(() => {
@@ -166,13 +156,14 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
       intersectionObserver.observe(canvas)
 
       if (isInView) {
-        animationFrameId = requestAnimationFrame(animate)
+        tick() // draw first frame immediately
+        tickId = setInterval(tick, TICK_MS)
       }
     }
 
     return () => {
-      if (animationFrameId !== null) {
-        cancelAnimationFrame(animationFrameId)
+      if (tickId !== null) {
+        clearInterval(tickId)
       }
       if (resizeObserver) {
         resizeObserver.disconnect()
