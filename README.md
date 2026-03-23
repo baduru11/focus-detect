@@ -33,32 +33,32 @@ The alarm level is set per profile, not auto-escalating — you choose your own 
 
 For ambiguous cases (you're in Chrome but the matching engine can't tell if that tab is work or not), it takes a screenshot and sends it to an AI vision model. Four-provider fallback chain: local Ollama first, then Gemini, Groq, OpenRouter. If the AI says you're off-task with >50% confidence, the grace period starts.
 
-<!--
 ## Screenshots
 
-> **TODO**: Add screenshots after building the app.
-> Run `npm run dev`, capture these views, save to `screenshots/` directory.
-
 ### Dashboard
-![Dashboard with Pomodoro ring and detection status](screenshots/dashboard.png)
-*Timer ring with gradient glow, detection status panel, recent check history*
+<img src="screenshots/dashboard.png" width="720" alt="Dashboard — Pomodoro ring with indigo gradient, timer controls, cycle counter" />
+
+The main view. 25-minute Pomodoro ring with gradient glow, start/pause controls, cycle tracker, and today's focus time.
 
 ### Widget
-![Always-on-top floating widget](screenshots/widget.png)
-*340x52px floating timer — always-on-top, transparent, draggable*
+<img src="screenshots/widget.png" alt="Floating widget — compact timer with detection dot" />
 
-### L3 Alarm
-![Level 3 alarm with glitch effects](screenshots/alarm-l3.png)
-*Fullscreen siren mode with screen shake, glitch distortion, and meme*
+Always-on-top 340x52px floating timer. Shows countdown, detection status dot, and quick controls. Syncs with the main window via localStorage polling.
 
-### Stats
-![Stats page with weekly chart and distractor leaderboard](screenshots/stats.png)
-*Weekly focus chart, timeline bar, distractor leaderboard, streak tracking*
+### Statistics
+<img src="screenshots/stats.png" width="720" alt="Statistics — focus ring, timeline, distractor leaderboard" />
 
-### Profile Editor
-![Profile editor with app rules](screenshots/profile-editor.png)
-*Whitelist/blacklist mode, per-browser site rules, detection config*
--->
+Focus percentage donut, 5-minute granularity timeline (focus/distraction/break segments), today's summary cards, and top distractor apps ranked by frequency.
+
+### Profiles
+<img src="screenshots/profiles.png" width="720" alt="Activity Profiles — profile cards with mode and app count" />
+
+Profile cards showing detection mode (whitelist/blacklist), monitored app count, and active status. Each profile has its own Pomodoro config, detection rules, and alarm level.
+
+### Settings
+<img src="screenshots/settings.png" width="720" alt="Settings — theme picker, volume slider, meme library" />
+
+Theme customization (6 accent colors), alarm volume with live preview, and meme library browser (bundled + custom). AI provider keys and autostart config below the fold.
 
 ## Architecture
 
