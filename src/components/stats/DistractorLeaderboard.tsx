@@ -20,7 +20,7 @@ export function DistractorLeaderboard({
 
   if (items.length === 0) {
     return (
-      <GlassCard className={className}>
+      <GlassCard interactive className={className}>
         <h3 className="text-[11px] font-semibold text-text-muted mb-4 uppercase tracking-[0.1em]">
           Top Distractors
         </h3>
@@ -32,7 +32,7 @@ export function DistractorLeaderboard({
   }
 
   return (
-    <GlassCard className={className}>
+    <GlassCard interactive className={className}>
       <h3 className="text-[11px] font-semibold text-text-muted mb-5 uppercase tracking-[0.1em]">
         Top Distractors
       </h3>
