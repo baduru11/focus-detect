@@ -44,6 +44,7 @@ export function StreakCard({ current, best, className }: StreakCardProps) {
 
   return (
     <GlassCard
+      interactive
       className={cn("relative overflow-hidden", className)}
     >
       <div className="flex flex-col items-center text-center gap-2.5">
