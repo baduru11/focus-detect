@@ -53,16 +53,17 @@ The core loop runs every 1 second during a work phase:
 |--------|------|----------|
 | Main | 1200×800 | Primary UI, resizable |
 | Widget | 340×52 | Always-on-top, transparent, draggable, single-row timer |
-| Alarm overlay | Fullscreen | Covers monitor during escalated alarms |
+| Alarm overlay | Fullscreen | **Dead code** — `show_alarm_overlay` never invoked from frontend. L3 alarm renders in-window via AlarmController. See TODO #9. |
 
-Window management is in `src-tauri/src/tray.rs` (widget, tray menu) and `src-tauri/src/alarm_overlay.rs`.
+Window management is in `src-tauri/src/tray.rs` (widget, tray menu) and `src-tauri/src/alarm_overlay.rs` (dead code).
 
 ### Tauri IPC Commands
 
-Defined in `src-tauri/src/lib.rs`, implemented in `detection.rs`, `tray.rs`, `alarm_overlay.rs`, `monitors.rs`:
+Defined in `src-tauri/src/lib.rs`, implemented in `detection.rs`, `tray.rs`, `alarm_overlay.rs`, `monitors.rs`, `memes.rs`:
 - `get_active_window_info`, `capture_screenshot`, `list_running_apps`
 - `toggle_widget`, `widget_open_main`, `show_alarm_overlay`, `hide_alarm_overlay`
 - `update_tray_tooltip`, `get_monitors`
+- `list_custom_memes` — scans `appDataDir/memes/custom/` for user meme images
 
 Frontend invokes via `@tauri-apps/api` `invoke()`. Tray menu emits `tray-action` events.
 
@@ -77,6 +78,19 @@ Profiles define detection behavior:
 - **Apps**: Rules with `{name, process, allowed, sites[]}` — site rules are matched against window title
 - **Pomodoro config**: work/break durations, cycles before long break
 - **Detection config**: `checkInterval` (AI cooldown), `graceCountdown`, `alarmLockDuration`
+
+### Meme System (`src/services/memeService.ts`)
+
+Displays memes in Level 2 and Level 3 alarms (L1 toast is too small). Bundled defaults in `/public/memes/defaults/` (Vite-served, hardcoded manifest). Custom memes loaded via `list_custom_memes` Rust IPC from `appDataDir/memes/custom/`. No-repeat-until-exhausted selection.
+
+### Alarm Sound System (`src/services/alarmSound.ts`)
+
+Primary: `.mp3` files via `AudioContext.decodeAudioData()` → `AudioBufferSourceNode` → `GainNode`. Fallback: Web Audio oscillator-based sounds if `.mp3` files not found. Volume control via `setVolume()`/`getVolume()`, persisted in SQLite settings. `AudioContext` resumed on first user interaction. Phase transition chime via `playPhaseChime()`.
+
+### Celebrations
+
+- **Confetti** (`src/components/ui/Confetti.tsx`): `canvas-confetti` library, triggers on work→break transition via `onPhaseChange` callback (checks for `shortBreak`/`longBreak` phase). Skips when document hidden.
+- **Milestone toasts** (`src/components/ui/Toast.tsx`): Glass notification at 5, 10, 25 completed work sessions today. Uses `sessionsCompletedToday` counter in AppContext (NOT `currentStreak` which is day-streak).
 
 ### Database
 
