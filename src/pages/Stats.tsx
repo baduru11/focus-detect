@@ -282,7 +282,7 @@ export default function Stats() {
               </div>
 
               {/* Achievement records */}
-              <GlassCard>
+              <GlassCard interactive>
                 <h3 className="text-[11px] font-semibold text-text-muted mb-5 uppercase tracking-[0.1em]">
                   Personal Records
                 </h3>
