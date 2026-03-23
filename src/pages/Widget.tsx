@@ -64,7 +64,7 @@ export default function Widget() {
 
   return (
     <div style={{
-      width: "100%", height: "100%", background: "#0d0d1a",
+      width: "100%", height: "100%", background: "rgba(13, 13, 26, 0.7)",
       display: "flex", alignItems: "center", gap: 12,
       padding: "0 16px",
       fontFamily: "'Inter', system-ui, sans-serif", color: "#f0f0f5",

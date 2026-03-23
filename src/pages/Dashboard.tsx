@@ -1,6 +1,6 @@
-import { useCallback } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Target, Eye, Monitor, Minimize2 } from "lucide-react";
+import { Target, Eye, Monitor, Minimize2, ChevronDown, Check } from "lucide-react";
 import { FlickeringGrid } from "@/components/magicui/FlickeringGrid";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { PomodoroRing } from "@/components/timer/PomodoroRing";
@@ -8,6 +8,7 @@ import { TimerControls } from "@/components/timer/TimerControls";
 import { DetectionStatus } from "@/components/detection/DetectionStatus";
 import { useApp } from "@/context/AppContext";
 import type { PomodoroConfig, TimerPhase } from "@/types/pomodoro";
+import type { Profile } from "@/types/profile";
 import type { ActiveWindowInfo } from "@/services/detectionService";
 
 const DEFAULT_CONFIG: PomodoroConfig = {
@@ -55,6 +56,82 @@ const resultLabels: Record<string, string> = {
   ambiguous: "Ambiguous",
 };
 
+function ProfileSelector({
+  profiles,
+  activeProfile,
+  onSelect,
+}: {
+  profiles: Profile[];
+  activeProfile: Profile | null;
+  onSelect: (id: string) => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handle = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [open]);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2.5 py-2 px-4 rounded-lg bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.08] transition-colors cursor-pointer"
+      >
+        <Target className="w-4 h-4 text-text-muted" />
+        <span className="text-sm text-text-secondary">
+          {activeProfile?.icon} {activeProfile?.name ?? "No Profile"}
+        </span>
+        <ChevronDown
+          className={`w-3.5 h-3.5 text-text-muted transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -4, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.97 }}
+            transition={{ duration: 0.15 }}
+            className="absolute top-full left-0 mt-2 min-w-[200px] py-1.5 rounded-xl bg-[#16161e]/95 backdrop-blur-xl border border-white/[0.1] shadow-2xl z-50"
+          >
+            {profiles.length === 0 && (
+              <div className="px-4 py-3 text-xs text-text-muted">No profiles</div>
+            )}
+            {profiles.map((p) => {
+              const isActive = p.id === activeProfile?.id;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => {
+                    onSelect(p.id);
+                    setOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-white/[0.06] transition-colors cursor-pointer ${
+                    isActive ? "bg-white/[0.04]" : ""
+                  }`}
+                >
+                  <span className="text-base leading-none">{p.icon}</span>
+                  <span className={`text-sm flex-1 ${isActive ? "text-text-primary font-medium" : "text-text-secondary"}`}>
+                    {p.name}
+                  </span>
+                  {isActive && <Check className="w-3.5 h-3.5 text-accent" />}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const {
     pomodoroState,
@@ -64,6 +141,8 @@ export default function Dashboard() {
     stopTimer,
     skipPhase,
     activeProfile,
+    profiles,
+    setActiveProfile,
     detectionState,
     graceRemaining,
     alarmLevel,
@@ -98,14 +177,13 @@ export default function Dashboard() {
       initial="hidden"
       animate="show"
     >
-      {/* Top bar: profile + widget toggle */}
+      {/* Top bar: profile selector + widget toggle */}
       <motion.div variants={staggerItem} className="flex items-center gap-3">
-        <div className="flex items-center gap-3 py-2 px-4 rounded-lg bg-white/[0.05] border border-white/[0.08]">
-          <Target className="w-4 h-4 text-text-muted" />
-          <span className="text-sm text-text-secondary">
-            {activeProfile?.name ?? "No Profile"}
-          </span>
-        </div>
+        <ProfileSelector
+          profiles={profiles}
+          activeProfile={activeProfile}
+          onSelect={setActiveProfile}
+        />
         <button
           className="p-2 rounded-lg bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.08] transition-colors cursor-pointer"
           title="Switch to mini widget"

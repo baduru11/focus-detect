@@ -5,6 +5,17 @@ mod detection;
 mod monitors;
 mod tray;
 
+#[cfg(target_os = "windows")]
+pub fn apply_vibrancy_effect(window: &tauri::WebviewWindow) {
+    use window_vibrancy::apply_acrylic;
+
+    // Acrylic = frosted glass blur. RGBA tint: dark base, partial transparency
+    match apply_acrylic(window, Some((6, 6, 12, 248))) {
+        Ok(_) => eprintln!("[vibrancy] Acrylic (frosted glass) applied"),
+        Err(e) => eprintln!("[vibrancy] Acrylic failed: {e:?}"),
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -36,7 +47,16 @@ pub fn run() {
         .setup(|app| {
             tray::setup_tray(app)?;
 
+            // Set window icon from bundled icon
+            if let Some(default_icon) = app.default_window_icon().cloned() {
+                for (_label, window) in app.webview_windows() {
+                    let _ = window.set_icon(default_icon.clone());
+                }
+            }
+
             if let Some(window) = app.get_webview_window("main") {
+                #[cfg(target_os = "windows")]
+                apply_vibrancy_effect(&window);
                 let _ = window.show();
             }
 

@@ -21,6 +21,7 @@ interface UseDetectionReturn {
   stop: () => void;
   pause: () => void;
   resume: () => void;
+  dismissAlarm: () => void;
 }
 
 export function useDetection(): UseDetectionReturn {
@@ -94,6 +95,15 @@ export function useDetection(): UseDetectionReturn {
     setLastVision(null);
   }, []);
 
+  const dismissAlarm = useCallback(() => {
+    if (pipelineRef.current) {
+      pipelineRef.current.resetAlarm();
+    }
+    setAlarmLevel(0);
+    setDetectionState("checking");
+    setGraceRemaining(0);
+  }, []);
+
   const pause = useCallback(() => {
     if (pipelineRef.current) {
       pipelineRef.current.pause();
@@ -117,5 +127,6 @@ export function useDetection(): UseDetectionReturn {
     stop,
     pause,
     resume,
+    dismissAlarm,
   };
 }

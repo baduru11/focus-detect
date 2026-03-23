@@ -14,6 +14,7 @@ export interface DetectionConfig {
   checkInterval: number;
   graceCountdown: number;
   alarmLockDuration: number;
+  alarmLevel: 1 | 2 | 3;
 }
 
 export interface PomodoroConfig {

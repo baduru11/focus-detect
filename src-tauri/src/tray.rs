@@ -72,12 +72,17 @@ pub fn create_widget_window(app: &tauri::AppHandle) -> Result<(), String> {
     .min_inner_size(280.0, 48.0)
     .position(100.0, 100.0)
     .decorations(false)
-    .transparent(false)
+    .transparent(true)
+    .shadow(false)
     .always_on_top(true)
     .resizable(true)
     .skip_taskbar(false)
+    .background_color(tauri::window::Color(0, 0, 0, 0))
     .build()
     .map_err(|e| e.to_string())?;
+
+    #[cfg(target_os = "windows")]
+    crate::apply_vibrancy_effect(&widget);
 
     // Ensure always-on-top is set after creation
     let _ = widget.set_always_on_top(true);

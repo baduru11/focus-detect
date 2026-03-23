@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Loader2 } from "lucide-react";
-import { useProfiles } from "@/hooks/useProfiles";
+import { Plus } from "lucide-react";
+import { useApp } from "@/context/AppContext";
 import { ProfileCard } from "@/components/profiles/ProfileCard";
 import { ProfileEditor } from "@/components/profiles/ProfileEditor";
 import type { Profile } from "@/types/profile";
@@ -18,7 +18,7 @@ const MOCK_PROFILES: Profile[] = [
       { name: "Reddit", process: "reddit.exe", allowed: false },
     ],
     pomodoro: { work: 50, shortBreak: 10, longBreak: 30, cyclesBeforeLong: 4 },
-    detection: { checkInterval: 5, graceCountdown: 10, alarmLockDuration: 30 },
+    detection: { checkInterval: 5, graceCountdown: 10, alarmLockDuration: 30, alarmLevel: 3 as const },
     monitors: { detection: "all", alarm: "primary" },
   },
   {
@@ -31,7 +31,7 @@ const MOCK_PROFILES: Profile[] = [
       { name: "Anki", process: "anki.exe", allowed: true },
     ],
     pomodoro: { work: 25, shortBreak: 5, longBreak: 15, cyclesBeforeLong: 4 },
-    detection: { checkInterval: 5, graceCountdown: 10, alarmLockDuration: 30 },
+    detection: { checkInterval: 5, graceCountdown: 10, alarmLockDuration: 30, alarmLevel: 3 as const },
     monitors: { detection: "all", alarm: "all" },
   },
   {
@@ -44,7 +44,7 @@ const MOCK_PROFILES: Profile[] = [
       { name: "Email", process: "outlook.exe", allowed: false },
     ],
     pomodoro: { work: 45, shortBreak: 10, longBreak: 20, cyclesBeforeLong: 3 },
-    detection: { checkInterval: 10, graceCountdown: 15, alarmLockDuration: 20 },
+    detection: { checkInterval: 10, graceCountdown: 15, alarmLockDuration: 20, alarmLevel: 3 as const },
     monitors: { detection: "primary", alarm: "primary" },
   },
 ];
@@ -66,12 +66,11 @@ export default function Profiles() {
   const {
     profiles: dbProfiles,
     activeProfile,
-    loading,
     setActiveProfile,
     createProfile,
     updateProfile,
     deleteProfile,
-  } = useProfiles();
+  } = useApp();
 
   // Use mock profiles when DB returns empty
   const profiles = dbProfiles.length > 0 ? dbProfiles : MOCK_PROFILES;
@@ -109,20 +108,6 @@ export default function Profiles() {
     await deleteProfile(id);
   };
 
-  if (loading) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex flex-col items-center gap-3"
-        >
-          <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
-          <span className="text-[13px] text-text-muted">Loading profiles...</span>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div className="h-full px-10 py-10 overflow-y-auto">

@@ -17,10 +17,9 @@ async function setAlwaysOnTop(on: boolean) {
     await win.setAlwaysOnTop(on);
     if (on) {
       await win.show();
-      await win.maximize();
-      await win.setFocus();
-    } else {
-      await win.unmaximize();
+      // Don't maximize or steal focus — alarm UI renders inside the app window
+      // as a fixed overlay. The off-task window stays active so detection
+      // continues to see it (prevents the self-focus dismiss loop).
     }
   } catch {
     // Not in Tauri
@@ -33,8 +32,7 @@ export function AlarmController({
 }: AlarmControllerProps) {
   const handleDismiss = useCallback(() => {
     stop();
-    setAlwaysOnTop(false);
-    onDismiss();
+    onDismiss(); // resets alarmLevel to 0 → useEffect handles setAlwaysOnTop(false)
   }, [onDismiss]);
 
   // Always-on-top when alarm is active so user can't hide it
@@ -63,7 +61,7 @@ export function AlarmController({
   return (
     <AnimatePresence mode="wait">
       {alarmLevel === 1 && (
-        <AlarmLevel1 key="alarm-1" onDismiss={handleDismiss} />
+        <AlarmLevel1 key="alarm-1" />
       )}
       {alarmLevel === 2 && (
         <AlarmLevel2 key="alarm-2" onDismiss={handleDismiss} />

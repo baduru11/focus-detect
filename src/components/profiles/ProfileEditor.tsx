@@ -126,6 +126,9 @@ export function ProfileEditor({
   const [alarmLockDuration, setAlarmLockDuration] = useState(
     profile?.detection.alarmLockDuration ?? 15
   );
+  const [alarmLevel, setAlarmLevel] = useState(
+    profile?.detection.alarmLevel ?? 3
+  );
 
   const [showNewAppForm, setShowNewAppForm] = useState(false);
   const [newApp, setNewApp] = useState<NewAppForm>({ name: "", process: "" });
@@ -182,6 +185,7 @@ export function ProfileEditor({
         checkInterval,
         graceCountdown,
         alarmLockDuration,
+        alarmLevel: alarmLevel as 1 | 2 | 3,
       },
       monitors: profile?.monitors ?? {
         detection: "all" as const,
@@ -547,6 +551,30 @@ export function ProfileEditor({
                 onChange={setAlarmLockDuration}
                 unit="s"
               />
+              <div className="flex flex-col gap-2">
+                <span className="text-sm text-text-secondary font-light">Alarm Intensity</span>
+                <div className="flex gap-2">
+                  {([1, 2, 3] as const).map((level) => {
+                    const labels = { 1: "Gentle", 2: "Moderate", 3: "Full Blast" };
+                    const isActive = alarmLevel === level;
+                    return (
+                      <NeonButton
+                        key={level}
+                        variant={isActive ? (level === 3 ? "danger" : level === 2 ? "primary" : "success") : "ghost"}
+                        size="sm"
+                        onClick={() => setAlarmLevel(level)}
+                      >
+                        {labels[level]}
+                      </NeonButton>
+                    );
+                  })}
+                </div>
+                <p className="text-[11px] text-text-muted">
+                  {alarmLevel === 1 && "Toast notification with chime"}
+                  {alarmLevel === 2 && "Center dialog with alert sound"}
+                  {alarmLevel === 3 && "Fullscreen lockdown with siren"}
+                </p>
+              </div>
             </div>
           </GlassCard>
 

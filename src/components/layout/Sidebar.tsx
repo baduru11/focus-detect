@@ -6,6 +6,7 @@ import {
   Users,
   BarChart3,
   Settings2,
+  Crosshair,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,8 +31,8 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center h-14 px-4 overflow-hidden">
-        <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
-          <span className="text-xs font-bold text-white">F</span>
+        <div className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/20 flex items-center justify-center flex-shrink-0">
+          <Crosshair className="w-4 h-4 text-accent-light" strokeWidth={2} />
         </div>
         <motion.span
           className="ml-3 text-sm font-semibold text-text-primary whitespace-nowrap"

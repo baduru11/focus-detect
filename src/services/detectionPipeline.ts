@@ -26,13 +26,10 @@ export interface DetectionCallbacks {
 
 export type PipelineState = "idle" | "running" | "paused";
 
-const MAX_ESCALATION = 3;
-
 export class DetectionPipeline {
   private intervalId: number | null = null;
   private graceTimeoutId: number | null = null;
   private graceTickId: number | null = null;
-  private escalationLevel: number = 0;
   private state: PipelineState = "idle";
   private profile: Profile | null = null;
   private callbacks: DetectionCallbacks | null = null;
@@ -47,18 +44,15 @@ export class DetectionPipeline {
     this.stop();
     this.profile = profile;
     this.callbacks = callbacks;
-    this.escalationLevel = 0;
     this.inGrace = false;
     this.inAlarm = false;
     this.graceRemaining = 0;
     this.state = "running";
 
-    // Window check every 1 second (lightweight — just gets window title)
-    // AI vision only triggers on ambiguous matches (expensive)
     this.runCheck();
     this.intervalId = window.setInterval(() => {
       this.runCheck();
-    }, 1000);
+    }, 500);
   }
 
   stop(): void {
@@ -66,7 +60,6 @@ export class DetectionPipeline {
     this.state = "idle";
     this.profile = null;
     this.callbacks = null;
-    this.escalationLevel = 0;
     this.inGrace = false;
     this.inAlarm = false;
     this.graceRemaining = 0;
@@ -80,26 +73,19 @@ export class DetectionPipeline {
 
   resume(): void {
     if (this.state !== "paused" || !this.profile || !this.callbacks) return;
-
     this.state = "running";
-
     this.runCheck();
     this.intervalId = window.setInterval(() => {
       this.runCheck();
     }, 1000);
   }
 
-  resetEscalation(): void {
-    this.escalationLevel = 0;
+  resetAlarm(): void {
     this.inAlarm = false;
   }
 
   getState(): PipelineState {
     return this.state;
-  }
-
-  getEscalationLevel(): number {
-    return this.escalationLevel;
   }
 
   private clearAllTimers(): void {
@@ -123,23 +109,25 @@ export class DetectionPipeline {
     try {
       const windowInfo = await getActiveWindowInfo();
 
-      // If the user clicked back to our app, treat as on-task (dismiss alarm)
-      const selfProcesses = ["focus-detector.exe", "focus detector.exe"];
-      if (selfProcesses.includes(windowInfo.process_name.toLowerCase())) {
+      // If the active window is our own app:
+      // - Always report it so the UI shows the current window
+      // - During alarm: treat as on-task so user can dismiss by clicking back
+      // - Otherwise: skip detection logic to avoid interfering
+      if (this.isSelfWindow(windowInfo)) {
         this.callbacks.onCheck("on_task", windowInfo);
-        this.handleOnTask();
+        if (this.inAlarm) {
+          this.handleOnTask();
+        }
         return;
       }
 
       const result = matchWindowAgainstProfile(windowInfo, this.profile);
 
       if (result === "ambiguous") {
-        // Ambiguous — use cached AI result, only re-check every 30s
         const now = Date.now();
         const AI_COOLDOWN = (this.profile.detection.checkInterval || 30) * 1000;
 
         if (!this.aiCheckRunning && now - this.lastAICheckTime > AI_COOLDOWN) {
-          // Time for a fresh AI check (runs in background, doesn't block)
           this.aiCheckRunning = true;
           this.resolveAmbiguous().then((resolved) => {
             this.lastAIResult = resolved;
@@ -150,7 +138,6 @@ export class DetectionPipeline {
           });
         }
 
-        // Use cached result for now
         this.callbacks.onCheck(this.lastAIResult === "off_task" ? "off_task" : "on_task", windowInfo);
         if (this.lastAIResult === "off_task") {
           this.handleOffTask();
@@ -160,7 +147,6 @@ export class DetectionPipeline {
         return;
       }
 
-      // Clear/definitive result from title matching
       this.callbacks.onCheck(result, windowInfo);
       if (result === "off_task") {
         this.handleOffTask();
@@ -175,49 +161,38 @@ export class DetectionPipeline {
   private handleOffTask(): void {
     if (!this.profile || !this.callbacks) return;
 
-    if (this.inAlarm) {
-      // Already alarming — escalate if not at max
-      if (this.escalationLevel < MAX_ESCALATION) {
-        this.escalationLevel++;
-        this.callbacks.onAlarm(
-          this.escalationLevel as 1 | 2 | 3
-        );
-      }
-      return;
-    }
+    // Already alarming — nothing more to do
+    if (this.inAlarm) return;
 
-    if (this.inGrace) {
-      // Grace period already running, let it continue
-      return;
-    }
+    // Grace period already running
+    if (this.inGrace) return;
 
     // Start grace countdown
     this.inGrace = true;
     this.graceRemaining = this.profile.detection.graceCountdown;
     this.callbacks.onGraceStart(this.graceRemaining);
 
+    const alarmLevel = this.profile.detection.alarmLevel ?? 3;
+
     this.graceTickId = window.setInterval(() => {
       this.graceRemaining--;
       if (this.graceRemaining > 0) {
         this.callbacks?.onGraceTick(this.graceRemaining);
       } else {
-        // Grace expired — trigger alarm
+        // Grace expired — fire alarm at configured level
         this.clearGraceTimers();
         this.inGrace = false;
         this.inAlarm = true;
-        this.escalationLevel = 1;
-        this.callbacks?.onAlarm(1);
+        this.callbacks?.onAlarm(alarmLevel as 1 | 2 | 3);
       }
     }, 1000);
 
-    // Also set a hard timeout as a safety net
     this.graceTimeoutId = window.setTimeout(() => {
       if (this.inGrace) {
         this.clearGraceTimers();
         this.inGrace = false;
         this.inAlarm = true;
-        this.escalationLevel = 1;
-        this.callbacks?.onAlarm(1);
+        this.callbacks?.onAlarm(alarmLevel as 1 | 2 | 3);
       }
     }, this.profile.detection.graceCountdown * 1000 + 100);
   }
@@ -226,7 +201,6 @@ export class DetectionPipeline {
     if (!this.callbacks) return;
 
     if (this.inGrace) {
-      // User got back on task during grace period
       this.clearGraceTimers();
       this.inGrace = false;
       this.graceRemaining = 0;
@@ -235,24 +209,16 @@ export class DetectionPipeline {
     }
 
     if (this.inAlarm) {
-      // User got back on task — immediately dismiss alarm
       this.inAlarm = false;
-      this.escalationLevel = 0;
       this.callbacks.onBackOnTask();
       return;
     }
   }
 
-  /**
-   * When the rule match is ambiguous (e.g., browser open but unknown site),
-   * capture a screenshot and ask the AI vision service to decide.
-   * Falls back to "on_task" if screenshot or vision is unavailable.
-   */
   private async resolveAmbiguous(): Promise<"on_task" | "off_task"> {
     try {
       const apiKeys = await getAIConfig();
 
-      // If no providers are available, default to on_task
       const hasAnyProvider =
         apiKeys.gemini || apiKeys.groq || apiKeys.openRouter || apiKeys.ollamaModel;
       if (!hasAnyProvider) {
@@ -270,14 +236,12 @@ export class DetectionPipeline {
         apiKeys
       );
 
-      // Notify UI about vision analysis
       this.callbacks?.onVisionAnalysis?.({
         screenshot,
         result: visionResult,
         timestamp: Date.now(),
       });
 
-      // Use confidence threshold: if confidence < 0.5, treat as on_task
       if (visionResult.confidence < 0.5) {
         return "on_task";
       }
@@ -287,6 +251,24 @@ export class DetectionPipeline {
       console.warn("Vision analysis failed for ambiguous result:", error);
       return "on_task";
     }
+  }
+
+  private isSelfWindow(windowInfo: ActiveWindowInfo): boolean {
+    const proc = windowInfo.process_name.toLowerCase();
+    const title = windowInfo.title.toLowerCase();
+    const app = windowInfo.app_name.toLowerCase();
+
+    const selfProcesses = [
+      "focus-detector.exe",
+      "focus detector.exe",
+      "focus_detector.exe",
+    ];
+    if (selfProcesses.includes(proc)) return true;
+
+    if (app === "focus detector" || app === "focus-detector") return true;
+    if (title === "focus detector") return true;
+
+    return false;
   }
 
   private clearGraceTimers(): void {

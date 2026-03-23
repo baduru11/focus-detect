@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background gradient -->
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#12121e"/>
+      <stop offset="100%" stop-color="#08080f"/>
+    </radialGradient>
+
+    <!-- Accent gradient (indigo to purple) -->
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="50%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+
+    <!-- Inner ring gradient -->
+    <linearGradient id="inner" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+
+    <!-- Center glow -->
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#c4b5fd"/>
+      <stop offset="40%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Outer glow filter -->
+    <filter id="outerGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Soft glow for center -->
+    <filter id="centerGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12"/>
+    </filter>
+
+    <!-- Subtle ambient glow -->
+    <filter id="ambientGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="35"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect width="1024" height="1024" rx="220" fill="url(#bg)"/>
+
+  <!-- Subtle surface noise/highlight -->
+  <rect width="1024" height="1024" rx="220" fill="url(#bg)" opacity="0.5"/>
+
+  <!-- Ambient glow behind everything -->
+  <circle cx="512" cy="512" r="260" fill="#6366f1" opacity="0.08" filter="url(#ambientGlow)"/>
+
+  <!-- Outer focus ring -->
+  <circle cx="512" cy="512" r="300" fill="none" stroke="url(#accent)" stroke-width="36" opacity="0.9" filter="url(#outerGlow)"/>
+
+  <!-- Ring gap markers (crosshair cuts) — top, right, bottom, left -->
+  <!-- These create the "focus bracket" look by masking parts of the outer ring -->
+  <line x1="512" y1="160" x2="512" y2="270" stroke="#08080f" stroke-width="52" stroke-linecap="round"/>
+  <line x1="864" y1="512" x2="754" y2="512" stroke="#08080f" stroke-width="52" stroke-linecap="round"/>
+  <line x1="512" y1="864" x2="512" y2="754" stroke="#08080f" stroke-width="52" stroke-linecap="round"/>
+  <line x1="160" y1="512" x2="270" y2="512" stroke="#08080f" stroke-width="52" stroke-linecap="round"/>
+
+  <!-- Inner ring -->
+  <circle cx="512" cy="512" r="170" fill="none" stroke="url(#inner)" stroke-width="24" opacity="0.7"/>
+
+  <!-- Center glow (soft) -->
+  <circle cx="512" cy="512" r="90" fill="#6366f1" opacity="0.12" filter="url(#centerGlow)"/>
+
+  <!-- Center dot with gradient -->
+  <circle cx="512" cy="512" r="52" fill="url(#glow)"/>
+
+  <!-- Specular highlight on center -->
+  <circle cx="500" cy="500" r="28" fill="white" opacity="0.12"/>
+
+  <!-- Thin crosshair lines extending inward -->
+  <line x1="512" y1="290" x2="512" y2="340" stroke="#818cf8" stroke-width="3" opacity="0.5"/>
+  <line x1="734" y1="512" x2="684" y2="512" stroke="#818cf8" stroke-width="3" opacity="0.5"/>
+  <line x1="512" y1="734" x2="512" y2="684" stroke="#818cf8" stroke-width="3" opacity="0.5"/>
+  <line x1="290" y1="512" x2="340" y2="512" stroke="#818cf8" stroke-width="3" opacity="0.5"/>
+
+  <!-- Corner bracket marks (subtle tech feel) -->
+  <!-- Top-left -->
+  <path d="M 260 195 L 195 195 L 195 260" fill="none" stroke="#818cf8" stroke-width="4" opacity="0.25" stroke-linecap="round"/>
+  <!-- Top-right -->
+  <path d="M 764 195 L 829 195 L 829 260" fill="none" stroke="#818cf8" stroke-width="4" opacity="0.25" stroke-linecap="round"/>
+  <!-- Bottom-right -->
+  <path d="M 829 764 L 829 829 L 764 829" fill="none" stroke="#818cf8" stroke-width="4" opacity="0.25" stroke-linecap="round"/>
+  <!-- Bottom-left -->
+  <path d="M 195 764 L 195 829 L 260 829" fill="none" stroke="#818cf8" stroke-width="4" opacity="0.25" stroke-linecap="round"/>
+</svg>

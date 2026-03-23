@@ -130,6 +130,26 @@ export async function endSession(
   }
 }
 
+export async function addDistraction(
+  sessionId: string,
+  appName: string,
+  windowTitle: string,
+  alarmLevel: number
+): Promise<void> {
+  try {
+    const database = await getDb();
+    const id = generateUUID();
+    const now = new Date().toISOString();
+    await database.execute(
+      `INSERT INTO distractions (id, session_id, detected_at, app_name, window_title, alarm_level)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, sessionId, now, appName, windowTitle, alarmLevel]
+    );
+  } catch {
+    // silently fail if DB is unavailable
+  }
+}
+
 // ─── Query helpers ──────────────────────────────────────────────────────────
 
 export async function getTodaySessions(): Promise<SessionRecord[]> {

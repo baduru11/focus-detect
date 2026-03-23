@@ -10,6 +10,14 @@ import {
 import { usePomodoro } from "@/hooks/usePomodoro";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDetection } from "@/hooks/useDetection";
+import {
+  startSession,
+  endSession,
+  addDistraction,
+  getTodaySessions,
+  getStreakInfo,
+} from "@/services/sessionService";
+import { loadSavedTheme } from "@/components/settings/ThemeCustomizer";
 import type { PomodoroConfig, PomodoroState } from "@/types/pomodoro";
 import type { Profile } from "@/types/profile";
 import type { ActiveWindowInfo } from "@/services/detectionService";
@@ -76,9 +84,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const config = activeProfile?.pomodoro ?? DEFAULT_CONFIG;
 
+  // ─── Session tracking refs ───────────────────────────────────────────
+  const sessionIdRef = useRef<string | null>(null);
+  const sessionStatsRef = useRef({
+    focusSeconds: 0,
+    distractionSeconds: 0,
+    alarmsLevel1: 0,
+    alarmsLevel2: 0,
+    alarmsLevel3: 0,
+    cyclesCompleted: 0,
+  });
+
   const pomodoroState = usePomodoro(config, {
     onPhaseChange: useCallback(() => {}, []),
-    onCycleComplete: useCallback(() => {}, []),
+    onCycleComplete: useCallback(() => {
+      sessionStatsRef.current.cyclesCompleted++;
+    }, []),
     onTimerEnd: useCallback(() => {}, []),
   });
 
@@ -93,14 +114,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     stop: stopDetection,
     pause: pauseDetection,
     resume: resumeDetection,
+    dismissAlarm: dismissDetectionAlarm,
   } = useDetection();
 
   const [lastCheckedWindow, setLastCheckedWindow] =
     useState<ActiveWindowInfo | null>(null);
   const [recentChecks, setRecentChecks] = useState<DetectionCheckEntry[]>([]);
   const [todayFocusMinutes, setTodayFocusMinutes] = useState(0);
-  const [currentStreak] = useState(0);
+  const [currentStreak, setCurrentStreak] = useState(0);
   const focusStartRef = useRef<number | null>(null);
+
+  // Stable refs for use inside intervals (avoids re-creating intervals on state change)
+  const detectionStateRef = useRef(detectionState);
+  useEffect(() => { detectionStateRef.current = detectionState; }, [detectionState]);
+  const alarmLevelRef = useRef(alarmLevel);
+  useEffect(() => { alarmLevelRef.current = alarmLevel; }, [alarmLevel]);
+  const lastWindowRef = useRef(lastWindowInfo);
+  useEffect(() => { lastWindowRef.current = lastWindowInfo; }, [lastWindowInfo]);
 
   // Sync lastWindowInfo from detection hook into context state
   useEffect(() => {
@@ -124,7 +154,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [lastCheck, lastWindowInfo]);
 
-  // Track focus time
+  // Track focus time (in-memory for dashboard display)
   useEffect(() => {
     if (
       pomodoroState.state.status === "running" &&
@@ -137,6 +167,72 @@ export function AppProvider({ children }: { children: ReactNode }) {
       focusStartRef.current = null;
     }
   }, [pomodoroState.state.status, pomodoroState.state.phase]);
+
+  // Track focus/distraction seconds for DB session (1s interval during work)
+  useEffect(() => {
+    const { status, phase } = pomodoroState.state;
+    if (status !== "running" || phase !== "work" || !sessionIdRef.current) return;
+    const interval = setInterval(() => {
+      const ds = detectionStateRef.current;
+      if (ds === "grace" || ds === "alarm") {
+        sessionStatsRef.current.distractionSeconds++;
+      } else {
+        sessionStatsRef.current.focusSeconds++;
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [pomodoroState.state.status, pomodoroState.state.phase]);
+
+  // Track alarm escalations
+  const prevAlarmRef = useRef(0);
+  useEffect(() => {
+    if (alarmLevel > prevAlarmRef.current && sessionIdRef.current) {
+      if (alarmLevel === 1) sessionStatsRef.current.alarmsLevel1++;
+      else if (alarmLevel === 2) sessionStatsRef.current.alarmsLevel2++;
+      else if (alarmLevel >= 3) sessionStatsRef.current.alarmsLevel3++;
+    }
+    prevAlarmRef.current = alarmLevel;
+  }, [alarmLevel]);
+
+  // Record distraction events to DB
+  const prevDetectionRef = useRef<DetectionState>("idle");
+  useEffect(() => {
+    if (
+      detectionState === "grace" &&
+      prevDetectionRef.current !== "grace" &&
+      sessionIdRef.current &&
+      lastWindowRef.current
+    ) {
+      const w = lastWindowRef.current;
+      addDistraction(
+        sessionIdRef.current,
+        w.app_name || w.process_name,
+        w.title,
+        alarmLevelRef.current
+      );
+    }
+    prevDetectionRef.current = detectionState;
+  }, [detectionState]);
+
+  // Load today stats from DB
+  const refreshTodayStats = useCallback(async () => {
+    try {
+      const [sessions, streakData] = await Promise.all([
+        getTodaySessions(),
+        getStreakInfo(),
+      ]);
+      let focusSec = 0;
+      for (const s of sessions) focusSec += s.focus_seconds;
+      setTodayFocusMinutes(Math.round(focusSec / 60));
+      setCurrentStreak(streakData.current);
+    } catch { /* ignore */ }
+  }, []);
+
+  // Load stats + theme on mount
+  useEffect(() => {
+    refreshTodayStats();
+    loadSavedTheme();
+  }, [refreshTodayStats]);
 
   // Sync detection with timer phase
   useEffect(() => {
@@ -159,9 +255,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     pauseDetection,
   ]);
 
-  const startTimer = useCallback(() => {
+  const startTimer = useCallback(async () => {
     pomodoroState.start();
-  }, [pomodoroState]);
+    if (activeProfile) {
+      sessionStatsRef.current = {
+        focusSeconds: 0, distractionSeconds: 0,
+        alarmsLevel1: 0, alarmsLevel2: 0, alarmsLevel3: 0,
+        cyclesCompleted: 0,
+      };
+      const id = await startSession(activeProfile.id);
+      sessionIdRef.current = id;
+    }
+  }, [pomodoroState, activeProfile]);
 
   const pauseTimer = useCallback(() => {
     pomodoroState.pause();
@@ -172,20 +277,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (activeProfile) resumeDetection();
   }, [pomodoroState, activeProfile, resumeDetection]);
 
-  const stopTimer = useCallback(() => {
+  const stopTimer = useCallback(async () => {
+    // End session in DB before resetting state
+    if (sessionIdRef.current) {
+      const stats = sessionStatsRef.current;
+      await endSession(sessionIdRef.current, {
+        phase: pomodoroState.state.phase,
+        cyclesCompleted: stats.cyclesCompleted,
+        focusSeconds: stats.focusSeconds,
+        distractionSeconds: stats.distractionSeconds,
+        alarmsLevel1: stats.alarmsLevel1,
+        alarmsLevel2: stats.alarmsLevel2,
+        alarmsLevel3: stats.alarmsLevel3,
+      });
+      sessionIdRef.current = null;
+    }
     pomodoroState.stop();
     stopDetection();
     setRecentChecks([]);
     setLastCheckedWindow(null);
-  }, [pomodoroState, stopDetection]);
+    refreshTodayStats();
+  }, [pomodoroState, stopDetection, refreshTodayStats]);
 
   const skipPhase = useCallback(() => {
     pomodoroState.skip();
   }, [pomodoroState]);
 
   const dismissAlarm = useCallback(() => {
-    // Alarm dismissed — detection pipeline handles de-escalation
-  }, []);
+    dismissDetectionAlarm();
+  }, [dismissDetectionAlarm]);
 
   // Sync state to widget via localStorage
   useEffect(() => {
