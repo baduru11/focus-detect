@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="app-icon.png" width="128" height="128" alt="Focus Detector icon — crosshair reticle with indigo rings" />
+  <img src="app-icon.svg" width="128" height="128" alt="Focus Detector icon — crosshair reticle with indigo rings" />
 </p>
 
 <h1 align="center">Focus Detector</h1>
