@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Detector — Design System Preview</title>
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700,900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a12;
+    --bg-raised: #0e0e18;
+    --surface: rgba(255, 255, 255, 0.045);
+    --surface-hover: rgba(255, 255, 255, 0.07);
+    --surface-solid: #111119;
+    --surface-raised: rgba(255, 255, 255, 0.06);
+    --accent: #0ea5e9;
+    --accent-light: #38bdf8;
+    --accent-glow: rgba(14, 165, 233, 0.15);
+    --accent-muted: rgba(14, 165, 233, 0.08);
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --info: #60a5fa;
+    --text-primary: #f0f0f5;
+    --text-secondary: #8b8ca0;
+    --text-muted: #55566a;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.14);
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --font-display: 'Satoshi', -apple-system, sans-serif;
+    --font-body: 'Geist', -apple-system, sans-serif;
+    --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+    --space-2xs: 2px;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+  }
+
+  [data-theme="light"] {
+    --bg: #f5f5f7;
+    --bg-raised: #ffffff;
+    --surface: rgba(0, 0, 0, 0.03);
+    --surface-hover: rgba(0, 0, 0, 0.06);
+    --surface-solid: #ffffff;
+    --surface-raised: rgba(0, 0, 0, 0.04);
+    --accent: #0284c7;
+    --accent-light: #0ea5e9;
+    --accent-glow: rgba(2, 132, 199, 0.12);
+    --accent-muted: rgba(2, 132, 199, 0.06);
+    --text-primary: #111119;
+    --text-secondary: #555566;
+    --text-muted: #8b8ca0;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-hover: rgba(0, 0, 0, 0.14);
+    --border-subtle: rgba(0, 0, 0, 0.05);
+    --success: #059669;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --info: #2563eb;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    letter-spacing: -0.006em;
+    min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .glass {
+    position: relative;
+    background: linear-gradient(135deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.07) 100%);
+    backdrop-filter: blur(40px) saturate(1.8) brightness(1.08);
+    -webkit-backdrop-filter: blur(40px) saturate(1.8) brightness(1.08);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.1), 0 1px 3px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.2);
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(145deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 25%, transparent 50%, rgba(255,255,255,0.02) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  [data-theme="light"] .glass {
+    background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.6) 100%);
+    border-color: rgba(0,0,0,0.06);
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.8), 0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
+  }
+  [data-theme="light"] .glass::before {
+    background: linear-gradient(145deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 25%, transparent 50%);
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg);
+  }
+
+  .section { margin-bottom: var(--space-3xl); }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    margin-bottom: var(--space-sm);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+  }
+
+  .section-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xl);
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  .header {
+    padding: var(--space-2xl) var(--space-lg);
+    text-align: center;
+  }
+
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    padding: var(--space-xs) var(--space-md);
+    border: 1px solid var(--accent-glow);
+    border-radius: var(--radius-full);
+    background: var(--accent-muted);
+    margin-bottom: var(--space-lg);
+  }
+
+  .header-title {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: var(--space-md);
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-subtitle {
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--text-secondary);
+    max-width: 480px;
+    margin: 0 auto var(--space-lg);
+    line-height: 1.7;
+  }
+
+  .theme-toggle {
+    position: fixed;
+    top: var(--space-md);
+    right: var(--space-md);
+    z-index: 100;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    backdrop-filter: blur(12px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+  }
+  .theme-toggle:hover {
+    border-color: var(--border-hover);
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+
+  .font-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .font-card { padding: var(--space-lg); }
+
+  .font-card-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: var(--space-xs);
+  }
+
+  .font-card-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-light);
+    margin-bottom: var(--space-md);
+  }
+
+  .font-hero {
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+  }
+
+  .font-body-sample {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+
+  .font-weights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .font-weight-item {
+    font-size: 20px;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .font-weight-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .color-row {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-md);
+  }
+
+  .color-swatch {
+    width: 80px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .color-swatch-fill { height: 56px; }
+
+  .color-swatch-info {
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--surface);
+  }
+
+  .color-swatch-name {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    display: block;
+  }
+
+  .color-swatch-hex {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-secondary);
+    display: block;
+    margin-top: 1px;
+  }
+
+  .component-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-radius: var(--radius-md);
+    padding: 9px 20px;
+  }
+
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-light); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+  }
+
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-success { background: var(--success); color: white; }
+  .btn-sm { font-size: 12px; padding: 6px 14px; }
+
+  .btn-group { display: flex; gap: var(--space-sm); flex-wrap: wrap; align-items: center; }
+
+  .input {
+    font-family: var(--font-body);
+    font-size: 13px;
+    padding: 9px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-primary);
+    outline: none;
+    width: 100%;
+    transition: all 0.15s ease;
+  }
+  .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .input::placeholder { color: var(--text-muted); }
+
+  .form-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xs);
+    display: block;
+  }
+
+  .form-group { margin-bottom: var(--space-md); }
+
+  .alert {
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    border: 1px solid;
+  }
+
+  .alert-success { background: rgba(52, 211, 153, 0.08); border-color: rgba(52, 211, 153, 0.2); color: var(--success); }
+  .alert-warning { background: rgba(251, 191, 36, 0.08); border-color: rgba(251, 191, 36, 0.2); color: var(--warning); }
+  .alert-danger { background: rgba(248, 113, 113, 0.08); border-color: rgba(248, 113, 113, 0.2); color: var(--danger); }
+  .alert-info { background: rgba(14, 165, 233, 0.08); border-color: rgba(14, 165, 233, 0.2); color: var(--accent-light); }
+
+  .mockup-frame {
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+  }
+  [data-theme="light"] .mockup-frame { box-shadow: 0 4px 24px rgba(0,0,0,0.1); }
+
+  .mockup-titlebar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  [data-theme="light"] .mockup-titlebar { background: rgba(0,0,0,0.02); }
+
+  .mockup-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); opacity: 0.4; }
+
+  .mockup-titlebar-text {
+    font-family: var(--font-body);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: var(--space-sm);
+  }
+
+  .mockup-body { display: flex; min-height: 500px; }
+
+  .mockup-sidebar {
+    width: 56px;
+    border-right: 1px solid var(--border-subtle);
+    background: rgba(255,255,255,0.02);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-md) 0;
+    gap: var(--space-xs);
+  }
+  [data-theme="light"] .mockup-sidebar { background: rgba(0,0,0,0.02); }
+
+  .mockup-sidebar-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: default;
+  }
+  .mockup-sidebar-icon.active { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+  [data-theme="light"] .mockup-sidebar-icon.active { background: rgba(0,0,0,0.06); }
+
+  .mockup-sidebar-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    background: var(--accent-muted);
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-light);
+    font-size: 14px;
+    margin-bottom: var(--space-md);
+  }
+
+  .mockup-content {
+    flex: 1;
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .mockup-content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+  }
+
+  .mockup-content-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .mockup-timer-area { display: flex; gap: var(--space-lg); align-items: flex-start; }
+  .mockup-timer { display: flex; flex-direction: column; align-items: center; gap: var(--space-md); }
+  .mockup-timer-ring { width: 200px; height: 200px; position: relative; }
+  .mockup-timer-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+
+  .mockup-timer-display {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mockup-timer-time {
+    font-family: var(--font-mono);
+    font-size: 40px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mockup-timer-phase {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    margin-top: var(--space-xs);
+  }
+
+  .mockup-timer-controls { display: flex; gap: var(--space-sm); }
+
+  .mockup-detection { flex: 1; display: flex; flex-direction: column; gap: var(--space-sm); }
+
+  .mockup-detection-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    font-size: 12px;
+  }
+
+  .mockup-detection-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  .mockup-detection-time {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mockup-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm); }
+
+  .mockup-stat-card {
+    padding: var(--space-md);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .mockup-stat-value {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mockup-stat-label { font-size: 11px; color: var(--text-muted); margin-top: var(--space-2xs); }
+  .mockup-stat-delta { font-family: var(--font-mono); font-size: 11px; margin-top: var(--space-xs); }
+
+  .mockup-profile-selector {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: default;
+  }
+
+  .mockup-profile-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+  .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); }
+
+  .comparison-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: var(--space-sm);
+    text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: var(--space-lg) var(--space-md); }
+    .font-grid { grid-template-columns: 1fr; }
+    .comparison-grid { grid-template-columns: 1fr; }
+    .mockup-timer-area { flex-direction: column; align-items: center; }
+    .mockup-stats-grid { grid-template-columns: 1fr; }
+    .mockup-body { flex-direction: column; }
+    .mockup-sidebar { flex-direction: row; width: 100%; padding: var(--space-sm) var(--space-md); border-right: none; border-bottom: 1px solid var(--border-subtle); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+    <span id="theme-icon">&#9789;</span>
+  </button>
+
+  <div class="container">
+    <header class="header section">
+      <div class="header-badge"><span>&#9670;</span> Design System Preview</div>
+      <h1 class="header-title">Focus Detector</h1>
+      <p class="header-subtitle">Dark Precision Glass — a design system built for a detection app that watches with elegant restraint.</p>
+    </header>
+
+    <!-- FONT SPECIMENS -->
+    <section class="section fade-in">
+      <div class="section-label">Typography</div>
+      <h2 class="section-title">Three fonts. Three jobs.</h2>
+      <p class="section-desc">Satoshi for display (personality), Geist for body (clarity), Geist Mono for data (precision). Each earns its place.</p>
+
+      <div class="font-grid">
+        <div class="glass font-card">
+          <div class="font-card-label">Display / Hero</div>
+          <div class="font-card-name">Satoshi Variable</div>
+          <div style="font-family: var(--font-display);">
+            <div class="font-hero">Focus Detected</div>
+            <div class="font-body-sample" style="font-size: 16px; font-weight: 500;">The geometric sans with optical warmth. When Inter blends in, Satoshi stands up.</div>
+            <div class="font-weights">
+              <div><div class="font-weight-item" style="font-family: var(--font-display); font-weight: 300;">Aa</div><div class="font-weight-label">Light 300</div></div>
+              <div><div class="font-weight-item" style="font-family: var(--font-display); font-weight: 400;">Aa</div><div class="font-weight-label">Regular 400</div></div>
+              <div><div class="font-weight-item" style="font-family: var(--font-display); font-weight: 500;">Aa</div><div class="font-weight-label">Medium 500</div></div>
+              <div><div class="font-weight-item" style="font-family: var(--font-display); font-weight: 700;">Aa</div><div class="font-weight-label">Bold 700</div></div>
+              <div><div class="font-weight-item" style="font-family: var(--font-display); font-weight: 900;">Aa</div><div class="font-weight-label">Black 900</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass font-card">
+          <div class="font-card-label">Body / UI</div>
+          <div class="font-card-name">Geist Variable</div>
+          <div style="font-family: var(--font-body);">
+            <div class="font-hero" style="font-size: 32px;">Your session is active</div>
+            <div class="font-body-sample">Purpose-built for dark interfaces by Vercel. Exceptional x-height makes 13px body text crisp and readable on high-DPI screens. The proportions feel native to glass surfaces.</div>
+            <div class="font-weights">
+              <div><div class="font-weight-item" style="font-family: var(--font-body); font-weight: 300;">Aa</div><div class="font-weight-label">Light 300</div></div>
+              <div><div class="font-weight-item" style="font-family: var(--font-body); font-weight: 400;">Aa</div><div class="font-weight-label">Regular 400</div></div>
+              <div><div class="font-weight-item" style="font-family: var(--font-body); font-weight: 500;">Aa</div><div class="font-weight-label">Medium 500</div></div>
+              <div><div class="font-weight-item" style="font-family: var(--font-body); font-weight: 700;">Aa</div><div class="font-weight-label">Bold 700</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass font-card">
+          <div class="font-card-label">Timer / Data / Code</div>
+          <div class="font-card-name">Geist Mono Variable</div>
+          <div style="font-family: var(--font-mono);">
+            <div class="font-hero" style="font-size: 48px; font-variant-numeric: tabular-nums;">24:59</div>
+            <div class="font-body-sample">Tabular figures mean digits never shift width as they count down. The timer becomes an instrument, not a label.</div>
+            <div style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--border-subtle); font-size: 13px; color: var(--text-secondary); font-variant-numeric: tabular-nums;">
+              <span style="color: var(--text-muted);">09:41:23</span>&nbsp;&nbsp;<span style="color: var(--success);">on_task</span>&nbsp;&nbsp;Visual Studio Code<br>
+              <span style="color: var(--text-muted);">09:44:07</span>&nbsp;&nbsp;<span style="color: var(--danger);">off_task</span>&nbsp;&nbsp;YouTube — Chrome<br>
+              <span style="color: var(--text-muted);">09:44:17</span>&nbsp;&nbsp;<span style="color: var(--warning);">ambiguous</span>&nbsp;Stack Overflow — Chrome
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COLOR PALETTE -->
+    <section class="section fade-in">
+      <div class="section-label">Color</div>
+      <h2 class="section-title">Restrained palette. Sky blue accent.</h2>
+      <p class="section-desc">Indigo is out. Sky blue reads as precision scanning against dark glass.</p>
+
+      <div style="margin-bottom: var(--space-lg);">
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: var(--space-sm); font-weight: 500;">Accent</div>
+        <div class="color-row">
+          <div class="color-swatch"><div class="color-swatch-fill" style="background: #0ea5e9;"></div><div class="color-swatch-info"><span class="color-swatch-name">Primary</span><span class="color-swatch-hex">#0ea5e9</span></div></div>
+          <div class="color-swatch"><div class="color-swatch-fill" style="background: #38bdf8;"></div><div class="color-swatch-info"><span class="color-swatch-name">Light</span><span class="color-swatch-hex">#38bdf8</span></div></div>
+          <div class="color-swatch"><div class="color-swatch-fill" style="background: rgba(14, 165, 233, 0.15);"></div><div class="color-swatch-info"><span class="color-swatch-name">Glow</span><span class="color-swatch-hex">15% opacity</span></div></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: var(--space-lg);">
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: var(--space-sm); font-weight: 500;">Semantic</div>
+        <div class="color-row">
+          <div class="color-swatch"><div class="color-swatch-fill" style="background: #34d399;"></div><div class="color-swatch-info"><span class="color-swatch-name">Success</span><span class="color-swatch-hex">#34d399</span></div></div>
+          <div class="color-swatch"><div class="color-swatch-fill" style="background: #fbbf24;"></div><div class="color-swatch-info"><span class="color-swatch-name">Warning</span><span class="color-swatch-hex">#fbbf24</span></div></div>
+          <div class="color-swatch"><div class="color-swatch-fill" style="background: #f87171;"></div><div class="color-swatch-info"><span class="color-swatch-name">Danger</span><span class="color-swatch-hex">#f87171</span></div></div>
+          <div class="color-swatch"><div class="color-swatch-fill" style="background: #60a5fa;"></div><div class="color-swatch-info"><span class="color-swatch-name">Info</span><span class="color-swatch-hex">#60a5fa</span></div></div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: var(--space-sm); font-weight: 500;">Surfaces & Text</div>
+        <div class="color-row">
+          <div class="color-swatch"><div class="color-swatch-fill" style="background: #0a0a12;"></div><div class="color-swatch-info"><span class="color-swatch-name">Base</span><span class="color-swatch-hex">#0a0a12</span></div></div>
+          <div class="color-swatch"><div class="color-swatch-fill" style="background: #111119;"></div><div class="color-swatch-info"><span class="color-swatch-name">Surface</span><span class="color-swatch-hex">#111119</span></div></div>
+          <div class="color-swatch"><div class="color-swatch-fill" style="background: #f0f0f5;"></div><div class="color-swatch-info"><span class="color-swatch-name">Text 1</span><span class="color-swatch-hex">#f0f0f5</span></div></div>
+          <div class="color-swatch"><div class="color-swatch-fill" style="background: #8b8ca0;"></div><div class="color-swatch-info"><span class="color-swatch-name">Text 2</span><span class="color-swatch-hex">#8b8ca0</span></div></div>
+          <div class="color-swatch"><div class="color-swatch-fill" style="background: #55566a;"></div><div class="color-swatch-info"><span class="color-swatch-name">Muted</span><span class="color-swatch-hex">#55566a</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- UI COMPONENTS -->
+    <section class="section fade-in">
+      <div class="section-label">Components</div>
+      <h2 class="section-title">Buttons, inputs, alerts.</h2>
+      <p class="section-desc">The sky blue accent applied to interactive elements.</p>
+
+      <div class="component-grid">
+        <div class="glass" style="padding: var(--space-lg);">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: var(--space-md); font-weight: 500;">Buttons</div>
+          <div class="btn-group" style="margin-bottom: var(--space-md);">
+            <button class="btn btn-primary">Start Session</button>
+            <button class="btn btn-ghost">Pause</button>
+            <button class="btn btn-danger btn-sm">Stop</button>
+            <button class="btn btn-success btn-sm">Skip Break</button>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary btn-sm" style="opacity: 0.4; pointer-events: none;">Disabled</button>
+            <button class="btn btn-ghost btn-sm">Settings</button>
+          </div>
+        </div>
+
+        <div class="glass" style="padding: var(--space-lg);">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: var(--space-md); font-weight: 500;">Form Inputs</div>
+          <div class="form-group"><label class="form-label">API Key</label><input class="input" type="text" placeholder="sk-..." value="sk-proj-abc...xyz"></div>
+          <div class="form-group"><label class="form-label">Work Duration</label><input class="input" type="number" value="25" style="width: 120px;"></div>
+        </div>
+
+        <div class="glass" style="padding: var(--space-lg);">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: var(--space-md); font-weight: 500;">Alerts</div>
+          <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+            <div class="alert alert-success">&#10003; On task — Visual Studio Code</div>
+            <div class="alert alert-warning">&#9888; Ambiguous — Stack Overflow</div>
+            <div class="alert alert-danger">&#10005; Off task — YouTube</div>
+            <div class="alert alert-info">&#9432; AI vision check in 12s</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD MOCKUP -->
+    <section class="section fade-in">
+      <div class="section-label">Mockup</div>
+      <h2 class="section-title">Dashboard — the daily view.</h2>
+      <p class="section-desc">Satoshi for headings, Geist for body, Geist Mono for the timer and detection log.</p>
+
+      <div class="mockup-frame">
+        <div class="mockup-titlebar">
+          <div class="mockup-dot"></div><div class="mockup-dot"></div><div class="mockup-dot"></div>
+          <span class="mockup-titlebar-text">Focus Detector</span>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-sidebar">
+            <div class="mockup-sidebar-logo">&#9678;</div>
+            <div class="mockup-sidebar-icon active">&#9632;</div>
+            <div class="mockup-sidebar-icon">&#9775;</div>
+            <div class="mockup-sidebar-icon">&#9636;</div>
+            <div class="mockup-sidebar-icon">&#9881;</div>
+          </div>
+          <div class="mockup-content">
+            <div class="mockup-content-header">
+              <div class="mockup-content-title" style="font-family: var(--font-display);">Dashboard</div>
+              <div class="mockup-profile-selector"><div class="mockup-profile-dot"></div><span>Deep Work</span><span style="color: var(--text-muted);">&#9662;</span></div>
+            </div>
+            <div class="mockup-timer-area">
+              <div class="mockup-timer">
+                <div class="mockup-timer-ring">
+                  <svg viewBox="0 0 250 250">
+                    <defs><linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#7dd3fc"/></linearGradient></defs>
+                    <circle cx="125" cy="125" r="115" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="5"/>
+                    <circle cx="125" cy="125" r="115" fill="none" stroke="url(#ring-grad)" stroke-width="5" stroke-linecap="round" stroke-dasharray="723" stroke-dashoffset="231" style="filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.3));"/>
+                  </svg>
+                  <div class="mockup-timer-display">
+                    <div class="mockup-timer-time">17:04</div>
+                    <div class="mockup-timer-phase">Focus</div>
+                  </div>
+                </div>
+                <div class="mockup-timer-controls">
+                  <button class="btn btn-ghost btn-sm">&#10074;&#10074; Pause</button>
+                  <button class="btn btn-ghost btn-sm" style="color: var(--danger);">&#9632; Stop</button>
+                  <button class="btn btn-ghost btn-sm">&#9193; Skip</button>
+                </div>
+                <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">Cycle 2 / 4</div>
+              </div>
+              <div class="mockup-detection">
+                <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-xs);">Recent Checks</div>
+                <div class="mockup-detection-item">
+                  <div class="mockup-detection-dot" style="background: var(--success);"></div>
+                  <span style="color: var(--text-secondary);">Visual Studio Code</span>
+                  <span style="font-family: var(--font-mono); font-size: 11px; color: var(--success);">on_task</span>
+                  <span class="mockup-detection-time">09:41:23</span>
+                </div>
+                <div class="mockup-detection-item">
+                  <div class="mockup-detection-dot" style="background: var(--success);"></div>
+                  <span style="color: var(--text-secondary);">Terminal — npm run dev</span>
+                  <span style="font-family: var(--font-mono); font-size: 11px; color: var(--success);">on_task</span>
+                  <span class="mockup-detection-time">09:38:15</span>
+                </div>
+                <div class="mockup-detection-item">
+                  <div class="mockup-detection-dot" style="background: var(--warning);"></div>
+                  <span style="color: var(--text-secondary);">Stack Overflow — Chrome</span>
+                  <span style="font-family: var(--font-mono); font-size: 11px; color: var(--warning);">ambiguous</span>
+                  <span class="mockup-detection-time">09:35:02</span>
+                </div>
+                <div class="mockup-detection-item">
+                  <div class="mockup-detection-dot" style="background: var(--danger);"></div>
+                  <span style="color: var(--text-secondary);">YouTube — Chrome</span>
+                  <span style="font-family: var(--font-mono); font-size: 11px; color: var(--danger);">off_task</span>
+                  <span class="mockup-detection-time">09:32:47</span>
+                </div>
+                <div style="margin-top: var(--space-md);">
+                  <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-sm);">Session</div>
+                  <div class="mockup-stats-grid">
+                    <div class="mockup-stat-card"><div class="mockup-stat-value" style="color: var(--success);">87%</div><div class="mockup-stat-label">Focus Rate</div><div class="mockup-stat-delta" style="color: var(--success);">+12% vs avg</div></div>
+                    <div class="mockup-stat-card"><div class="mockup-stat-value">1h 23m</div><div class="mockup-stat-label">Focus Time</div><div class="mockup-stat-delta" style="color: var(--text-muted);">today</div></div>
+                    <div class="mockup-stat-card"><div class="mockup-stat-value" style="color: var(--danger);">2</div><div class="mockup-stat-label">Distractions</div><div class="mockup-stat-delta" style="color: var(--success);">-3 vs avg</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BEFORE / AFTER -->
+    <section class="section fade-in">
+      <div class="section-label">Comparison</div>
+      <h2 class="section-title">Before and after.</h2>
+      <p class="section-desc">Same glass surfaces. Different typography and accent. The difference is identity.</p>
+
+      <div class="comparison-grid">
+        <div>
+          <div class="comparison-label">Before — Inter + Indigo</div>
+          <div class="glass" style="padding: var(--space-lg); text-align: center;">
+            <div class="font-hero" style="font-family: 'Inter', -apple-system, sans-serif; color: #818cf8;">Focus Detector</div>
+            <div style="font-family: 'Inter', -apple-system, sans-serif; font-size: 14px; color: var(--text-secondary); margin: var(--space-md) 0;">Every other dark-mode productivity tool.</div>
+            <div style="font-family: 'Inter', -apple-system, sans-serif; font-size: 48px; font-weight: 300; color: var(--text-primary); margin: var(--space-lg) 0; font-variant-numeric: tabular-nums;">24:59</div>
+            <button class="btn" style="background: #6366f1; color: white; font-family: 'Inter', -apple-system, sans-serif;">Start Session</button>
+          </div>
+        </div>
+        <div>
+          <div class="comparison-label">After — Satoshi + Geist + Sky Blue</div>
+          <div class="glass" style="padding: var(--space-lg); text-align: center;">
+            <div class="font-hero" style="font-family: var(--font-display); color: var(--accent-light);">Focus Detector</div>
+            <div style="font-family: var(--font-body); font-size: 14px; color: var(--text-secondary); margin: var(--space-md) 0;">Precision glass. Scanner blue. Purpose-built.</div>
+            <div style="font-family: var(--font-mono); font-size: 48px; font-weight: 400; color: var(--text-primary); margin: var(--space-lg) 0; font-variant-numeric: tabular-nums;">24:59</div>
+            <button class="btn btn-primary">Start Session</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DESIGN TOKENS -->
+    <section class="section fade-in">
+      <div class="section-label">Tokens</div>
+      <h2 class="section-title">The complete system.</h2>
+      <p class="section-desc">Every value codified. No guessing during implementation.</p>
+
+      <div class="glass" style="padding: var(--space-lg); font-family: var(--font-mono); font-size: 12px; line-height: 2; color: var(--text-secondary);">
+        <span style="color: var(--text-muted);">/* Typography */</span><br>
+        <span style="color: var(--accent-light);">--font-display</span>: 'Satoshi', sans-serif;<br>
+        <span style="color: var(--accent-light);">--font-body</span>: 'Geist', sans-serif;<br>
+        <span style="color: var(--accent-light);">--font-mono</span>: 'Geist Mono', monospace;<br><br>
+        <span style="color: var(--text-muted);">/* Accent — Sky Blue */</span><br>
+        <span style="color: var(--accent-light);">--accent</span>: <span style="color: #0ea5e9;">#0ea5e9</span>;<br>
+        <span style="color: var(--accent-light);">--accent-light</span>: <span style="color: #38bdf8;">#38bdf8</span>;<br>
+        <span style="color: var(--accent-light);">--accent-glow</span>: rgba(14, 165, 233, 0.15);<br><br>
+        <span style="color: var(--text-muted);">/* Spacing — 4px base */</span><br>
+        <span style="color: var(--accent-light);">--space-xs</span>: 4px; &nbsp;<span style="color: var(--accent-light);">--space-sm</span>: 8px; &nbsp;<span style="color: var(--accent-light);">--space-md</span>: 16px;<br>
+        <span style="color: var(--accent-light);">--space-lg</span>: 24px; &nbsp;<span style="color: var(--accent-light);">--space-xl</span>: 32px; &nbsp;<span style="color: var(--accent-light);">--space-2xl</span>: 48px;<br><br>
+        <span style="color: var(--text-muted);">/* Radius */</span><br>
+        <span style="color: var(--accent-light);">--radius-sm</span>: 4px; &nbsp;<span style="color: var(--accent-light);">--radius-md</span>: 8px; &nbsp;<span style="color: var(--accent-light);">--radius-lg</span>: 12px; &nbsp;<span style="color: var(--accent-light);">--radius-xl</span>: 16px;
+      </div>
+    </section>
+
+    <footer style="text-align: center; padding: var(--space-2xl) 0 var(--space-xl); color: var(--text-muted); font-size: 12px;">
+      <div style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em;">FOCUS DETECTOR &middot; DESIGN SYSTEM &middot; DARK PRECISION GLASS</div>
+    </footer>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('theme-icon').textContent = next === 'dark' ? '\u263D' : '\u2600';
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

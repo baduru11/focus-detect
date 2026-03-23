@@ -48,3 +48,10 @@
 - **Context:** Identified in CEO review 2026-03-23 system audit. Must wait for test safety net.
 - **Depends on:** Test coverage (Phase 1 of Stabilize & Polish)
 - **Priority:** P3 — code health
+
+## TODO 8: Configure Content Security Policy
+- **What:** Set proper CSP in `tauri.conf.json` instead of `"csp": null`. Restrict to needed origins (self, Tauri asset protocol, AI provider API domains).
+- **Why:** CSP is currently completely disabled. Plan adds user-provided filesystem images (meme system) and `shell.open()`. No CSP means any XSS in the webview could access arbitrary resources.
+- **Context:** Flagged by Outside Voice in CEO review 2026-03-23. Not critical for local desktop app but should be done before any public distribution.
+- **Depends on:** Meme system complete (need to know which origins are required)
+- **Priority:** P2 — security hygiene
