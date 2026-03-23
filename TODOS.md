@@ -55,3 +55,10 @@
 - **Context:** Flagged by Outside Voice in CEO review 2026-03-23. Not critical for local desktop app but should be done before any public distribution.
 - **Depends on:** Meme system complete (need to know which origins are required)
 - **Priority:** P2 — security hygiene
+
+## TODO 9: Remove or wire alarm overlay dead code
+- **What:** `AlarmPage.tsx` and `alarm_overlay.rs` (`show_alarm_overlay`/`hide_alarm_overlay`) are dead code. The IPC command is registered in lib.rs but never invoked from the frontend. L3 alarm renders in-window via AlarmController.
+- **Why:** Dead code confuses future developers and wastes bundle size. Either remove it entirely, or wire `show_alarm_overlay` into useDetection when L3 fires (requires dual-window coordination for sound/state).
+- **Context:** Discovered by Outside Voice in eng review 2026-03-23. The alarm overlay was likely an early prototype for fullscreen alarms that was superseded by the in-window AlarmController approach with `setAlwaysOnTop(true)`.
+- **Depends on:** Nothing
+- **Priority:** P2 — dead code removal
