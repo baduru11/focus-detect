@@ -62,13 +62,30 @@
 - **Duration:** micro(100ms) short(150ms) medium(200ms) long(400ms)
 - **Library:** framer-motion — whileTap, AnimatePresence, layout animations
 
-## Glass Surface Specification
-Glass cards use layered depth:
+## Glass Surface Specification (Liquid Glass)
+Inspired by Apple's iOS 26 Liquid Glass — translated to CSS/React for Tauri.
+
+### Base Glass
 - Background: gradient from `white/9%` to `white/5%` to `white/7%`
 - Backdrop: `blur(40px) saturate(1.8) brightness(1.08)`
 - Border: `1px solid white/12%`
 - Shadow: `inset 0 1px white/10%, 0 1px 3px black/30%, 0 8px 24px black/20%`
-- Specular highlight: `::before` pseudo with diagonal gradient
+- Specular highlight: static diagonal gradient (default)
+
+### Liquid Glass Features (GlassCard props)
+- **`interactive`** — Pointer-tracking specular highlight. A radial gradient follows the cursor across the glass surface, simulating light refraction. Cards also compress slightly on press (`scale: 0.985`). Use on cards the user interacts with.
+- **`tint`** — Accent color wash over the glass. 6% opacity overlay. Use to give contextual meaning (e.g., success tint on on-task cards, danger tint on alarm cards).
+- **`glow`** — Accent-colored border glow for active/focused elements.
+- **`hoverable`** — Subtle background shift on hover for clickable cards.
+
+### When to Use Each
+| Prop | Use Case |
+|------|----------|
+| Default (no props) | Static display cards, stat panels |
+| `hoverable` | Clickable cards (profiles, settings) |
+| `interactive` | Primary interaction surfaces (timer card, detection panel) |
+| `glow` | Active/focused state (selected profile, running timer) |
+| `tint` | Contextual color (status indicators, alarm states) |
 
 ## Decisions Log
 | Date | Decision | Rationale |
