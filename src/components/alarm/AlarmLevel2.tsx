@@ -20,9 +20,10 @@ const MESSAGES = [
 
 interface AlarmLevel2Props {
   onDismiss: () => void;
+  memeUrl?: string | null;
 }
 
-export function AlarmLevel2({ onDismiss }: AlarmLevel2Props) {
+export function AlarmLevel2({ onDismiss, memeUrl }: AlarmLevel2Props) {
   const [cooldown, setCooldown] = useState(3);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const message = useMemo(
@@ -96,6 +97,16 @@ export function AlarmLevel2({ onDismiss }: AlarmLevel2Props) {
             }}
             transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
           />
+
+          {/* Meme image */}
+          {memeUrl && (
+            <img
+              src={memeUrl}
+              alt=""
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              className="w-full max-h-48 object-contain rounded-lg mb-4"
+            />
+          )}
 
           <AlertTriangle className="w-12 h-12 text-neon-red mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-neon-red mb-2">

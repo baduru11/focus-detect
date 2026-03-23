@@ -2,6 +2,7 @@ use tauri::Manager;
 
 mod alarm_overlay;
 mod detection;
+mod memes;
 mod monitors;
 mod tray;
 
@@ -20,6 +21,10 @@ pub fn apply_vibrancy_effect(window: &tauri::WebviewWindow) {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            None,
+        ))
         .plugin(
             tauri_plugin_sql::Builder::default()
                 .add_migrations(
@@ -41,6 +46,7 @@ pub fn run() {
             tray::update_tray_tooltip,
             tray::toggle_widget,
             tray::widget_open_main,
+            memes::list_custom_memes,
             alarm_overlay::show_alarm_overlay,
             alarm_overlay::hide_alarm_overlay,
         ])

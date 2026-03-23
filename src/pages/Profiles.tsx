@@ -1,53 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus } from "lucide-react";
+import { Plus, Shield } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { ProfileCard } from "@/components/profiles/ProfileCard";
 import { ProfileEditor } from "@/components/profiles/ProfileEditor";
 import type { Profile } from "@/types/profile";
-
-const MOCK_PROFILES: Profile[] = [
-  {
-    id: "mock-deep-work",
-    name: "Deep Work",
-    icon: "\uD83D\uDCBB",
-    mode: "blacklist",
-    apps: [
-      { name: "Twitter", process: "twitter.exe", allowed: false },
-      { name: "YouTube", process: "youtube.exe", allowed: false },
-      { name: "Reddit", process: "reddit.exe", allowed: false },
-    ],
-    pomodoro: { work: 50, shortBreak: 10, longBreak: 30, cyclesBeforeLong: 4 },
-    detection: { checkInterval: 5, graceCountdown: 10, alarmLockDuration: 30, alarmLevel: 3 as const },
-    monitors: { detection: "all", alarm: "primary" },
-  },
-  {
-    id: "mock-study-mode",
-    name: "Study Mode",
-    icon: "\uD83D\uDCDA",
-    mode: "whitelist",
-    apps: [
-      { name: "Notion", process: "notion.exe", allowed: true },
-      { name: "Anki", process: "anki.exe", allowed: true },
-    ],
-    pomodoro: { work: 25, shortBreak: 5, longBreak: 15, cyclesBeforeLong: 4 },
-    detection: { checkInterval: 5, graceCountdown: 10, alarmLockDuration: 30, alarmLevel: 3 as const },
-    monitors: { detection: "all", alarm: "all" },
-  },
-  {
-    id: "mock-creative-flow",
-    name: "Creative Flow",
-    icon: "\uD83C\uDFA8",
-    mode: "blacklist",
-    apps: [
-      { name: "Slack", process: "slack.exe", allowed: false },
-      { name: "Email", process: "outlook.exe", allowed: false },
-    ],
-    pomodoro: { work: 45, shortBreak: 10, longBreak: 20, cyclesBeforeLong: 3 },
-    detection: { checkInterval: 10, graceCountdown: 15, alarmLockDuration: 20, alarmLevel: 3 as const },
-    monitors: { detection: "primary", alarm: "primary" },
-  },
-];
 
 const container = {
   hidden: { opacity: 0 },
@@ -72,8 +29,7 @@ export default function Profiles() {
     deleteProfile,
   } = useApp();
 
-  // Use mock profiles when DB returns empty
-  const profiles = dbProfiles.length > 0 ? dbProfiles : MOCK_PROFILES;
+  const profiles = dbProfiles;
   const activeId = activeProfile?.id ?? (profiles.length > 0 ? profiles[0].id : null);
 
   const [editorState, setEditorState] = useState<
@@ -119,6 +75,28 @@ export default function Profiles() {
       >
         Activity Profiles
       </motion.h1>
+
+      {/* Empty State */}
+      {profiles.length === 0 && (
+        <motion.div
+          className="flex flex-col items-center justify-center py-20 gap-5"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.03] border border-accent/15 flex items-center justify-center shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_0_12px_rgba(99,102,241,0.06)]">
+            <Shield className="w-7 h-7 text-accent/60" />
+          </div>
+          <div className="flex flex-col items-center gap-1.5">
+            <span className="text-[15px] font-medium text-text-primary">
+              Create your first profile to get started
+            </span>
+            <span className="text-[13px] text-text-muted max-w-xs text-center">
+              Profiles define which apps are allowed or blocked during focus sessions.
+            </span>
+          </div>
+        </motion.div>
+      )}
 
       {/* Profile Grid */}
       <motion.div

@@ -2,6 +2,9 @@ import { motion } from "framer-motion";
 import { ThemeCustomizer } from "@/components/settings/ThemeCustomizer";
 import { AIProviderConfig } from "@/components/settings/AIProviderConfig";
 import { DataExport } from "@/components/settings/DataExport";
+import { VolumeControl } from "@/components/settings/VolumeControl";
+import { MemeManager } from "@/components/settings/MemeManager";
+import { AutoStartToggle } from "@/components/settings/AutoStartToggle";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 12 },
@@ -39,7 +42,19 @@ export default function Settings() {
         </motion.div>
 
         <motion.div variants={sectionVariants}>
+          <VolumeControl />
+        </motion.div>
+
+        <motion.div variants={sectionVariants}>
+          <MemeManager />
+        </motion.div>
+
+        <motion.div variants={sectionVariants}>
           <AIProviderConfig />
+        </motion.div>
+
+        <motion.div variants={sectionVariants}>
+          <AutoStartToggle />
         </motion.div>
 
         <motion.div variants={sectionVariants}>

@@ -60,6 +60,13 @@ interface AppContextValue {
   // Session
   todayFocusMinutes: number;
   currentStreak: number;
+  sessionsCompletedToday: number;
+
+  // Celebrations
+  showCelebration: boolean;
+  clearCelebration: () => void;
+  milestoneMessage: string | null;
+  clearMilestone: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -98,11 +105,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
 
   const pomodoroState = usePomodoro(config, {
-    onPhaseChange: useCallback(() => {}, []),
+    onPhaseChange: useCallback((phase: string) => {
+      // Confetti on work→break transition (phase is the NEXT phase, not previous)
+      // Guard: don't fire on start() which sends "work"
+      if (phase === "shortBreak" || phase === "longBreak") {
+        setShowCelebration(true);
+        // Increment sessions completed today
+        setSessionsCompletedToday((prev) => {
+          const next = prev + 1;
+          // Milestone toasts at 5, 10, 25
+          if (next === 5) setMilestoneMessage("5 sessions done! You're on fire!");
+          else if (next === 10) setMilestoneMessage("10 sessions! Unstoppable!");
+          else if (next === 25) setMilestoneMessage("25 sessions! Legendary focus!");
+          return next;
+        });
+      }
+    }, []),
     onCycleComplete: useCallback(() => {
       sessionStatsRef.current.cyclesCompleted++;
     }, []),
-    onTimerEnd: useCallback(() => {}, []),
+    onTimerEnd: useCallback(() => {
+      // Play phase transition chime
+      import("@/services/alarmSound").then(({ playPhaseChime }) => playPhaseChime()).catch(() => {});
+    }, []),
   });
 
   const {
@@ -124,6 +149,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [recentChecks, setRecentChecks] = useState<DetectionCheckEntry[]>([]);
   const [todayFocusMinutes, setTodayFocusMinutes] = useState(0);
   const [currentStreak, setCurrentStreak] = useState(0);
+  const [sessionsCompletedToday, setSessionsCompletedToday] = useState(0);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [milestoneMessage, setMilestoneMessage] = useState<string | null>(null);
   const focusStartRef = useRef<number | null>(null);
 
   // Stable refs for use inside intervals (avoids re-creating intervals on state change)
@@ -334,6 +362,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dismissDetectionAlarm();
   }, [dismissDetectionAlarm]);
 
+  const clearCelebration = useCallback(() => setShowCelebration(false), []);
+  const clearMilestone = useCallback(() => setMilestoneMessage(null), []);
+
   // Sync state to widget via localStorage
   useEffect(() => {
     const mins = Math.floor(pomodoroState.state.secondsRemaining / 60);
@@ -398,6 +429,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         lastVision,
         todayFocusMinutes,
         currentStreak,
+        sessionsCompletedToday,
+        showCelebration,
+        clearCelebration,
+        milestoneMessage,
+        clearMilestone,
       }}
     >
       {children}

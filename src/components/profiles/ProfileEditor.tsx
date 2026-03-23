@@ -7,6 +7,7 @@ import { NeonButton } from "@/components/ui/NeonButton";
 import { NeonInput } from "@/components/ui/NeonInput";
 import { NeonSlider } from "@/components/ui/NeonSlider";
 import { NeonToggle } from "@/components/ui/NeonToggle";
+import { AlarmPreview } from "@/components/profiles/AlarmPreview";
 import { listRunningApps, type RunningApp } from "@/services/detectionService";
 import type { Profile, AppRule } from "@/types/profile";
 
@@ -483,7 +484,7 @@ export function ProfileEditor({
                       shortBreak:
                         "bg-success/30 border-r border-success/20",
                       longBreak:
-                        "bg-[#a855f7]/30 border-r border-[#a855f7]/20",
+                        "bg-[purple]/30 border-r border-[purple]/20",
                     };
                     return (
                       <motion.div
@@ -513,7 +514,7 @@ export function ProfileEditor({
                     Short Break
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-sm bg-[#a855f7]/30" />
+                    <span className="w-2 h-2 rounded-sm bg-[purple]/30" />
                     Long Break
                   </span>
                 </div>
@@ -574,6 +575,9 @@ export function ProfileEditor({
                   {alarmLevel === 2 && "Center dialog with alert sound"}
                   {alarmLevel === 3 && "Fullscreen lockdown with siren"}
                 </p>
+                <div className="mt-3">
+                  <AlarmPreview />
+                </div>
               </div>
             </div>
           </GlassCard>

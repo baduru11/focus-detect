@@ -1,28 +1,219 @@
+// ---------------------------------------------------------------------------
+// Alarm Sound System
+// Primary: AudioBuffer playback from .mp3 files
+// Fallback: Web Audio oscillator-based sounds (original implementation)
+// ---------------------------------------------------------------------------
+
+// Module-level state
 let audioCtx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
+let savedVolume = 0.7;
+let currentSource: AudioBufferSourceNode | OscillatorNode | null = null;
+const audioBufferCache: Map<string, AudioBuffer> = new Map();
+let audioContextResumed = false;
+
+// Oscillator fallback state
 const activeOscillators: OscillatorNode[] = [];
 const activeGains: GainNode[] = [];
 let sirenInterval: ReturnType<typeof setInterval> | null = null;
 
-function getAudioContext(): { ctx: AudioContext; gain: GainNode } {
-  if (!audioCtx || audioCtx.state === "closed") {
+// Sound file paths (bundled in /public/sounds/)
+const SOUND_FILES = {
+  chime: '/sounds/chime.mp3',
+  alert: '/sounds/alert.mp3',
+  siren: '/sounds/siren.mp3',
+  phaseChime: '/sounds/phase-chime.mp3',
+};
+
+// ---------------------------------------------------------------------------
+// AudioContext management
+// ---------------------------------------------------------------------------
+
+function getAudioContext(): AudioContext {
+  if (!audioCtx || audioCtx.state === 'closed') {
     audioCtx = new AudioContext();
     masterGain = audioCtx.createGain();
-    masterGain.gain.value = 0.5;
+    masterGain.gain.value = savedVolume;
     masterGain.connect(audioCtx.destination);
   }
-  if (audioCtx.state === "suspended") {
+  if (audioCtx.state === 'suspended') {
     audioCtx.resume();
   }
-  return { ctx: audioCtx, gain: masterGain! };
+  return audioCtx;
 }
+
+/**
+ * Resume AudioContext on first user interaction to satisfy browser autoplay
+ * policy. Registers one-shot listeners that auto-remove after firing.
+ */
+function ensureAudioResumed(): void {
+  if (audioContextResumed) return;
+
+  const resume = () => {
+    audioCtx?.resume();
+    audioContextResumed = true;
+    document.removeEventListener('click', resume);
+    document.removeEventListener('keydown', resume);
+  };
+  document.addEventListener('click', resume, { once: true });
+  document.addEventListener('keydown', resume, { once: true });
+}
+
+// ---------------------------------------------------------------------------
+// AudioBuffer loading & playback
+// ---------------------------------------------------------------------------
+
+async function loadAudioBuffer(url: string): Promise<AudioBuffer | null> {
+  if (audioBufferCache.has(url)) return audioBufferCache.get(url)!;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} for ${url}`);
+    }
+    const arrayBuffer = await response.arrayBuffer();
+    const ctx = getAudioContext();
+    const buffer = await ctx.decodeAudioData(arrayBuffer);
+    audioBufferCache.set(url, buffer);
+    return buffer;
+  } catch (e) {
+    console.warn(`Failed to load audio ${url}, will use oscillator fallback:`, e);
+    return null;
+  }
+}
+
+function playBuffer(buffer: AudioBuffer, loop = false): void {
+  stop();
+  const ctx = getAudioContext();
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.loop = loop;
+  source.connect(masterGain!);
+  source.start();
+  currentSource = source;
+}
+
+// ---------------------------------------------------------------------------
+// Volume control
+// ---------------------------------------------------------------------------
+
+/** Set master volume (0-1). Persists across sound changes. */
+export function setVolume(vol: number): void {
+  savedVolume = Math.max(0, Math.min(1, vol));
+  if (masterGain) {
+    masterGain.gain.value = savedVolume;
+  }
+}
+
+/** Get current master volume (0-1). */
+export function getVolume(): number {
+  return savedVolume;
+}
+
+// ---------------------------------------------------------------------------
+// Public play functions — try .mp3 first, fallback to oscillator
+// ---------------------------------------------------------------------------
+
+/** Gentle notification chime (Level 1) */
+export async function playChime(): Promise<void> {
+  ensureAudioResumed();
+  const buffer = await loadAudioBuffer(SOUND_FILES.chime);
+  if (buffer) {
+    playBuffer(buffer);
+    return;
+  }
+  playChimeFallback();
+}
+
+/** Urgent alert tone (Level 2) */
+export async function playAlert(): Promise<void> {
+  ensureAudioResumed();
+  const buffer = await loadAudioBuffer(SOUND_FILES.alert);
+  if (buffer) {
+    playBuffer(buffer);
+    return;
+  }
+  playAlertFallback();
+}
+
+/** Dramatic siren loop (Level 3) */
+export async function playSiren(): Promise<void> {
+  ensureAudioResumed();
+  const buffer = await loadAudioBuffer(SOUND_FILES.siren);
+  if (buffer) {
+    playBuffer(buffer, true);
+    return;
+  }
+  playSirenFallback();
+}
+
+/** Subtle phase transition chime */
+export async function playPhaseChime(): Promise<void> {
+  ensureAudioResumed();
+  const buffer = await loadAudioBuffer(SOUND_FILES.phaseChime);
+  if (buffer) {
+    playBuffer(buffer);
+    return;
+  }
+  playPhaseChimeFallback();
+}
+
+// ---------------------------------------------------------------------------
+// Stop
+// ---------------------------------------------------------------------------
+
+/** Stop all active sounds (buffer sources and oscillators). Does not close AudioContext. */
+export function stop(): void {
+  // Stop buffer source if active
+  if (currentSource) {
+    try {
+      currentSource.stop();
+    } catch {
+      // already stopped
+    }
+    try {
+      currentSource.disconnect();
+    } catch {
+      // already disconnected
+    }
+    currentSource = null;
+  }
+
+  // Stop siren interval
+  if (sirenInterval) {
+    clearInterval(sirenInterval);
+    sirenInterval = null;
+  }
+
+  // Stop all fallback oscillators
+  [...activeOscillators].forEach((osc) => {
+    try {
+      osc.stop();
+    } catch {
+      // already stopped
+    }
+  });
+  [...activeGains].forEach((g) => {
+    try {
+      g.disconnect();
+    } catch {
+      // already disconnected
+    }
+  });
+  activeOscillators.length = 0;
+  activeGains.length = 0;
+}
+
+// ---------------------------------------------------------------------------
+// Oscillator helpers (shared by fallback functions)
+// ---------------------------------------------------------------------------
 
 function createOscillator(
   ctx: AudioContext,
   destination: AudioNode,
   frequency: number,
-  type: OscillatorType = "sine",
-  volume: number = 0.3
+  type: OscillatorType = 'sine',
+  volume: number = 0.3,
 ): { osc: OscillatorNode; oscGain: GainNode } {
   const osc = ctx.createOscillator();
   const oscGain = ctx.createGain();
@@ -49,13 +240,17 @@ function cleanupOscillator(osc: OscillatorNode, oscGain: GainNode): void {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Fallback oscillator implementations (original alarm sounds)
+// ---------------------------------------------------------------------------
+
 /** Gentle two-note ascending chime (440Hz -> 660Hz), ~300ms, low volume */
-export function playChime(): void {
-  const { ctx, gain } = getAudioContext();
+function playChimeFallback(): void {
+  const ctx = getAudioContext();
   const now = ctx.currentTime;
 
   // First note: 440Hz
-  const { osc: osc1, oscGain: g1 } = createOscillator(ctx, gain, 440, "sine", 0.15);
+  const { osc: osc1, oscGain: g1 } = createOscillator(ctx, masterGain!, 440, 'sine', 0.15);
   g1.gain.setValueAtTime(0.15, now);
   g1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
   osc1.start(now);
@@ -63,7 +258,7 @@ export function playChime(): void {
   osc1.onended = () => cleanupOscillator(osc1, g1);
 
   // Second note: 660Hz
-  const { osc: osc2, oscGain: g2 } = createOscillator(ctx, gain, 660, "sine", 0.15);
+  const { osc: osc2, oscGain: g2 } = createOscillator(ctx, masterGain!, 660, 'sine', 0.15);
   g2.gain.setValueAtTime(0.001, now + 0.15);
   g2.gain.linearRampToValueAtTime(0.15, now + 0.16);
   g2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
@@ -73,8 +268,8 @@ export function playChime(): void {
 }
 
 /** Urgent three-note descending-ascending pattern, medium volume, plays twice */
-export function playAlert(): void {
-  const { ctx, gain } = getAudioContext();
+function playAlertFallback(): void {
+  const ctx = getAudioContext();
   const now = ctx.currentTime;
   const notes = [880, 660, 880];
   const noteDuration = 0.15;
@@ -85,7 +280,7 @@ export function playAlert(): void {
     const offset = repeat * (notes.length * (noteDuration + gap) + 0.1);
     notes.forEach((freq, i) => {
       const start = now + offset + i * (noteDuration + gap);
-      const { osc, oscGain } = createOscillator(ctx, gain, freq, "square", volume);
+      const { osc, oscGain } = createOscillator(ctx, masterGain!, freq, 'square', volume);
       oscGain.gain.setValueAtTime(volume, start);
       oscGain.gain.exponentialRampToValueAtTime(0.001, start + noteDuration);
       osc.start(start);
@@ -96,10 +291,10 @@ export function playAlert(): void {
 }
 
 /** Alternating 880Hz/440Hz siren oscillation, continuous loop, loud */
-export function playSiren(): void {
+function playSirenFallback(): void {
   stop();
-  const { ctx, gain } = getAudioContext();
-  const { osc, oscGain } = createOscillator(ctx, gain, 880, "sawtooth", 0.4);
+  const ctx = getAudioContext();
+  const { osc, oscGain } = createOscillator(ctx, masterGain!, 880, 'sawtooth', 0.4);
 
   // Oscillate frequency between 880 and 440
   let high = true;
@@ -122,35 +317,15 @@ export function playSiren(): void {
   };
 }
 
-/** Stop all active oscillators and disconnect nodes */
-export function stop(): void {
-  if (sirenInterval) {
-    clearInterval(sirenInterval);
-    sirenInterval = null;
-  }
-  // Copy arrays since cleanup mutates them
-  [...activeOscillators].forEach((osc) => {
-    try {
-      osc.stop();
-    } catch {
-      // already stopped
-    }
-  });
-  [...activeGains].forEach((g) => {
-    try {
-      g.disconnect();
-    } catch {
-      // already disconnected
-    }
-  });
-  activeOscillators.length = 0;
-  activeGains.length = 0;
-}
+/** Subtle phase transition: soft 523Hz sine, ~200ms fade-out */
+function playPhaseChimeFallback(): void {
+  const ctx = getAudioContext();
+  const now = ctx.currentTime;
 
-/** Set master volume (0-1) */
-export function setVolume(level: number): void {
-  const clamped = Math.max(0, Math.min(1, level));
-  if (masterGain) {
-    masterGain.gain.value = clamped;
-  }
+  const { osc, oscGain } = createOscillator(ctx, masterGain!, 523, 'sine', 0.1);
+  oscGain.gain.setValueAtTime(0.1, now);
+  oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+  osc.start(now);
+  osc.stop(now + 0.2);
+  osc.onended = () => cleanupOscillator(osc, oscGain);
 }

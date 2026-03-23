@@ -46,6 +46,13 @@ export default function Stats() {
   const [activeTab, setActiveTab] = useState<Tab>("today");
   const stats = useStats();
 
+  const isEmpty =
+    !stats.loading &&
+    stats.todaySummary.focusMinutes === 0 &&
+    stats.todaySummary.alarms === 0 &&
+    stats.todaySummary.cycles === 0 &&
+    stats.allTimeSummary.totalSessions === 0;
+
   if (stats.loading) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -116,6 +123,26 @@ export default function Stats() {
 
       {/* Tab content */}
       <div className="flex-1 min-h-0">
+        {isEmpty ? (
+          <motion.div
+            className="flex flex-col items-center justify-center py-24 gap-5"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+          >
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.03] border border-white/[0.1] flex items-center justify-center shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]">
+              <Zap className="w-7 h-7 text-accent/60" />
+            </div>
+            <div className="flex flex-col items-center gap-1.5">
+              <span className="text-[15px] font-medium text-text-primary">
+                Start your first focus session!
+              </span>
+              <span className="text-[13px] text-text-muted max-w-xs text-center">
+                Your stats will appear here once you complete a Pomodoro cycle.
+              </span>
+            </div>
+          </motion.div>
+        ) : (
         <AnimatePresence mode="wait">
           {activeTab === "today" && (
             <motion.div
@@ -318,6 +345,7 @@ export default function Stats() {
             </motion.div>
           )}
         </AnimatePresence>
+        )}
       </div>
     </div>
   );

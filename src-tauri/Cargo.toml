@@ -26,3 +26,4 @@ reqwest = { version = "0.13.2", features = ["json"] }
 xcap = "0.3"
 image = "0.25"
 window-vibrancy = "0.7"
+tauri-plugin-autostart = "2"

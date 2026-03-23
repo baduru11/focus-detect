@@ -23,11 +23,13 @@ const MESSAGES = [
 interface AlarmLevel3Props {
   lockDuration?: number;
   onDismiss: () => void;
+  memeUrl?: string | null;
 }
 
 export function AlarmLevel3({
   lockDuration = 15,
   onDismiss,
+  memeUrl,
 }: AlarmLevel3Props) {
   const [countdown, setCountdown] = useState(lockDuration);
   const [messageIndex, setMessageIndex] = useState(0);
@@ -146,6 +148,20 @@ export function AlarmLevel3({
               >
                 {countdown}
               </motion.div>
+            )}
+
+            {/* Meme image */}
+            {memeUrl && (
+              <motion.img
+                src={memeUrl}
+                alt=""
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                className="max-w-md max-h-64 object-contain rounded-xl"
+                style={{ filter: "drop-shadow(0 0 20px rgba(255, 0, 60, 0.5))" }}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+              />
             )}
 
             {/* Cycling motivational message */}

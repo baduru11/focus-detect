@@ -106,8 +106,8 @@ export function PomodoroRing({
           strokeWidth={strokeWidth}
         />
 
-        {/* Progress ring with subtle glow */}
-        <motion.circle
+        {/* Progress ring with subtle glow — CSS transition for smooth tick interpolation */}
+        <circle
           cx={center}
           cy={center}
           r={radius}
@@ -116,13 +116,12 @@ export function PomodoroRing({
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          initial={false}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+          strokeDashoffset={offset}
           filter={`url(#${glowId})`}
           style={{
             transform: "rotate(-90deg)",
             transformOrigin: "center",
+            transition: "stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         />
       </svg>

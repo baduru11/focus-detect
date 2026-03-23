@@ -6,6 +6,8 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { PomodoroRing } from "@/components/timer/PomodoroRing";
 import { TimerControls } from "@/components/timer/TimerControls";
 import { DetectionStatus } from "@/components/detection/DetectionStatus";
+import { Confetti } from "@/components/ui/Confetti";
+import { Toast } from "@/components/ui/Toast";
 import { useApp } from "@/context/AppContext";
 import { phaseToSeconds } from "@/lib/pomodoro";
 import type { PomodoroConfig } from "@/types/pomodoro";
@@ -140,6 +142,10 @@ export default function Dashboard() {
     lastVision,
     todayFocusMinutes,
     currentStreak,
+    showCelebration,
+    clearCelebration,
+    milestoneMessage,
+    clearMilestone,
   } = useApp();
 
   const config = activeProfile?.pomodoro ?? DEFAULT_CONFIG;
@@ -157,6 +163,9 @@ export default function Dashboard() {
   const todayMins = Math.floor(todayFocusMinutes % 60);
 
   return (
+    <>
+      <Confetti trigger={showCelebration} onComplete={clearCelebration} />
+      <Toast message={milestoneMessage ?? ""} visible={!!milestoneMessage} onDismiss={clearMilestone} />
     <motion.div
       className="h-full flex flex-col items-center justify-start gap-7 px-8 py-10 overflow-y-auto"
       variants={{
@@ -342,6 +351,7 @@ export default function Dashboard() {
         </span>
       </motion.div>
     </motion.div>
+    </>
   );
 }
 
