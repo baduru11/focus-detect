@@ -7,9 +7,9 @@ import { PomodoroRing } from "@/components/timer/PomodoroRing";
 import { TimerControls } from "@/components/timer/TimerControls";
 import { DetectionStatus } from "@/components/detection/DetectionStatus";
 import { useApp } from "@/context/AppContext";
-import type { PomodoroConfig, TimerPhase } from "@/types/pomodoro";
+import { phaseToSeconds } from "@/lib/pomodoro";
+import type { PomodoroConfig } from "@/types/pomodoro";
 import type { Profile } from "@/types/profile";
-import type { ActiveWindowInfo } from "@/services/detectionService";
 
 const DEFAULT_CONFIG: PomodoroConfig = {
   work: 25,
@@ -17,17 +17,6 @@ const DEFAULT_CONFIG: PomodoroConfig = {
   longBreak: 15,
   cyclesBeforeLong: 4,
 };
-
-function phaseTotalSeconds(phase: TimerPhase, config: PomodoroConfig): number {
-  switch (phase) {
-    case "work":
-      return config.work * 60;
-    case "shortBreak":
-      return config.shortBreak * 60;
-    case "longBreak":
-      return config.longBreak * 60;
-  }
-}
 
 const staggerItem = {
   hidden: { opacity: 0, y: 12 },
@@ -154,7 +143,7 @@ export default function Dashboard() {
   } = useApp();
 
   const config = activeProfile?.pomodoro ?? DEFAULT_CONFIG;
-  const totalSeconds = phaseTotalSeconds(pomodoroState.phase, config);
+  const totalSeconds = phaseToSeconds(pomodoroState.phase, config);
   const isIdle = pomodoroState.status === "idle";
   const isRunning = pomodoroState.status === "running";
 

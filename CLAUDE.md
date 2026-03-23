@@ -31,14 +31,14 @@ The core loop runs every 1 second during a work phase:
 1. `get_active_window_info` → Tauri command returns `{title, process_name}`
 2. `matchingEngine` evaluates window against active profile rules → `on_task | off_task | ambiguous`
 3. If ambiguous and 30s cooldown elapsed: screenshot → AI vision provider → confidence-based result (< 0.5 = on_task)
-4. Off-task triggers grace countdown (default 5s) → then escalating alarms (level 1 → 2 → 3)
+4. Off-task triggers grace countdown (default 10s) → then alarm at profile-configured level (1, 2, or 3)
 5. Return to on-task immediately dismisses alarm
 
 ### State Management
 
 - **AppContext** (`src/context/AppContext.tsx`): Single React Context holds all global state — profiles, timer, detection, alarm level, recent checks. This is the central coordination point.
 - **Hooks**: `usePomodoro` (timer FSM), `useDetection` (pipeline lifecycle), `useProfiles` (CRUD), `useStats` (SQLite queries)
-- **Widget sync**: Main window ↔ Widget communicate via `localStorage` polling (200ms), not Tauri IPC. Keys: `widget-sync` (state), `widget-action` (commands). Deduplication via timestamps.
+- **Widget sync**: Main window ↔ Widget communicate via `localStorage` polling (1000ms), not Tauri IPC. Keys: `widget-sync` (state), `widget-action` (commands). Deduplication via timestamps.
 
 ### Multi-Window Setup
 

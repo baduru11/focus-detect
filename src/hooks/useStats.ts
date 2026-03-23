@@ -11,7 +11,6 @@ import {
   getStreakInfo,
   getTopDistractors,
   buildTimeline,
-  getMockData,
 } from "@/services/sessionService";
 
 interface StatsData {
@@ -75,7 +74,7 @@ export function useStats(): StatsData {
         setTodayTimeline([]);
         setWeekSummary([]);
         setWeeklyBars([]);
-        setAllTimeSummary({ totalFocusHours: 0, totalSessions: 0, bestDayMinutes: 0, bestDayDate: null });
+        setAllTimeSummary({ totalFocusHours: 0, totalSessions: 0, bestDayMinutes: 0, bestDayDate: "" });
         setStreak({ current: 0, best: 0 });
         setTopDistractors([]);
       } else {
@@ -119,15 +118,15 @@ export function useStats(): StatsData {
         setStreak(streakData);
         setTopDistractors(distractors);
       }
-    } catch {
+    } catch (error) {
       // Fallback to empty on error
-      console.warn("Stats load error, showing empty:", err);
+      console.warn("Stats load error, showing empty:", error);
       setTodaySummary({ date: new Date().toISOString().slice(0, 10), focusMinutes: 0, distractionMinutes: 0, alarms: 0, cycles: 0 });
       setFocusPercent(0);
       setTodayTimeline([]);
       setWeekSummary([]);
       setWeeklyBars([]);
-      setAllTimeSummary({ totalFocusHours: 0, totalSessions: 0, bestDayMinutes: 0, bestDayDate: null });
+      setAllTimeSummary({ totalFocusHours: 0, totalSessions: 0, bestDayMinutes: 0, bestDayDate: "" });
       setStreak({ current: 0, best: 0 });
       setTopDistractors([]);
     } finally {

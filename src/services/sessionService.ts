@@ -73,20 +73,16 @@ function todayISO(): string {
 // ─── Session CRUD ───────────────────────────────────────────────────────────
 
 export async function startSession(profileId: string): Promise<string> {
-  try {
-    const database = await getDb();
-    const id = generateUUID();
-    const now = new Date().toISOString();
-    await database.execute(
-      `INSERT INTO sessions (id, profile_id, started_at, phase, cycles_completed,
-        focus_seconds, distraction_seconds, alarms_level1, alarms_level2, alarms_level3)
-       VALUES ($1, $2, $3, 'focus', 0, 0, 0, 0, 0, 0)`,
-      [id, profileId, now]
-    );
-    return id;
-  } catch {
-    return generateUUID();
-  }
+  const database = await getDb();
+  const id = generateUUID();
+  const now = new Date().toISOString();
+  await database.execute(
+    `INSERT INTO sessions (id, profile_id, started_at, phase, cycles_completed,
+      focus_seconds, distraction_seconds, alarms_level1, alarms_level2, alarms_level3)
+     VALUES ($1, $2, $3, 'focus', 0, 0, 0, 0, 0, 0)`,
+    [id, profileId, now]
+  );
+  return id;
 }
 
 export async function endSession(
@@ -101,33 +97,29 @@ export async function endSession(
     alarmsLevel3?: number;
   }
 ): Promise<void> {
-  try {
-    const database = await getDb();
-    const now = new Date().toISOString();
-    await database.execute(
-      `UPDATE sessions SET ended_at = $1, phase = COALESCE($2, phase),
-        cycles_completed = COALESCE($3, cycles_completed),
-        focus_seconds = COALESCE($4, focus_seconds),
-        distraction_seconds = COALESCE($5, distraction_seconds),
-        alarms_level1 = COALESCE($6, alarms_level1),
-        alarms_level2 = COALESCE($7, alarms_level2),
-        alarms_level3 = COALESCE($8, alarms_level3)
-       WHERE id = $9`,
-      [
-        now,
-        stats?.phase ?? null,
-        stats?.cyclesCompleted ?? null,
-        stats?.focusSeconds ?? null,
-        stats?.distractionSeconds ?? null,
-        stats?.alarmsLevel1 ?? null,
-        stats?.alarmsLevel2 ?? null,
-        stats?.alarmsLevel3 ?? null,
-        sessionId,
-      ]
-    );
-  } catch {
-    // silently fail if DB is unavailable
-  }
+  const database = await getDb();
+  const now = new Date().toISOString();
+  await database.execute(
+    `UPDATE sessions SET ended_at = $1, phase = COALESCE($2, phase),
+      cycles_completed = COALESCE($3, cycles_completed),
+      focus_seconds = COALESCE($4, focus_seconds),
+      distraction_seconds = COALESCE($5, distraction_seconds),
+      alarms_level1 = COALESCE($6, alarms_level1),
+      alarms_level2 = COALESCE($7, alarms_level2),
+      alarms_level3 = COALESCE($8, alarms_level3)
+     WHERE id = $9`,
+    [
+      now,
+      stats?.phase ?? null,
+      stats?.cyclesCompleted ?? null,
+      stats?.focusSeconds ?? null,
+      stats?.distractionSeconds ?? null,
+      stats?.alarmsLevel1 ?? null,
+      stats?.alarmsLevel2 ?? null,
+      stats?.alarmsLevel3 ?? null,
+      sessionId,
+    ]
+  );
 }
 
 export async function addDistraction(
@@ -136,18 +128,14 @@ export async function addDistraction(
   windowTitle: string,
   alarmLevel: number
 ): Promise<void> {
-  try {
-    const database = await getDb();
-    const id = generateUUID();
-    const now = new Date().toISOString();
-    await database.execute(
-      `INSERT INTO distractions (id, session_id, detected_at, app_name, window_title, alarm_level)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [id, sessionId, now, appName, windowTitle, alarmLevel]
-    );
-  } catch {
-    // silently fail if DB is unavailable
-  }
+  const database = await getDb();
+  const id = generateUUID();
+  const now = new Date().toISOString();
+  await database.execute(
+    `INSERT INTO distractions (id, session_id, detected_at, app_name, window_title, alarm_level)
+     VALUES ($1, $2, $3, $4, $5, $6)`,
+    [id, sessionId, now, appName, windowTitle, alarmLevel]
+  );
 }
 
 // ─── Query helpers ──────────────────────────────────────────────────────────
@@ -169,37 +157,49 @@ export async function getTodaySessions(): Promise<SessionRecord[]> {
 export async function getWeekSummary(): Promise<DaySummary[]> {
   try {
     const database = await getDb();
-    const results: DaySummary[] = [];
+
+    // Build date range for the last 7 days
+    const dates: string[] = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().slice(0, 10);
-      const rows = await database.select<
-        {
-          total_focus: number;
-          total_distraction: number;
-          total_alarms: number;
-          total_cycles: number;
-        }[]
-      >(
-        `SELECT
-          COALESCE(SUM(focus_seconds), 0) as total_focus,
-          COALESCE(SUM(distraction_seconds), 0) as total_distraction,
-          COALESCE(SUM(alarms_level1 + alarms_level2 + alarms_level3), 0) as total_alarms,
-          COALESCE(SUM(cycles_completed), 0) as total_cycles
-         FROM sessions WHERE date(started_at) = $1`,
-        [dateStr]
-      );
-      const row = rows[0];
-      results.push({
-        date: dateStr,
+      dates.push(d.toISOString().slice(0, 10));
+    }
+
+    // Single query instead of 7 separate ones
+    const rows = await database.select<
+      {
+        day_date: string;
+        total_focus: number;
+        total_distraction: number;
+        total_alarms: number;
+        total_cycles: number;
+      }[]
+    >(
+      `SELECT
+        date(started_at) as day_date,
+        COALESCE(SUM(focus_seconds), 0) as total_focus,
+        COALESCE(SUM(distraction_seconds), 0) as total_distraction,
+        COALESCE(SUM(alarms_level1 + alarms_level2 + alarms_level3), 0) as total_alarms,
+        COALESCE(SUM(cycles_completed), 0) as total_cycles
+       FROM sessions
+       WHERE date(started_at) >= $1
+       GROUP BY date(started_at)`,
+      [dates[0]]
+    );
+
+    // Map results back to the 7-day range (fill missing days with zeroes)
+    const rowMap = new Map(rows.map((r) => [r.day_date, r]));
+    return dates.map((date) => {
+      const row = rowMap.get(date);
+      return {
+        date,
         focusMinutes: Math.round((row?.total_focus ?? 0) / 60),
         distractionMinutes: Math.round((row?.total_distraction ?? 0) / 60),
         alarms: row?.total_alarms ?? 0,
         cycles: row?.total_cycles ?? 0,
-      });
-    }
-    return results;
+      };
+    });
   } catch {
     return [];
   }
@@ -328,90 +328,3 @@ export function buildTimeline(sessions: SessionRecord[]): TimelineSegment[] {
   return segments.sort((a, b) => a.startMinute - b.startMinute);
 }
 
-// ─── Mock data ──────────────────────────────────────────────────────────────
-
-export function getMockData() {
-  const now = new Date();
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-  const weekSummary: DaySummary[] = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
-    const dayIdx = d.getDay();
-    const isWeekend = dayIdx === 0 || dayIdx === 6;
-    const baseFocus = isWeekend ? 45 : 120;
-    const jitter = Math.round((Math.random() - 0.3) * 60);
-    return {
-      date: d.toISOString().slice(0, 10),
-      focusMinutes: Math.max(15, baseFocus + jitter),
-      distractionMinutes: Math.round(10 + Math.random() * 25),
-      alarms: Math.round(Math.random() * 6),
-      cycles: Math.round(2 + Math.random() * 4),
-    };
-  });
-
-  const todaySummary = weekSummary[6];
-
-  const focusPercent =
-    todaySummary.focusMinutes + todaySummary.distractionMinutes > 0
-      ? Math.round(
-          (todaySummary.focusMinutes /
-            (todaySummary.focusMinutes + todaySummary.distractionMinutes)) *
-            100
-        )
-      : 0;
-
-  const weeklyBars = weekSummary.map((d) => {
-    const date = new Date(d.date + "T00:00:00");
-    return {
-      day: dayNames[date.getDay()],
-      hours: Math.round((d.focusMinutes / 60) * 10) / 10,
-    };
-  });
-
-  const todayTimeline: TimelineSegment[] = [
-    { startMinute: 540, endMinute: 565, type: "focus" },
-    { startMinute: 565, endMinute: 570, type: "break" },
-    { startMinute: 570, endMinute: 595, type: "focus" },
-    { startMinute: 595, endMinute: 596, type: "alarm" },
-    { startMinute: 596, endMinute: 600, type: "break" },
-    { startMinute: 600, endMinute: 625, type: "focus" },
-    { startMinute: 630, endMinute: 655, type: "focus" },
-    { startMinute: 660, endMinute: 665, type: "break" },
-    { startMinute: 665, endMinute: 690, type: "focus" },
-    { startMinute: 690, endMinute: 691, type: "alarm" },
-    {
-      startMinute: now.getHours() * 60 + now.getMinutes() - 20,
-      endMinute: now.getHours() * 60 + now.getMinutes(),
-      type: "focus",
-    },
-  ];
-
-  const allTimeSummary: AllTimeSummary = {
-    totalFocusHours: 42.3,
-    bestDayMinutes: 185,
-    bestDayDate: "2026-03-10",
-    totalSessions: 156,
-  };
-
-  const streak: StreakInfo = { current: 7, best: 12 };
-
-  const topDistractors: DistractorEntry[] = [
-    { name: "Discord", count: 34 },
-    { name: "YouTube", count: 28 },
-    { name: "Twitter/X", count: 19 },
-    { name: "Slack", count: 12 },
-    { name: "Reddit", count: 8 },
-  ];
-
-  return {
-    todaySummary,
-    weekSummary,
-    focusPercent,
-    weeklyBars,
-    todayTimeline,
-    allTimeSummary,
-    streak,
-    topDistractors,
-  };
-}

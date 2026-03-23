@@ -263,8 +263,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         alarmsLevel1: 0, alarmsLevel2: 0, alarmsLevel3: 0,
         cyclesCompleted: 0,
       };
-      const id = await startSession(activeProfile.id);
-      sessionIdRef.current = id;
+      try {
+        const id = await startSession(activeProfile.id);
+        sessionIdRef.current = id;
+      } catch (error) {
+        console.error("Failed to start session in DB:", error);
+        sessionIdRef.current = null;
+      }
     }
   }, [pomodoroState, activeProfile]);
 
@@ -281,15 +286,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // End session in DB before resetting state
     if (sessionIdRef.current) {
       const stats = sessionStatsRef.current;
-      await endSession(sessionIdRef.current, {
-        phase: pomodoroState.state.phase,
-        cyclesCompleted: stats.cyclesCompleted,
-        focusSeconds: stats.focusSeconds,
-        distractionSeconds: stats.distractionSeconds,
-        alarmsLevel1: stats.alarmsLevel1,
-        alarmsLevel2: stats.alarmsLevel2,
-        alarmsLevel3: stats.alarmsLevel3,
-      });
+      try {
+        await endSession(sessionIdRef.current, {
+          phase: pomodoroState.state.phase,
+          cyclesCompleted: stats.cyclesCompleted,
+          focusSeconds: stats.focusSeconds,
+          distractionSeconds: stats.distractionSeconds,
+          alarmsLevel1: stats.alarmsLevel1,
+          alarmsLevel2: stats.alarmsLevel2,
+          alarmsLevel3: stats.alarmsLevel3,
+        });
+      } catch (error) {
+        console.error("Failed to save session to DB:", error);
+      }
       sessionIdRef.current = null;
     }
     pomodoroState.stop();

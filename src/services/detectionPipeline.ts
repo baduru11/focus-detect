@@ -186,15 +186,6 @@ export class DetectionPipeline {
         this.callbacks?.onAlarm(alarmLevel as 1 | 2 | 3);
       }
     }, 1000);
-
-    this.graceTimeoutId = window.setTimeout(() => {
-      if (this.inGrace) {
-        this.clearGraceTimers();
-        this.inGrace = false;
-        this.inAlarm = true;
-        this.callbacks?.onAlarm(alarmLevel as 1 | 2 | 3);
-      }
-    }, this.profile.detection.graceCountdown * 1000 + 100);
   }
 
   private handleOnTask(): void {

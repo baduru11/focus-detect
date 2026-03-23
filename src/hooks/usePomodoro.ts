@@ -4,22 +4,12 @@ import type {
   PomodoroState,
   TimerPhase,
 } from "@/types/pomodoro";
+import { phaseToSeconds } from "@/lib/pomodoro";
 
 interface PomodoroCallbacks {
   onPhaseChange?: (phase: TimerPhase) => void;
   onCycleComplete?: (cycle: number) => void;
   onTimerEnd?: () => void;
-}
-
-function phaseToSeconds(phase: TimerPhase, config: PomodoroConfig): number {
-  switch (phase) {
-    case "work":
-      return config.work * 60;
-    case "shortBreak":
-      return config.shortBreak * 60;
-    case "longBreak":
-      return config.longBreak * 60;
-  }
 }
 
 function getInitialState(config: PomodoroConfig): PomodoroState {

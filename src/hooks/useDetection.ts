@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import type { Profile } from "@/types/profile";
 import type { MatchResult } from "@/services/matchingEngine";
 import type { ActiveWindowInfo } from "@/services/detectionService";
@@ -33,6 +33,14 @@ export function useDetection(): UseDetectionReturn {
   const [lastVision, setLastVision] = useState<VisionEvent | null>(null);
 
   const pipelineRef = useRef<DetectionPipeline | null>(null);
+
+  // Cleanup pipeline on unmount to prevent orphaned intervals
+  useEffect(() => {
+    return () => {
+      pipelineRef.current?.stop();
+      pipelineRef.current = null;
+    };
+  }, []);
 
   const start = useCallback((profile: Profile) => {
     if (pipelineRef.current) {

@@ -103,10 +103,13 @@ class GeminiProvider implements VisionProvider {
     const prompt = VISION_PROMPT_TEMPLATE(profileContext);
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": this.apiKey,
+        },
         body: JSON.stringify({
           contents: [
             {
@@ -259,6 +262,21 @@ class OpenRouterProvider implements VisionProvider {
   }
 }
 
+// Cache Ollama availability to avoid 3s timeout on every check
+let ollamaCacheResult: boolean | null = null;
+let ollamaCacheTime = 0;
+const OLLAMA_CACHE_TTL = 60_000; // 60 seconds
+
+async function isOllamaCached(endpoint: string): Promise<boolean> {
+  const now = Date.now();
+  if (ollamaCacheResult !== null && now - ollamaCacheTime < OLLAMA_CACHE_TTL) {
+    return ollamaCacheResult;
+  }
+  ollamaCacheResult = await isOllamaAvailable(endpoint);
+  ollamaCacheTime = now;
+  return ollamaCacheResult;
+}
+
 export async function analyzeScreenshot(
   base64Screenshot: string,
   profileContext: string,
@@ -269,7 +287,7 @@ export async function analyzeScreenshot(
   // Ollama (local) is first in the chain — free and fast if available
   const ollamaEndpoint = apiKeys.ollamaEndpoint || "http://localhost:11434";
   const ollamaModel = apiKeys.ollamaModel || "llava";
-  const ollamaUp = await isOllamaAvailable(ollamaEndpoint);
+  const ollamaUp = await isOllamaCached(ollamaEndpoint);
   if (ollamaUp) {
     providers.push(new OllamaProvider(ollamaModel, ollamaEndpoint));
   }
