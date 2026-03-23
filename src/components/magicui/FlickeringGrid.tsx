@@ -127,22 +127,28 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
       updateCanvasSize()
 
       let lastTime = 0
+      const FRAME_INTERVAL = 1000 / 15 // ~15fps is enough for flicker
+      let elapsed = 0
       const animate = (time: number) => {
         if (!isInView || !gridParams) return
 
         const deltaTime = (time - lastTime) / 1000
+        elapsed += time - lastTime
         lastTime = time
 
-        updateSquares(gridParams.squares, deltaTime)
-        drawGrid(
-          ctx,
-          canvas.width,
-          canvas.height,
-          gridParams.cols,
-          gridParams.rows,
-          gridParams.squares,
-          gridParams.dpr
-        )
+        if (elapsed >= FRAME_INTERVAL) {
+          elapsed = elapsed % FRAME_INTERVAL
+          updateSquares(gridParams.squares, deltaTime)
+          drawGrid(
+            ctx,
+            canvas.width,
+            canvas.height,
+            gridParams.cols,
+            gridParams.rows,
+            gridParams.squares,
+            gridParams.dpr
+          )
+        }
         animationFrameId = requestAnimationFrame(animate)
       }
 

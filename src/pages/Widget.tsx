@@ -40,7 +40,7 @@ export default function Widget() {
         const data = localStorage.getItem("widget-sync");
         if (data) setState(JSON.parse(data));
       } catch { /* ignore */ }
-    }, 200);
+    }, 1000);
     return () => clearInterval(interval);
   }, []);
 

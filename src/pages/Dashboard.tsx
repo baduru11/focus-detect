@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Target, Eye, Monitor, Minimize2, ChevronDown, Check } from "lucide-react";
-import { FlickeringGrid } from "@/components/magicui/FlickeringGrid";
+
 import { GlassCard } from "@/components/ui/GlassCard";
 import { PomodoroRing } from "@/components/timer/PomodoroRing";
 import { TimerControls } from "@/components/timer/TimerControls";

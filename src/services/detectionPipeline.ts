@@ -52,7 +52,7 @@ export class DetectionPipeline {
     this.runCheck();
     this.intervalId = window.setInterval(() => {
       this.runCheck();
-    }, 500);
+    }, 1000);
   }
 
   stop(): void {
