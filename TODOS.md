@@ -20,3 +20,31 @@
 - **Context:** Was previously used for demo/placeholder data. Confirmed unused — the import exists but `getMockData` is never called.
 - **Depends on:** Nothing
 - **Priority:** Low — cleanup
+
+## TODO 4: Keyboard shortcuts (global hotkeys)
+- **What:** Global hotkeys for pause/resume/skip without touching the mouse (Ctrl+Shift+P, Ctrl+Shift+S)
+- **Why:** Power users expect keyboard control. Reduces context switching during focus sessions.
+- **Context:** Deferred from CEO review 2026-03-23. Use `tauri-plugin-global-shortcut`. Not theatrical enough for current "Stabilize & Polish" scope.
+- **Depends on:** Nothing
+- **Priority:** P2 — quality-of-life
+
+## TODO 5: First-run onboarding
+- **What:** 3-step guide for new users: create profile → configure detection → start first session
+- **Why:** Without onboarding, new users see an empty dashboard with no guidance on how to start.
+- **Context:** Deferred from CEO review 2026-03-23. Should show meme preview during setup. Important for community adoption.
+- **Depends on:** Meme system complete
+- **Priority:** P2 — user experience
+
+## TODO 6: ProfileEditor refactor
+- **What:** Split 796-line monolith into: AppSelector, SiteEditor, PomodoroPreview sub-components
+- **Why:** Current file is 2x recommended limit, 8+ nesting levels, hard to maintain and reason about.
+- **Context:** Identified in CEO review 2026-03-23 system audit. Must wait for test safety net before refactoring.
+- **Depends on:** Test coverage (Phase 1 of Stabilize & Polish)
+- **Priority:** P3 — code health
+
+## TODO 7: sessionService split
+- **What:** Separate CRUD operations from stats/reporting queries into sessionService + statsQueryService
+- **Why:** 417-line file mixing concerns. Reporting queries are complex and unrelated to session CRUD.
+- **Context:** Identified in CEO review 2026-03-23 system audit. Must wait for test safety net.
+- **Depends on:** Test coverage (Phase 1 of Stabilize & Polish)
+- **Priority:** P3 — code health
