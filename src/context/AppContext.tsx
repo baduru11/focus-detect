@@ -86,6 +86,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // ─── Session tracking refs ───────────────────────────────────────────
   const sessionIdRef = useRef<string | null>(null);
+  const [sessionActive, setSessionActive] = useState(false);
   const sessionStatsRef = useRef({
     focusSeconds: 0,
     distractionSeconds: 0,
@@ -169,6 +170,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [pomodoroState.state.status, pomodoroState.state.phase]);
 
   // Track focus/distraction seconds for DB session (1s interval during work)
+  // sessionActive (state) is the trigger — sessionIdRef alone is a ref and won't re-fire this effect
   useEffect(() => {
     const { status, phase } = pomodoroState.state;
     if (status !== "running" || phase !== "work" || !sessionIdRef.current) return;
@@ -181,7 +183,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [pomodoroState.state.status, pomodoroState.state.phase]);
+  }, [pomodoroState.state.status, pomodoroState.state.phase, sessionActive]);
 
   // Track alarm escalations
   const prevAlarmRef = useRef(0);
@@ -266,6 +268,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         const id = await startSession(activeProfile.id);
         sessionIdRef.current = id;
+        setSessionActive(true);
       } catch (error) {
         console.error("Failed to start session in DB:", error);
         sessionIdRef.current = null;
@@ -300,6 +303,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.error("Failed to save session to DB:", error);
       }
       sessionIdRef.current = null;
+      setSessionActive(false);
     }
     pomodoroState.stop();
     stopDetection();
