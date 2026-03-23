@@ -130,7 +130,7 @@ export function PomodoroRing({
       {/* Center content */}
       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center">
         {/* Per-digit animation — only the changing digit animates */}
-        <div className="flex items-center text-[48px] font-normal text-text-primary tracking-[0.02em] font-mono leading-none tabular-nums">
+        <div className="flex items-center text-[52px] font-bold text-text-primary tracking-[-0.04em] font-mono leading-none tabular-nums">
           {timeDisplay.split("").map((char, i) => (
             <AnimatePresence mode="wait" key={i}>
               <motion.span
