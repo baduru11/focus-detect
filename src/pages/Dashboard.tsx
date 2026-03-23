@@ -219,7 +219,7 @@ export default function Dashboard() {
           variants={staggerItem}
           className="w-full max-w-sm"
         >
-          <GlassCard className="p-5">
+          <GlassCard interactive className="p-5">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="w-6 h-6 rounded-md bg-accent/10 flex items-center justify-center">
                 <Monitor className="w-3 h-3 text-accent-light" strokeWidth={1.8} />
@@ -297,7 +297,7 @@ export default function Dashboard() {
           variants={staggerItem}
           className="w-full max-w-lg"
         >
-          <GlassCard className="p-4">
+          <GlassCard interactive className="p-4">
             <div className="flex items-center gap-2 mb-3">
               <Eye className="w-4 h-4 text-accent" />
               <span className="text-xs text-text-muted uppercase tracking-wider font-medium">AI Vision</span>
