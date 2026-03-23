@@ -36,7 +36,7 @@ For ambiguous cases (you're in Chrome but the matching engine can't tell if that
 ## Screenshots
 
 ### Dashboard
-<img src="screenshots/dashboard.png?v=2" width="720" alt="Dashboard — Pomodoro ring with indigo gradient, timer controls, cycle counter" />
+<img src="screenshots/dashboard.png?v=3" width="720" alt="Dashboard — Pomodoro ring with indigo gradient, timer controls, cycle counter" />
 
 The main view. 25-minute Pomodoro ring with gradient glow, start/pause controls, cycle tracker, and today's focus time.
 
