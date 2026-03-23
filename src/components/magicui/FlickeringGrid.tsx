@@ -11,6 +11,8 @@ interface FlickeringGridProps extends React.HTMLAttributes<HTMLDivElement> {
   height?: number
   className?: string
   maxOpacity?: number
+  /** When true, animation stops (static frame stays visible) */
+  paused?: boolean
 }
 
 export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
@@ -22,6 +24,7 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
   height,
   className,
   maxOpacity = 0.3,
+  paused = false,
   ...props
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -48,7 +51,7 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
 
   const setupCanvas = useCallback(
     (canvas: HTMLCanvasElement, width: number, height: number) => {
-      const dpr = window.devicePixelRatio || 1
+      const dpr = 1 // background effect — retina not needed
       canvas.width = width * dpr
       canvas.height = height * dpr
       canvas.style.width = `${width}px`
@@ -155,9 +158,11 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
       )
       intersectionObserver.observe(canvas)
 
-      if (isInView) {
+      if (isInView && !paused) {
         tick() // draw first frame immediately
         tickId = setInterval(tick, TICK_MS)
+      } else if (isInView && paused) {
+        tick() // draw one static frame, then stop
       }
     }
 
@@ -172,7 +177,7 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
         intersectionObserver.disconnect()
       }
     }
-  }, [setupCanvas, updateSquares, drawGrid, width, height, isInView])
+  }, [setupCanvas, updateSquares, drawGrid, width, height, isInView, paused])
 
   return (
     <div
